@@ -181,6 +181,10 @@ class Settings:
         # Rate Limiting Configuration
         self.RATE_LIMIT_DEFAULT = parse_list_from_env("RATE_LIMIT_DEFAULT", ["200 per day", "50 per hour"])
 
+        # Task / AI Configuration
+        self.PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "")
+        self.PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "synapse-tasks")
+
         # Rate limit endpoints defaults
         default_endpoints = {
             "chat": ["30 per minute"],
@@ -190,6 +194,8 @@ class Settings:
             "login": ["20 per minute"],
             "root": ["10 per minute"],
             "health": ["20 per minute"],
+            "tasks": ["50 per minute"],
+            "tasks_ai": ["10 per minute"],
         }
 
         # Update rate limit endpoints from environment variables
