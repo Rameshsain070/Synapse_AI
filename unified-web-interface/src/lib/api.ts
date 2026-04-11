@@ -36,14 +36,14 @@ api.interceptors.response.use(
 
 export const authApi = {
   async login(email: string, password: string): Promise<{ access_token: string }> {
-    const formData = new FormData();
+    const formData = new URLSearchParams();
     formData.append("username", email);
     formData.append("password", password);
     formData.append("grant_type", "password");
     const { data } = await api.post<{ access_token: string }>(
       "/api/v1/auth/login",
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
     localStorage.setItem(USER_TOKEN_KEY, data.access_token);
     return data;

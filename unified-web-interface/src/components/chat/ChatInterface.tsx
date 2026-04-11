@@ -142,7 +142,7 @@ export function ChatInterface() {
           ...updatedMessages,
           {
             role: "assistant",
-            content: "Sorry, I encountered an error. Please check the **Diagnostics** page for details.",
+            content: "Sorry, I encountered an error. Please check the Diagnostics page for details.",
           },
         ]);
       } finally {
