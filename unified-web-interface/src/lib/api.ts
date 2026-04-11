@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { ChatResponse, Message, SessionResponse, StreamChunk, ServiceHealth } from "./types";
+import type { ChatResponse, Message, SessionResponse, UserResponse, StreamChunk, ServiceHealth } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 const USER_TOKEN_KEY = "synapse_user_token";
@@ -21,23 +21,38 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Redirect to login on 401 (client-side only)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (typeof window !== "undefined" && error?.response?.status === 401) {
+      localStorage.removeItem(USER_TOKEN_KEY);
+      localStorage.removeItem(SESSION_TOKEN_KEY);
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const authApi = {
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<{ access_token: string }> {
     const formData = new URLSearchParams();
     formData.append("username", email);
     formData.append("password", password);
     formData.append("grant_type", "password");
-    const { data } = await api.post("/api/v1/auth/token", formData, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
+    const { data } = await api.post<{ access_token: string }>(
+      "/api/v1/auth/login",
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
     localStorage.setItem(USER_TOKEN_KEY, data.access_token);
     return data;
   },
 
-  async register(email: string, password: string) {
-    const { data } = await api.post("/api/v1/auth/register", { email, password });
-    if (data.token) {
-      localStorage.setItem(USER_TOKEN_KEY, data.token);
+  async register(email: string, password: string): Promise<UserResponse> {
+    const { data } = await api.post<UserResponse>("/api/v1/auth/register", { email, password });
+    if (data.token?.access_token) {
+      localStorage.setItem(USER_TOKEN_KEY, data.token.access_token);
     }
     return data;
   },
@@ -47,13 +62,18 @@ export const authApi = {
     localStorage.removeItem(SESSION_TOKEN_KEY);
   },
 
+  getUserToken(): string | null {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(USER_TOKEN_KEY);
+  },
+
   getToken(): string | null {
     if (typeof window === "undefined") return null;
     return localStorage.getItem(SESSION_TOKEN_KEY) || localStorage.getItem(USER_TOKEN_KEY);
   },
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return !!this.getUserToken();
   },
 };
 
@@ -114,32 +134,50 @@ export const chatApi = {
     const { data } = await api.get<ChatResponse>("/api/v1/chatbot/messages");
     return data;
   },
+
+  async clearMessages(): Promise<void> {
+    await api.delete("/api/v1/chatbot/messages");
+  },
 };
 
 export const sessionApi = {
   async create(): Promise<SessionResponse> {
-    const { data } = await api.post<SessionResponse>("/api/v1/chatbot/sessions");
-    if (data.token) {
-      localStorage.setItem(SESSION_TOKEN_KEY, data.token);
+    const userToken = authApi.getUserToken();
+    const { data } = await api.post<SessionResponse>(
+      "/api/v1/auth/session",
+      undefined,
+      { headers: { Authorization: `Bearer ${userToken}` } }
+    );
+    if (data.token?.access_token) {
+      localStorage.setItem(SESSION_TOKEN_KEY, data.token.access_token);
     }
     return data;
   },
 
   async list(): Promise<SessionResponse[]> {
-    const { data } = await api.get<SessionResponse[]>("/api/v1/chatbot/sessions");
+    const userToken = authApi.getUserToken();
+    const { data } = await api.get<SessionResponse[]>(
+      "/api/v1/auth/sessions",
+      { headers: { Authorization: `Bearer ${userToken}` } }
+    );
     return data;
   },
 
   async rename(sessionId: string, name: string): Promise<SessionResponse> {
     const { data } = await api.patch<SessionResponse>(
-      `/api/v1/chatbot/sessions/${sessionId}`,
+      `/api/v1/auth/session/${sessionId}/name`,
       { name }
     );
     return data;
   },
 
   async delete(sessionId: string): Promise<void> {
-    await api.delete(`/api/v1/chatbot/sessions/${sessionId}`);
+    await api.delete(`/api/v1/auth/session/${sessionId}`);
+    localStorage.removeItem(SESSION_TOKEN_KEY);
+  },
+
+  setActiveToken(token: string) {
+    localStorage.setItem(SESSION_TOKEN_KEY, token);
   },
 };
 
@@ -172,9 +210,9 @@ export const diagnosticsApi = {
 
   async checkAllServices(): Promise<ServiceHealth[]> {
     const services = [
-      { name: "API Gateway", url: `${API_BASE_URL}/docs` },
-      { name: "LLM Service", url: `${API_BASE_URL}/api/v1/chatbot/chat` },
-      { name: "Authentication", url: `${API_BASE_URL}/api/v1/auth/token` },
+      { name: "API Gateway", url: `${API_BASE_URL}/health` },
+      { name: "LLM Service", url: `${API_BASE_URL}/api/v1/chatbot/messages` },
+      { name: "Authentication", url: `${API_BASE_URL}/api/v1/auth/sessions` },
     ];
     return Promise.all(
       services.map((s) => this.checkHealth(s.name, s.url))
