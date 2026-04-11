@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'index-integrated.html'
       - 'assets/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
