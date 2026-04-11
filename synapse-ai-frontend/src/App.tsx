@@ -7,6 +7,7 @@ import { ProtectedRoute } from "./routes/ProtectedRoute.tsx";
 import { LoginPage } from "./pages/LoginPage.tsx";
 import { RegisterPage } from "./pages/RegisterPage.tsx";
 import { ChatPage } from "./pages/ChatPage.tsx";
+import { TodoPage } from "./pages/TodoPage.tsx";
 import { NotFoundPage } from "./pages/NotFoundPage.tsx";
 
 export function App() {
@@ -27,6 +28,7 @@ export function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/todo" element={<TodoPage />} />
                 <Route path="/" element={<Navigate to="/chat" replace />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
