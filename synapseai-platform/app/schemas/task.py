@@ -13,6 +13,19 @@ from pydantic import (
     field_validator,
 )
 
+# Characters that are not allowed in user-supplied text fields
+_DISALLOWED_PATTERN = re.compile(r"[<>{}()\[\]\\]")
+
+
+def _sanitize_text(v: str) -> str:
+    """Sanitise a text field by stripping dangerous characters."""
+    v = v.strip()
+    if "\0" in v:
+        raise ValueError("Text contains null bytes")
+    # Remove any characters commonly used in HTML/script injection
+    v = _DISALLOWED_PATTERN.sub("", v)
+    return v
+
 
 class TaskCreate(BaseModel):
     """Request model for creating a new task.
@@ -35,13 +48,9 @@ class TaskCreate(BaseModel):
     @classmethod
     def validate_title(cls, v: str) -> str:
         """Strip and validate the title."""
-        v = v.strip()
+        v = _sanitize_text(v)
         if not v:
             raise ValueError("Title must not be empty")
-        if re.search(r"<script.*?>.*?</script>", v, re.IGNORECASE | re.DOTALL):
-            raise ValueError("Title contains disallowed content")
-        if "\0" in v:
-            raise ValueError("Title contains null bytes")
         return v
 
     @field_validator("priority")
@@ -72,13 +81,9 @@ class TaskUpdate(BaseModel):
     def validate_title(cls, v: Optional[str]) -> Optional[str]:
         """Validate and sanitise the title when provided."""
         if v is not None:
-            v = v.strip()
+            v = _sanitize_text(v)
             if not v:
                 raise ValueError("Title must not be empty")
-            if re.search(r"<script.*?>.*?</script>", v, re.IGNORECASE | re.DOTALL):
-                raise ValueError("Title contains disallowed content")
-            if "\0" in v:
-                raise ValueError("Title contains null bytes")
         return v
 
     @field_validator("priority")

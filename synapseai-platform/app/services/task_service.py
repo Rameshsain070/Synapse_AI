@@ -105,8 +105,16 @@ class TaskService:
             statement = statement.order_by(Task.created_at.desc())
             return list(session.exec(statement).all())
 
+    # Fields that can be updated by the API
+    UPDATABLE_FIELDS = frozenset({
+        "title", "description", "completed", "priority", "category",
+        "due_date", "ai_priority_score", "ai_suggested_due_date", "ai_summary",
+    })
+
     async def update_task(self, task_id: int, user_id: int, **kwargs) -> Optional[Task]:
         """Update a task's fields.
+
+        Only fields listed in UPDATABLE_FIELDS are accepted.
 
         Args:
             task_id: The task ID
@@ -122,7 +130,7 @@ class TaskService:
             if not task:
                 return None
             for key, value in kwargs.items():
-                if value is not None and hasattr(task, key):
+                if value is not None and key in self.UPDATABLE_FIELDS:
                     setattr(task, key, value)
             session.add(task)
             session.commit()

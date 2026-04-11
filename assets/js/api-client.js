@@ -105,9 +105,11 @@ var SynapseAPI = (function () {
   function login(email, password) {
     // The backend expects form data for login
     var url = _baseUrl + '/api/v1/auth/login';
-    var formBody = 'username=' + encodeURIComponent(email) +
-                   '&password=' + encodeURIComponent(password) +
-                   '&grant_type=password';
+    var formBody = new URLSearchParams({
+      username: email,
+      password: password,
+      grant_type: 'password',
+    }).toString();
     return fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

@@ -68,8 +68,8 @@ async def create_task(
             from app.agents.rag_engine import task_rag_engine
 
             await task_rag_engine.index_task(user.id, task.id, task.title, task.description)
-        except Exception:
-            pass  # Non-critical – don't block task creation
+        except Exception as rag_err:
+            logger.warning("rag_index_skipped", task_id=task.id, error=str(rag_err))
 
         return TaskRead.model_validate(task)
     except Exception as e:
@@ -240,12 +240,14 @@ async def get_ai_suggestions(
         )
 
         # Persist AI fields back to the task (best-effort)
+        import json as _json
+
         await task_service.update_task(
             task_id,
             user.id,
             ai_priority_score=suggestions.get("priority_score"),
             ai_suggested_due_date=suggestions.get("suggested_due_date"),
-            ai_summary="; ".join(suggestions.get("breakdown", [])),
+            ai_summary=_json.dumps(suggestions.get("breakdown", [])),
         )
 
         return AISuggestion(
