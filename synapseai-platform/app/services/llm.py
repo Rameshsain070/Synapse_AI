@@ -348,6 +348,9 @@ class LLMService:
                 response = await self._call_llm_with_retry(messages)
                 return response
             except Exception as e:
+                # Catching broadly so that non-OpenAI providers (e.g. Gemini) also
+                # trigger the circular model-fallback chain.  The inner
+                # `_call_llm_with_retry` still retries on OpenAI-specific errors.
                 last_error = e
                 models_tried += 1
 

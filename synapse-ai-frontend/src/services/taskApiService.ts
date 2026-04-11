@@ -17,7 +17,11 @@ import { api, USER_TOKEN_KEY } from "./api.ts";
 import type { AxiosRequestConfig } from "axios";
 
 /** Returns request config that explicitly uses the user JWT, bypassing the
- *  session-token-first interceptor in api.ts. */
+ *  session-token-first interceptor in api.ts.
+ *
+ *  When the user is not authenticated (no token in localStorage) an empty
+ *  config is returned.  The backend will respond with 401, which the global
+ *  Axios response interceptor in api.ts will handle by redirecting to /login. */
 function userAuthConfig(): AxiosRequestConfig {
   const token = localStorage.getItem(USER_TOKEN_KEY);
   return token ? { headers: { Authorization: `Bearer ${token}` } } : {};

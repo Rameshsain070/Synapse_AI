@@ -158,7 +158,9 @@ export function TodoProvider({ children }: { children: ReactNode }) {
       .then((bts) => {
         if (!cancelled) setTasks(bts.map(backendToTask));
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        // Fall back to localStorage so the UI stays functional
+        console.error("[TodoContext] Failed to load tasks from backend:", err);
         if (!cancelled) setTasks(loadTasks());
       })
       .finally(() => {
@@ -231,8 +233,8 @@ export function TodoProvider({ children }: { children: ReactNode }) {
     (id: string) => {
       const task = tasks.find((t) => t.id === id);
       if (apiMode && task?.backendId !== undefined) {
-        taskApi.deleteTask(task.backendId).catch(() => {
-          /* best-effort */
+        taskApi.deleteTask(task.backendId).catch((err: unknown) => {
+          console.error("[TodoContext] deleteTask failed:", err);
         });
       }
       setTasks((prev) => prev.filter((t) => t.id !== id));
@@ -273,8 +275,8 @@ export function TodoProvider({ children }: { children: ReactNode }) {
             category: category.trim() || "General",
             due_date: dueDate,
           })
-          .catch(() => {
-            /* best-effort */
+          .catch((err: unknown) => {
+            console.error("[TodoContext] editTask failed:", err);
           });
       }
     },
@@ -290,8 +292,8 @@ export function TodoProvider({ children }: { children: ReactNode }) {
       if (apiMode && task?.backendId !== undefined) {
         taskApi
           .updateTask(task.backendId, { completed: !task.completed })
-          .catch(() => {
-            /* best-effort */
+          .catch((err: unknown) => {
+            console.error("[TodoContext] toggleTask failed:", err);
           });
       }
     },
@@ -303,8 +305,8 @@ export function TodoProvider({ children }: { children: ReactNode }) {
       tasks
         .filter((t) => t.completed && t.backendId !== undefined)
         .forEach((t) => {
-          taskApi.deleteTask(t.backendId!).catch(() => {
-            /* best-effort */
+          taskApi.deleteTask(t.backendId!).catch((err: unknown) => {
+            console.error("[TodoContext] clearCompleted deleteTask failed:", err);
           });
         });
     }
