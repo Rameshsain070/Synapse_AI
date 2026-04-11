@@ -27,6 +27,7 @@ class TaskRAGEngine:
     COLLECTION = "task_embeddings"
 
     def __init__(self):
+        """Initialise the RAG engine."""
         self._memory = None
         logger.info("task_rag_engine_initialized")
 

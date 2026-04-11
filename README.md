@@ -904,6 +904,85 @@ assets/js/app.js      – Vanilla JavaScript (no build step required)
 
 ---
 
+## 🧠 AI-Integrated To-Do Application
+
+The repository includes a **full-stack AI-powered To-Do application** that integrates the GitHub Pages frontend with the FastAPI + LangGraph backend.
+
+### Live Demo
+
+| Version | URL |
+|---------|-----|
+| Basic Todo | `https://rameshsain070.github.io/Synapse_AI/` |
+| AI-Integrated | `https://rameshsain070.github.io/Synapse_AI/index-integrated.html` |
+
+### Architecture
+
+```
+Frontend (GitHub Pages)              Backend (FastAPI)
+┌─────────────────────┐     REST    ┌─────────────────────────────────┐
+│ index-integrated.html│────────────│ /api/v1/tasks    (CRUD)         │
+│ api-client.js        │            │ /api/v1/tasks/search (RAG)      │
+│ ai-integration.js    │            │ /api/v1/tasks/{id}/ai-suggestions│
+│ app.js               │            │ /api/v1/chatbot/chat/stream     │
+└─────────────────────┘            └──────────┬──────────────────────┘
+                                              │
+                                   ┌──────────▼──────────┐
+                                   │  LangGraph Agent     │
+                                   │  • task_agent.py     │
+                                   │  • rag_engine.py     │
+                                   │  • memory_manager.py │
+                                   └──────────┬──────────┘
+                                              │
+                                   ┌──────────▼──────────┐
+                                   │  PostgreSQL + pgvector│
+                                   │  mem0 Long-term Memory│
+                                   │  Pinecone (optional)  │
+                                   └──────────────────────┘
+```
+
+### Backend Endpoints (Task API)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/tasks` | Create a task |
+| GET | `/api/v1/tasks` | List tasks (with filters) |
+| GET | `/api/v1/tasks/{id}` | Get single task |
+| PUT | `/api/v1/tasks/{id}` | Update task |
+| DELETE | `/api/v1/tasks/{id}` | Delete task |
+| GET | `/api/v1/tasks/{id}/ai-suggestions` | AI analysis for a task |
+| POST | `/api/v1/tasks/search` | Semantic search |
+
+### AI Features
+
+- **Task Prioritisation** – LLM scores urgency on a 0–1 scale
+- **Due Date Prediction** – AI estimates appropriate deadlines
+- **Task Breakdown** – Decomposes tasks into actionable sub-steps
+- **Smart Recommendations** – Context-aware improvement suggestions
+- **Semantic Search** – Vector-based search via pgvector / Pinecone RAG
+- **Long-term Memory** – Learns user preferences with mem0
+- **AI Chat Sidebar** – Full streaming LLM chat in the UI
+
+### Frontend Files
+
+| File | Purpose |
+|------|---------|
+| `index-integrated.html` | AI-integrated to-do UI |
+| `assets/js/api-client.js` | FastAPI connection, JWT auth, retry logic |
+| `assets/js/ai-integration.js` | AI chat sidebar and suggestion rendering |
+| `assets/js/app.js` | Core to-do logic with local-storage fallback |
+| `assets/css/style.css` | Responsive dark/light theme |
+
+### Environment Variables (Task-related)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PINECONE_API_KEY` | `""` | Pinecone vector DB API key |
+| `PINECONE_INDEX_NAME` | `synapse-tasks` | Pinecone index name |
+
+All existing environment variables (database, LLM, auth) are shared with the task module.
+
+---
+
 ## 👨‍💻 Author
 
 **Ramesh Sain**  

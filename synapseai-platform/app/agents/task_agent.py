@@ -38,6 +38,7 @@ class TaskAgent:
     )
 
     def __init__(self):
+        """Initialise the task agent with the shared LLM service."""
         self.llm_service = llm_service
         logger.info("task_agent_initialized", model=settings.DEFAULT_LLM_MODEL)
 
@@ -69,7 +70,7 @@ class TaskAgent:
         # Strip markdown code fences if present
         if text.startswith("```"):
             lines = text.split("\n")
-            lines = [l for l in lines if not l.strip().startswith("```")]
+            lines = [line for line in lines if not line.strip().startswith("```")]
             text = "\n".join(lines)
         try:
             return json.loads(text)

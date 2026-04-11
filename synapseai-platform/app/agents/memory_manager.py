@@ -28,6 +28,7 @@ class TaskMemoryManager:
     COLLECTION = "task_user_memory"
 
     def __init__(self):
+        """Initialise the task memory manager."""
         self._memory = None
         logger.info("task_memory_manager_initialized")
 

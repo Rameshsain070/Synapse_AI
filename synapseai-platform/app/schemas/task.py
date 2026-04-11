@@ -70,6 +70,7 @@ class TaskUpdate(BaseModel):
     @field_validator("title")
     @classmethod
     def validate_title(cls, v: Optional[str]) -> Optional[str]:
+        """Validate and sanitise the title when provided."""
         if v is not None:
             v = v.strip()
             if not v:
@@ -83,6 +84,7 @@ class TaskUpdate(BaseModel):
     @field_validator("priority")
     @classmethod
     def validate_priority(cls, v: Optional[str]) -> Optional[str]:
+        """Ensure priority is one of the allowed values when provided."""
         if v is not None:
             allowed = {"high", "medium", "low"}
             if v.lower() not in allowed:
@@ -136,6 +138,7 @@ class TaskSearchRequest(BaseModel):
     @field_validator("query")
     @classmethod
     def validate_query(cls, v: str) -> str:
+        """Strip and validate the search query."""
         v = v.strip()
         if not v:
             raise ValueError("Search query must not be empty")

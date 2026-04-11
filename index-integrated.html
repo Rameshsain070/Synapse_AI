@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Synapse AI Todo – An AI-powered to-do list application with LangGraph agents, Pinecone RAG, and smart recommendations.">
+  <title>Synapse AI Todo</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+  <style>
+    /* ---- AI Sidebar ---- */
+    .layout{display:flex;min-height:100vh;flex-direction:column}
+    .layout-body{display:flex;flex:1;position:relative}
+    .layout-main{flex:1;overflow-y:auto}
+    #ai-sidebar{position:fixed;top:0;right:-380px;width:370px;height:100vh;background:var(--color-surface);box-shadow:-2px 0 20px rgba(0,0,0,.12);transition:right .3s ease;z-index:1000;display:flex;flex-direction:column}
+    #ai-sidebar.open{right:0}
+    .ai-sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid var(--color-bg);font-weight:700;font-size:1.05rem}
+    .ai-sidebar-header button{background:none;border:none;cursor:pointer;color:var(--color-text);font-size:1.3rem}
+    #ai-chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
+    .ai-bubble{padding:.6rem 1rem;border-radius:12px;max-width:90%;font-size:.92rem;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+    .ai-bubble--user{align-self:flex-end;background:var(--color-primary);color:#fff;border-bottom-right-radius:4px}
+    .ai-bubble--assistant{align-self:flex-start;background:var(--color-bg);color:var(--color-text);border-bottom-left-radius:4px}
+    .ai-chat-bar{display:flex;gap:.5rem;padding:.8rem 1rem;border-top:1px solid var(--color-bg)}
+    .ai-chat-bar input{flex:1;padding:.55rem .8rem;border:1px solid var(--color-bg);border-radius:8px;font-size:.92rem;background:var(--color-bg);color:var(--color-text)}
+    .ai-chat-bar button{background:var(--color-primary);border:none;color:#fff;padding:.55rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;font-size:.92rem}
+    .ai-fab{position:fixed;bottom:1.5rem;right:1.5rem;width:54px;height:54px;border-radius:50%;background:var(--color-primary);color:#fff;border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(59,130,246,.35);z-index:999;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+    .ai-fab:hover{transform:scale(1.08)}
+    /* AI suggestions inside task cards */
+    .ai-suggestions{font-size:.88rem;padding:.6rem;background:var(--color-bg);border-radius:8px;margin-top:.5rem}
+    .ai-suggestions ol,.ai-suggestions ul{margin:.3rem 0 .3rem 1.2rem;padding:0}
+    .ai-suggestions li{margin-bottom:.2rem}
+    .ai-score{opacity:.65;font-size:.82rem}
+    .ai-loading{font-style:italic;opacity:.7;font-size:.88rem}
+    .ai-suggestions--offline{opacity:.75}
+    /* Settings panel */
+    .settings-panel{background:var(--color-surface);border-radius:var(--radius-md);padding:1.2rem;margin-bottom:1rem;box-shadow:var(--shadow-md)}
+    .settings-panel h3{margin:0 0 .8rem;font-size:1rem}
+    .settings-panel label{display:block;font-size:.88rem;margin-bottom:.25rem;font-weight:600}
+    .settings-panel .input{width:100%;margin-bottom:.7rem}
+    .settings-panel .btn{width:100%}
+    .settings-toggle{font-size:.82rem;cursor:pointer;background:none;border:none;color:var(--color-primary);text-decoration:underline;margin-bottom:.5rem}
+    .badge-ai{display:inline-block;font-size:.7rem;background:var(--color-primary);color:#fff;padding:1px 6px;border-radius:6px;margin-left:.4rem;vertical-align:middle}
+    /* task AI button */
+    .btn-ai{background:none;border:1px solid var(--color-primary);color:var(--color-primary);padding:2px 8px;border-radius:6px;font-size:.78rem;cursor:pointer;margin-left:.3rem}
+    .btn-ai:hover{background:var(--color-primary);color:#fff}
+    .ai-result-box{margin-top:.4rem}
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <div class="layout">
+    <!-- Header -->
+    <header class="header" role="banner">
+      <div class="header-inner">
+        <div class="logo">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <h1>Synapse AI Todo <span class="badge-ai">AI</span></h1>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <button id="theme-toggle" class="btn-icon" aria-label="Toggle dark mode" title="Toggle theme">
+            <svg class="icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <svg class="icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <div class="layout-main">
+        <main id="main" class="main" role="main">
+          <div class="container">
+
+            <!-- Backend Connection Settings -->
+            <section class="settings-panel" id="settings-panel">
+              <button class="settings-toggle" id="settings-toggle" aria-label="Toggle settings">⚙ Backend Settings</button>
+              <div id="settings-body" hidden>
+                <h3>Connect to Synapse AI Backend</h3>
+                <label for="api-url">API Base URL</label>
+                <input type="url" id="api-url" class="input" placeholder="https://your-api.example.com" value="">
+                <label for="api-token">JWT Token (optional)</label>
+                <input type="text" id="api-token" class="input" placeholder="Paste your JWT token">
+                <button class="btn btn-primary" id="connect-btn">Connect</button>
+                <p id="connection-status" style="font-size:.82rem;margin-top:.4rem"></p>
+              </div>
+            </section>
+
+            <!-- Task Form -->
+            <section class="card task-form-card" aria-label="Add new task">
+              <form id="task-form" autocomplete="off">
+                <div class="form-row">
+                  <label for="task-input" class="sr-only">Task title</label>
+                  <input type="text" id="task-input" class="input task-input" placeholder="What needs to be done?" maxlength="200" required aria-required="true">
+                  <button type="submit" class="btn btn-primary" id="add-btn" aria-label="Add task">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    <span>Add</span>
+                  </button>
+                </div>
+                <div class="form-details">
+                  <div class="form-group">
+                    <label for="task-priority" class="sr-only">Priority</label>
+                    <select id="task-priority" class="select" aria-label="Task priority">
+                      <option value="medium">Medium Priority</option>
+                      <option value="high">High Priority</option>
+                      <option value="low">Low Priority</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="task-category" class="sr-only">Category</label>
+                    <input type="text" id="task-category" class="input" placeholder="Category (optional)" maxlength="30" list="category-list" aria-label="Task category">
+                    <datalist id="category-list"></datalist>
+                  </div>
+                  <div class="form-group">
+                    <label for="task-due-date" class="sr-only">Due date</label>
+                    <input type="date" id="task-due-date" class="input" aria-label="Due date">
+                  </div>
+                </div>
+              </form>
+            </section>
+
+            <!-- Filters & Search -->
+            <section class="card filters-card" aria-label="Filter and search tasks">
+              <div class="filters-row">
+                <div class="search-box">
+                  <svg class="icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  <label for="search-input" class="sr-only">Search tasks</label>
+                  <input type="text" id="search-input" class="input search-input" placeholder="Search tasks…" aria-label="Search tasks">
+                </div>
+                <div class="filter-tabs" role="tablist" aria-label="Task status filter">
+                  <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+                  <button class="filter-tab" data-filter="active" role="tab" aria-selected="false">Active</button>
+                  <button class="filter-tab" data-filter="completed" role="tab" aria-selected="false">Completed</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Task Counter -->
+            <section class="counter-bar" aria-label="Task statistics">
+              <span class="counter" id="counter-total" title="Total tasks"><strong id="total-count">0</strong> Total</span>
+              <span class="counter" id="counter-active" title="Active tasks"><strong id="active-count">0</strong> Active</span>
+              <span class="counter" id="counter-completed" title="Completed tasks"><strong id="completed-count">0</strong> Done</span>
+              <button id="clear-completed" class="btn btn-text" aria-label="Clear completed tasks" hidden>Clear completed</button>
+            </section>
+
+            <!-- Task List -->
+            <section aria-label="Task list">
+              <ul id="task-list" class="task-list" role="list" aria-live="polite"></ul>
+              <div id="empty-state" class="empty-state" hidden>
+                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                  <rect x="9" y="3" width="6" height="4" rx="1"/>
+                </svg>
+                <p class="empty-title">No tasks yet</p>
+                <p class="empty-subtitle">Add a task above to get started!</p>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+
+      <!-- AI Chat Sidebar -->
+      <aside id="ai-sidebar" aria-label="AI Assistant">
+        <div class="ai-sidebar-header">
+          <span>🧠 Synapse AI Chat</span>
+          <button id="ai-sidebar-close" aria-label="Close AI sidebar">&times;</button>
+        </div>
+        <div id="ai-chat-messages">
+          <div class="ai-bubble ai-bubble--assistant">Hi! I'm Synapse AI. Ask me to help with your tasks – prioritisation, due dates, breakdowns, or just chat! 🚀</div>
+        </div>
+        <div class="ai-chat-bar">
+          <input type="text" id="ai-chat-input" placeholder="Ask Synapse AI…" aria-label="AI chat input">
+          <button id="ai-chat-send" aria-label="Send message">Send</button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+      <p>Synapse AI Todo &middot; Powered by LangGraph, FastAPI &amp; Pinecone RAG</p>
+    </footer>
+  </div>
+
+  <!-- AI Floating Action Button -->
+  <button class="ai-fab" id="ai-fab" aria-label="Open AI Assistant" title="Synapse AI Chat">🧠</button>
+
+  <!-- Edit Modal -->
+  <div id="edit-modal" class="modal-overlay" hidden aria-modal="true" role="dialog" aria-label="Edit task">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Task</h2>
+        <button id="modal-close" class="btn-icon" aria-label="Close dialog">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <form id="edit-form" autocomplete="off">
+        <div class="form-group">
+          <label for="edit-title">Title</label>
+          <input type="text" id="edit-title" class="input" maxlength="200" required>
+        </div>
+        <div class="form-row-modal">
+          <div class="form-group">
+            <label for="edit-priority">Priority</label>
+            <select id="edit-priority" class="select">
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-category">Category</label>
+            <input type="text" id="edit-category" class="input" maxlength="30" list="edit-category-list">
+            <datalist id="edit-category-list"></datalist>
+          </div>
+          <div class="form-group">
+            <label for="edit-due-date">Due date</label>
+            <input type="date" id="edit-due-date" class="input">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="modal-cancel" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Scripts -->
+  <script src="assets/js/api-client.js"></script>
+  <script src="assets/js/ai-integration.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // ---- Settings panel ----
+      var settingsToggle = document.getElementById('settings-toggle');
+      var settingsBody = document.getElementById('settings-body');
+      var connectBtn = document.getElementById('connect-btn');
+      var connectionStatus = document.getElementById('connection-status');
+
+      if (settingsToggle && settingsBody) {
+        settingsToggle.addEventListener('click', function () {
+          settingsBody.hidden = !settingsBody.hidden;
+        });
+      }
+
+      // Restore saved API URL
+      var savedUrl = localStorage.getItem('synapse_api_url') || '';
+      var apiUrlInput = document.getElementById('api-url');
+      if (apiUrlInput && savedUrl) apiUrlInput.value = savedUrl;
+
+      if (connectBtn) {
+        connectBtn.addEventListener('click', function () {
+          var url = (apiUrlInput && apiUrlInput.value.trim()) || '';
+          var token = (document.getElementById('api-token') && document.getElementById('api-token').value.trim()) || '';
+          if (!url) {
+            connectionStatus.textContent = '⚠ Please enter an API URL';
+            return;
+          }
+          localStorage.setItem('synapse_api_url', url);
+          var opts = { baseUrl: url };
+          if (token) opts.token = token;
+          SynapseAPI.configure(opts);
+
+          connectionStatus.textContent = '🔄 Testing connection…';
+          fetch(url.replace(/\/+$/, '') + '/health')
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d && d.status === 'healthy') {
+                connectionStatus.textContent = '✅ Connected! Backend v' + (d.version || '?');
+                connectionStatus.style.color = 'var(--color-low)';
+              } else {
+                connectionStatus.textContent = '⚠ Unexpected response';
+              }
+            })
+            .catch(function () {
+              connectionStatus.textContent = '❌ Cannot reach backend – tasks saved locally';
+              connectionStatus.style.color = 'var(--color-danger)';
+            });
+        });
+      }
+
+      // Auto-connect if URL was saved
+      if (savedUrl) {
+        SynapseAPI.configure({ baseUrl: savedUrl });
+      }
+
+      // ---- AI Sidebar ----
+      SynapseAI.init();
+      var fab = document.getElementById('ai-fab');
+      var closeBtn = document.getElementById('ai-sidebar-close');
+      if (fab) fab.addEventListener('click', function () { SynapseAI.toggleSidebar(); });
+      if (closeBtn) closeBtn.addEventListener('click', function () { SynapseAI.closeSidebar(); });
+    })();
+  </script>
+</body>
+</html>
