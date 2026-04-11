@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "SynapseAI - Unified AI Platform",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased dark">
-      <body className="min-h-full flex flex-col bg-gray-950 text-gray-100">{children}</body>
+      <body className="min-h-full flex flex-col bg-gray-950 text-gray-100">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

@@ -18,10 +18,27 @@ export interface StreamChunk {
   done: boolean;
 }
 
+export interface TokenData {
+  access_token: string;
+  token_type: string;
+  expires_at?: string;
+}
+
+export interface UserResponse {
+  id: number;
+  email: string;
+  token: TokenData;
+}
+
 export interface SessionResponse {
   session_id: string;
   name: string;
-  token: string;
+  token: TokenData;
+}
+
+export interface AuthUser {
+  id: number;
+  email: string;
 }
 
 export interface ServiceHealth {
