@@ -11,7 +11,7 @@ import { NotFoundPage } from "./pages/NotFoundPage.tsx";
 
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/Synapse_AI/">
       <ThemeProvider>
         <AuthProvider>
           <ChatProvider>

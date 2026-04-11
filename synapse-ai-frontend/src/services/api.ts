@@ -28,7 +28,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem(USER_TOKEN_KEY);
       localStorage.removeItem(SESSION_TOKEN_KEY);
-      window.location.href = "/login";
+      const base = import.meta.env.BASE_URL || "/";
+      window.location.href = `${base}login`;
     }
     return Promise.reject(error);
   },
