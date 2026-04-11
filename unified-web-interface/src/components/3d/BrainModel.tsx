@@ -9,12 +9,24 @@ interface NodeData {
   connections: number[];
 }
 
+// Deterministic pseudo-random number generator (mulberry32)
+function seededRandom(seed: number): () => number {
+  let s = seed | 0;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 function generateNodes(count: number): NodeData[] {
+  const rng = seededRandom(123);
   const nodes: NodeData[] = [];
   for (let i = 0; i < count; i++) {
-    const phi = Math.acos(2 * Math.random() - 1);
-    const theta = 2 * Math.PI * Math.random();
-    const r = 1.5 + Math.random() * 0.8;
+    const phi = Math.acos(2 * rng() - 1);
+    const theta = 2 * Math.PI * rng();
+    const r = 1.5 + rng() * 0.8;
     const position = new THREE.Vector3(
       r * Math.sin(phi) * Math.cos(theta),
       r * Math.sin(phi) * Math.sin(theta),
