@@ -4,6 +4,8 @@ Provides full CRUD for tasks, AI-powered suggestions, and semantic search.
 All endpoints require session-level JWT authentication.
 """
 
+import json as _json
+
 from fastapi import (
     APIRouter,
     Depends,
@@ -240,8 +242,6 @@ async def get_ai_suggestions(
         )
 
         # Persist AI fields back to the task (best-effort)
-        import json as _json
-
         await task_service.update_task(
             task_id,
             user.id,

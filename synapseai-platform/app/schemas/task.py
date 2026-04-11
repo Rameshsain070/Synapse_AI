@@ -13,8 +13,10 @@ from pydantic import (
     field_validator,
 )
 
-# Characters that are not allowed in user-supplied text fields
-_DISALLOWED_PATTERN = re.compile(r"[<>{}()\[\]\\]")
+# Characters that are not allowed in user-supplied text fields.
+# Angle brackets are stripped to prevent HTML injection.
+# Backslash is stripped to prevent escape-sequence attacks.
+_DISALLOWED_PATTERN = re.compile(r"[<>\\]")
 
 
 def _sanitize_text(v: str) -> str:
