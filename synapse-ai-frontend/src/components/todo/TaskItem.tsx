@@ -21,6 +21,14 @@ const priorityConfig = {
   low: { color: "text-green-500", bg: "bg-green-100 dark:bg-green-900/30", label: "Low" },
 };
 
+function parseDateLocal(dateStr: string): Date {
+  return new Date(dateStr + "T00:00:00");
+}
+
+function todayDateString(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
 export function TaskItem({ task }: TaskItemProps) {
   const { toggleTask, deleteTask, editTask } = useTodo();
   const [isEditing, setIsEditing] = useState(false);
@@ -49,7 +57,7 @@ export function TaskItem({ task }: TaskItemProps) {
   }
 
   const pConfig = priorityConfig[task.priority];
-  const isOverdue = task.dueDate && !task.completed && new Date(task.dueDate) < new Date(new Date().toISOString().split("T")[0]);
+  const isOverdue = task.dueDate && !task.completed && parseDateLocal(task.dueDate) < parseDateLocal(todayDateString());
 
   if (isEditing) {
     return (
@@ -157,7 +165,7 @@ export function TaskItem({ task }: TaskItemProps) {
               }`}
             >
               <Calendar className="h-3 w-3" />
-              {new Date(task.dueDate + "T00:00:00").toLocaleDateString()}
+              {parseDateLocal(task.dueDate).toLocaleDateString()}
             </span>
           )}
         </div>
