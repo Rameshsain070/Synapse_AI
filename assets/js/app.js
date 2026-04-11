@@ -266,6 +266,8 @@
 
   /* ---------- Render ---------- */
   var VALID_PRIORITIES = { high: true, medium: true, low: true };
+  var ICON_WARNING = '⚠ ';
+  var ICON_CALENDAR = '📅 ';
 
   /* SVG namespace */
   var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -351,7 +353,7 @@
         var overdue = !task.completed && isOverdue(task.dueDate);
         var dueBadge = createBadge(
           overdue ? 'badge-overdue' : 'badge-due',
-          (overdue ? '\u26A0 ' : '\uD83D\uDCC5 ') + formatDate(task.dueDate)
+          (overdue ? ICON_WARNING : ICON_CALENDAR) + formatDate(task.dueDate)
         );
         meta.appendChild(dueBadge);
       }
