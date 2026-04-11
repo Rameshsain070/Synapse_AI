@@ -1,6 +1,7 @@
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, CheckSquare } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.ts";
 import { ThemeToggle } from "../common/ThemeToggle.tsx";
+import { NavLink } from "react-router-dom";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -24,9 +25,24 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         </h1>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
+        {/* Tasks nav link */}
+        <NavLink
+          to="/todo"
+          className={({ isActive }) =>
+            `flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-colors duration-200 ${
+              isActive
+                ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+            }`
+          }
+        >
+          <CheckSquare className="h-4 w-4" />
+          <span className="hidden sm:inline">Tasks</span>
+        </NavLink>
+
         {user?.email && (
-          <span className="hidden text-sm text-gray-500 sm:inline dark:text-gray-400">
+          <span className="hidden text-sm text-gray-500 sm:inline dark:text-gray-400 mx-2">
             {user.email}
           </span>
         )}

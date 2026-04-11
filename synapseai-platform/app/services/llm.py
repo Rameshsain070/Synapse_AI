@@ -91,6 +91,45 @@ class LLMRegistry:
         },
     ]
 
+    # Append Google Gemini models when GOOGLE_API_KEY is configured
+    if settings.GOOGLE_API_KEY:
+        try:
+            from langchain_google_genai import ChatGoogleGenerativeAI as _ChatGemini  # noqa: PLC0415
+
+            LLMS.extend(
+                [
+                    {
+                        "name": "gemini-2.0-flash",
+                        "llm": _ChatGemini(
+                            model="gemini-2.0-flash",
+                            google_api_key=settings.GOOGLE_API_KEY,
+                            max_output_tokens=settings.MAX_TOKENS,
+                            temperature=settings.DEFAULT_LLM_TEMPERATURE,
+                        ),
+                    },
+                    {
+                        "name": "gemini-1.5-pro",
+                        "llm": _ChatGemini(
+                            model="gemini-1.5-pro",
+                            google_api_key=settings.GOOGLE_API_KEY,
+                            max_output_tokens=settings.MAX_TOKENS,
+                            temperature=settings.DEFAULT_LLM_TEMPERATURE,
+                        ),
+                    },
+                    {
+                        "name": "gemini-1.5-flash",
+                        "llm": _ChatGemini(
+                            model="gemini-1.5-flash",
+                            google_api_key=settings.GOOGLE_API_KEY,
+                            max_output_tokens=settings.MAX_TOKENS,
+                            temperature=settings.DEFAULT_LLM_TEMPERATURE,
+                        ),
+                    },
+                ]
+            )
+        except ImportError:
+            pass  # langchain-google-genai not installed; skip Gemini models
+
     @classmethod
     def get(cls, model_name: str, **kwargs) -> BaseChatModel:
         """Get an LLM by name with optional argument overrides.
@@ -308,7 +347,10 @@ class LLMService:
             try:
                 response = await self._call_llm_with_retry(messages)
                 return response
-            except OpenAIError as e:
+            except Exception as e:
+                # Catching broadly so that non-OpenAI providers (e.g. Gemini) also
+                # trigger the circular model-fallback chain.  The inner
+                # `_call_llm_with_retry` still retries on OpenAI-specific errors.
                 last_error = e
                 models_tried += 1
 
