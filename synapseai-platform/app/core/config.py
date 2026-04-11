@@ -185,6 +185,9 @@ class Settings:
         self.PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "")
         self.PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "synapse-tasks")
 
+        # Google Gemini Configuration (optional — adds Gemini to the LLM fallback chain)
+        self.GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+
         # Rate limit endpoints defaults
         default_endpoints = {
             "chat": ["30 per minute"],
