@@ -21,7 +21,8 @@ describe("TodoPage", () => {
 
   it("renders the todo page with header", () => {
     renderTodoPage();
-    expect(screen.getByText("Synapse Todo")).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("SynapseAI Tasks");
   });
 
   it("loads demo tasks on first render", () => {
