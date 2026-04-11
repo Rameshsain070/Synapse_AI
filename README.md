@@ -866,6 +866,44 @@ make clean                 # Remove .venv, __pycache__, .pytest_cache
 
 ---
 
+## ✅ Synapse Todo — To-Do List Web Application
+
+A **production-ready, feature-rich to-do list** hosted on GitHub Pages.
+
+### 🌐 Live URL
+
+**<https://rameshsain070.github.io/Synapse_AI/>**
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| **Task Management** | Add, edit, delete, and complete tasks |
+| **Priorities** | High / Medium / Low with color-coded badges |
+| **Categories** | Organize tasks into custom categories |
+| **Due Dates** | Date picker with overdue highlighting |
+| **Search & Filter** | Search by title/category; filter by All / Active / Completed |
+| **Dark / Light Theme** | One-click toggle; preference saved in local storage |
+| **Local Storage** | All tasks persist across page refreshes — no backend needed |
+| **Responsive Design** | Works on desktop, tablet, and mobile |
+| **Accessibility** | Semantic HTML, ARIA labels, keyboard navigation |
+| **Animations** | Smooth transitions, toast notifications, slide effects |
+
+### Files
+
+```
+index.html            – Main application page
+assets/css/style.css  – Responsive styles with dark/light theme
+assets/js/app.js      – Vanilla JavaScript (no build step required)
+```
+
+### Keyboard Shortcuts
+
+- **Enter** — Add task / save edit
+- **Escape** — Close edit dialog
+
+---
+
 ## 👨‍💻 Author
 
 **Ramesh Sain**  

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Synapse Todo – A modern, feature-rich to-do list application with local storage, dark/light theme, priorities, categories, and more.">
+  <title>Synapse Todo</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+</head>
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- Header -->
+  <header class="header" role="banner">
+    <div class="header-inner">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        <h1>Synapse Todo</h1>
+      </div>
+      <button id="theme-toggle" class="btn-icon" aria-label="Toggle dark mode" title="Toggle theme">
+        <svg class="icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main" class="main" role="main">
+    <div class="container">
+
+      <!-- Task Form -->
+      <section class="card task-form-card" aria-label="Add new task">
+        <form id="task-form" autocomplete="off">
+          <div class="form-row">
+            <label for="task-input" class="sr-only">Task title</label>
+            <input
+              type="text"
+              id="task-input"
+              class="input task-input"
+              placeholder="What needs to be done?"
+              maxlength="200"
+              required
+              aria-required="true"
+            >
+            <button type="submit" class="btn btn-primary" id="add-btn" aria-label="Add task">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <span>Add</span>
+            </button>
+          </div>
+          <div class="form-details">
+            <div class="form-group">
+              <label for="task-priority" class="sr-only">Priority</label>
+              <select id="task-priority" class="select" aria-label="Task priority">
+                <option value="medium">Medium Priority</option>
+                <option value="high">High Priority</option>
+                <option value="low">Low Priority</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-category" class="sr-only">Category</label>
+              <input
+                type="text"
+                id="task-category"
+                class="input"
+                placeholder="Category (optional)"
+                maxlength="30"
+                list="category-list"
+                aria-label="Task category"
+              >
+              <datalist id="category-list"></datalist>
+            </div>
+            <div class="form-group">
+              <label for="task-due-date" class="sr-only">Due date</label>
+              <input
+                type="date"
+                id="task-due-date"
+                class="input"
+                aria-label="Due date"
+              >
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Filters & Search -->
+      <section class="card filters-card" aria-label="Filter and search tasks">
+        <div class="filters-row">
+          <div class="search-box">
+            <svg class="icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <label for="search-input" class="sr-only">Search tasks</label>
+            <input type="text" id="search-input" class="input search-input" placeholder="Search tasks…" aria-label="Search tasks">
+          </div>
+          <div class="filter-tabs" role="tablist" aria-label="Task status filter">
+            <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+            <button class="filter-tab" data-filter="active" role="tab" aria-selected="false">Active</button>
+            <button class="filter-tab" data-filter="completed" role="tab" aria-selected="false">Completed</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Task Counter -->
+      <section class="counter-bar" aria-label="Task statistics">
+        <span class="counter" id="counter-total" title="Total tasks">
+          <strong id="total-count">0</strong> Total
+        </span>
+        <span class="counter" id="counter-active" title="Active tasks">
+          <strong id="active-count">0</strong> Active
+        </span>
+        <span class="counter" id="counter-completed" title="Completed tasks">
+          <strong id="completed-count">0</strong> Done
+        </span>
+        <button id="clear-completed" class="btn btn-text" aria-label="Clear completed tasks" hidden>
+          Clear completed
+        </button>
+      </section>
+
+      <!-- Task List -->
+      <section aria-label="Task list">
+        <ul id="task-list" class="task-list" role="list" aria-live="polite"></ul>
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state" hidden>
+          <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+          </svg>
+          <p class="empty-title">No tasks yet</p>
+          <p class="empty-subtitle">Add a task above to get started!</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Edit Modal -->
+  <div id="edit-modal" class="modal-overlay" hidden aria-modal="true" role="dialog" aria-label="Edit task">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Task</h2>
+        <button id="modal-close" class="btn-icon" aria-label="Close dialog">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <form id="edit-form" autocomplete="off">
+        <div class="form-group">
+          <label for="edit-title">Title</label>
+          <input type="text" id="edit-title" class="input" maxlength="200" required>
+        </div>
+        <div class="form-row-modal">
+          <div class="form-group">
+            <label for="edit-priority">Priority</label>
+            <select id="edit-priority" class="select">
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-category">Category</label>
+            <input type="text" id="edit-category" class="input" maxlength="30" list="edit-category-list">
+            <datalist id="edit-category-list"></datalist>
+          </div>
+          <div class="form-group">
+            <label for="edit-due-date">Due date</label>
+            <input type="date" id="edit-due-date" class="input">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="modal-cancel" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <p>Synapse Todo &middot; Tasks are saved in your browser's local storage</p>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
