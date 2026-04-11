@@ -879,7 +879,7 @@ A **production-ready, feature-rich to-do list** hosted on GitHub Pages.
 | Feature | Description |
 |---------|-------------|
 | **Task Management** | Add, edit, delete, and complete tasks |
-| **Priorities** | High / Medium / Low with colour-coded badges |
+| **Priorities** | High / Medium / Low with color-coded badges |
 | **Categories** | Organise tasks into custom categories |
 | **Due Dates** | Date picker with overdue highlighting |
 | **Search & Filter** | Search by title/category; filter by All / Active / Completed |

@@ -115,35 +115,36 @@
     tasks.forEach(function (t) {
       if (t.category) cats[t.category] = true;
     });
-    var html = Object.keys(cats).map(function (c) {
-      return '<option value="' + escapeHtml(c) + '">';
-    }).join('');
-    categoryList.innerHTML = html;
-    editCategoryList.innerHTML = html;
-  }
-
-  /* ---------- Escape HTML ---------- */
-  function escapeHtml(str) {
-    var div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
-    return div.innerHTML;
+    categoryList.innerHTML = '';
+    editCategoryList.innerHTML = '';
+    Object.keys(cats).forEach(function (c) {
+      var opt1 = document.createElement('option');
+      opt1.value = c;
+      categoryList.appendChild(opt1);
+      var opt2 = document.createElement('option');
+      opt2.value = c;
+      editCategoryList.appendChild(opt2);
+    });
   }
 
   /* ---------- Date helpers ---------- */
+  var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
   function formatDate(dateStr) {
-    if (!dateStr) return '';
+    if (!dateStr || !DATE_RE.test(dateStr)) return dateStr || '';
     var parts = dateStr.split('-');
-    if (parts.length !== 3) return dateStr;
-    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
+    var monthIdx = parseInt(parts[1], 10) - 1;
+    if (monthIdx < 0 || monthIdx > 11) return dateStr;
+    return MONTH_NAMES[monthIdx] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
   }
 
   function isOverdue(dateStr) {
-    if (!dateStr) return false;
+    if (!dateStr || !DATE_RE.test(dateStr)) return false;
     var today = new Date();
     today.setHours(0, 0, 0, 0);
     var due = new Date(dateStr + 'T00:00:00');
-    return due < today;
+    return !isNaN(due.getTime()) && due < today;
   }
 
   /* ---------- Add Task ---------- */
@@ -264,6 +265,41 @@
   }
 
   /* ---------- Render ---------- */
+  var VALID_PRIORITIES = { high: true, medium: true, low: true };
+
+  /* SVG namespace */
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  function createSvgIcon(paths) {
+    var svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'icon');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    paths.forEach(function (p) {
+      if (p.tag === 'path') {
+        var el = document.createElementNS(SVG_NS, 'path');
+        el.setAttribute('d', p.d);
+        svg.appendChild(el);
+      } else if (p.tag === 'polyline') {
+        var el2 = document.createElementNS(SVG_NS, 'polyline');
+        el2.setAttribute('points', p.points);
+        svg.appendChild(el2);
+      }
+    });
+    return svg;
+  }
+
+  function createBadge(className, text) {
+    var span = document.createElement('span');
+    span.className = 'task-badge ' + className;
+    span.textContent = text;
+    return span;
+  }
+
   function render() {
     var filtered = getFilteredTasks();
 
@@ -279,47 +315,74 @@
     /* Empty state */
     emptyState.hidden = filtered.length > 0;
 
-    /* Build list */
+    /* Build list using safe DOM APIs */
     taskList.innerHTML = '';
     filtered.forEach(function (task) {
+      var priority = VALID_PRIORITIES[task.priority] ? task.priority : 'medium';
+
       var li = document.createElement('li');
-      li.className = 'task-item priority-' + task.priority + (task.completed ? ' completed' : '');
+      li.className = 'task-item priority-' + priority + (task.completed ? ' completed' : '');
       li.setAttribute('data-id', task.id);
 
-      /* Meta badges */
-      var metaHtml = '';
-      metaHtml += '<span class="task-badge badge-' + task.priority + '">' + task.priority + '</span>';
+      /* Checkbox */
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.className = 'task-checkbox';
+      cb.checked = !!task.completed;
+      cb.setAttribute('aria-label', 'Mark ' + task.title + ' as ' + (task.completed ? 'incomplete' : 'complete'));
+      li.appendChild(cb);
+
+      /* Content wrapper */
+      var content = document.createElement('div');
+      content.className = 'task-content';
+
+      var titleEl = document.createElement('div');
+      titleEl.className = 'task-title';
+      titleEl.textContent = task.title;
+      content.appendChild(titleEl);
+
+      var meta = document.createElement('div');
+      meta.className = 'task-meta';
+      meta.appendChild(createBadge('badge-' + priority, priority));
       if (task.category) {
-        metaHtml += '<span class="task-badge badge-category">' + escapeHtml(task.category) + '</span>';
+        meta.appendChild(createBadge('badge-category', task.category));
       }
       if (task.dueDate) {
         var overdue = !task.completed && isOverdue(task.dueDate);
-        metaHtml += '<span class="task-badge ' + (overdue ? 'badge-overdue' : 'badge-due') + '">'
-          + (overdue ? '⚠ ' : '📅 ') + formatDate(task.dueDate) + '</span>';
+        var dueBadge = createBadge(
+          overdue ? 'badge-overdue' : 'badge-due',
+          (overdue ? '\u26A0 ' : '\uD83D\uDCC5 ') + formatDate(task.dueDate)
+        );
+        meta.appendChild(dueBadge);
       }
+      content.appendChild(meta);
+      li.appendChild(content);
 
-      li.innerHTML =
-        '<input type="checkbox" class="task-checkbox" ' + (task.completed ? 'checked' : '') +
-        ' aria-label="Mark ' + escapeHtml(task.title) + ' as ' + (task.completed ? 'incomplete' : 'complete') + '">' +
-        '<div class="task-content">' +
-          '<div class="task-title">' + escapeHtml(task.title) + '</div>' +
-          '<div class="task-meta">' + metaHtml + '</div>' +
-        '</div>' +
-        '<div class="task-actions">' +
-          '<button class="task-action-btn edit" aria-label="Edit task" title="Edit">' +
-            '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>' +
-              '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>' +
-            '</svg>' +
-          '</button>' +
-          '<button class="task-action-btn delete" aria-label="Delete task" title="Delete">' +
-            '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<polyline points="3 6 5 6 21 6"/>' +
-              '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>' +
-            '</svg>' +
-          '</button>' +
-        '</div>';
+      /* Action buttons */
+      var actions = document.createElement('div');
+      actions.className = 'task-actions';
 
+      var editBtn = document.createElement('button');
+      editBtn.className = 'task-action-btn edit';
+      editBtn.setAttribute('aria-label', 'Edit task');
+      editBtn.title = 'Edit';
+      editBtn.appendChild(createSvgIcon([
+        { tag: 'path', d: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' },
+        { tag: 'path', d: 'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' }
+      ]));
+      actions.appendChild(editBtn);
+
+      var delBtn = document.createElement('button');
+      delBtn.className = 'task-action-btn delete';
+      delBtn.setAttribute('aria-label', 'Delete task');
+      delBtn.title = 'Delete';
+      delBtn.appendChild(createSvgIcon([
+        { tag: 'polyline', points: '3 6 5 6 21 6' },
+        { tag: 'path', d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' }
+      ]));
+      actions.appendChild(delBtn);
+
+      li.appendChild(actions);
       taskList.appendChild(li);
     });
   }
