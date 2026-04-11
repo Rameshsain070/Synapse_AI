@@ -1,0 +1,58 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'synapse-ai-frontend/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'synapse-ai-frontend/**'
+
+defaults:
+  run:
+    working-directory: synapse-ai-frontend
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: synapse-ai-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc -b
+
+      - name: Run tests
+        run: npm run test -- --run
+
+      - name: Build production bundle
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: https://api.example.com
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: synapse-ai-frontend/dist
+          retention-days: 7
