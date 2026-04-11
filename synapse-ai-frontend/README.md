@@ -26,6 +26,7 @@ A modern, production-ready web interface for the **SynapseAI** agentic AI platfo
 | **Authentication** | Register / login with JWT tokens; protected routes redirect unauthenticated users |
 | **Chat Interface** | Real-time chat with SSE streaming, markdown rendering, and code syntax highlighting |
 | **Session Management** | Create, rename, delete, and switch between chat sessions |
+| **Todo Application** | Full-featured task manager with local storage persistence, priorities, categories, due dates, and filtering |
 | **Dark / Light Theme** | Toggle between themes; preference is persisted in `localStorage` |
 | **Responsive Design** | Optimized for mobile, tablet, and desktop with a collapsible sidebar |
 | **Code Highlighting** | Fenced code blocks rendered with Prism.js syntax highlighting |
@@ -65,12 +66,13 @@ synapse-ai-frontend/
 │   │   ├── auth/           # LoginForm, RegisterForm, AuthLayout
 │   │   ├── chat/           # ChatInterface, Message, MessageList, MessageInput, SessionList
 │   │   ├── layout/         # Header, Sidebar, MainLayout
+│   │   ├── todo/           # TaskForm, TaskItem, TaskList, TaskFilter, TaskCounter
 │   │   └── common/         # ThemeToggle, LoadingSpinner, Toast
-│   ├── context/            # AuthContext, ChatContext, ThemeContext
-│   ├── hooks/              # useAuth, useChat, useSessions, useTheme
+│   ├── context/            # AuthContext, ChatContext, ThemeContext, TodoContext
+│   ├── hooks/              # useAuth, useChat, useSessions, useTheme, useTodo
 │   ├── services/           # api.ts (Axios), authService, chatService, sessionService
-│   ├── types/              # TypeScript interfaces (auth, chat, session, api)
-│   ├── pages/              # LoginPage, RegisterPage, ChatPage, NotFoundPage
+│   ├── types/              # TypeScript interfaces (auth, chat, session, api, todo)
+│   ├── pages/              # LoginPage, RegisterPage, ChatPage, TodoPage, NotFoundPage
 │   ├── routes/             # ProtectedRoute
 │   ├── test/               # Test setup and test files
 │   ├── App.tsx             # Root component with routing
@@ -284,6 +286,34 @@ npm run test:coverage
 ```
 
 Tests use **Vitest** with **React Testing Library** and **jsdom** environment.
+
+---
+
+## ✅ Todo Application
+
+The frontend includes a standalone **Todo Application** accessible at `/todo`. It works entirely client-side with browser local storage — no backend required.
+
+### Features
+
+| Feature | Description |
+|---|---|
+| **Task CRUD** | Add, edit, delete, and toggle tasks |
+| **Priority Levels** | High, Medium, Low with color-coded badges |
+| **Categories** | Organize tasks with custom categories |
+| **Due Dates** | Set and track due dates with overdue indicators |
+| **Search & Filter** | Search tasks by title/category; filter by All/Active/Completed status |
+| **Category Filter** | Filter tasks by specific categories |
+| **Task Counter** | Shows total, active, and completed counts |
+| **Clear Completed** | Remove all completed tasks in one click |
+| **Dark/Light Theme** | Full theme support matching the main application |
+| **Local Storage** | All tasks persist in `localStorage` (`synapse_todo_tasks` key) |
+| **Demo Tasks** | First-time users see example tasks to get started |
+| **Keyboard Shortcuts** | Enter to add task, Escape to cancel edit |
+| **Responsive Design** | Mobile-friendly layout |
+
+### Usage
+
+Navigate to `/todo` in the application or visit `http://localhost:3000/Synapse_AI/todo` during development.
 
 ---
 
