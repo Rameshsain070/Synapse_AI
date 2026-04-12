@@ -1,206 +1,232 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Synapse Todo – A modern, feature-rich to-do list application with local storage, dark/light theme, priorities, categories, and more.">
-  <title>Synapse Todo</title>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+  <meta name="description" content="Synapse AI – Full-stack AI assistant with LangGraph chat, smart task management, RAG memory, and pgvector semantic search.">
+  <title>Synapse AI – AI Assistant &amp; Task Manager</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#f1f5f9;min-height:100vh}
+    a{text-decoration:none;color:inherit}
+
+    /* Nav */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:.9rem 2rem;display:flex;align-items:center;gap:1rem;background:rgba(15,23,42,.85);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.07)}
+    .nav-logo{display:flex;align-items:center;gap:.6rem;font-size:1.05rem;font-weight:800}
+    .nav-logo span{background:linear-gradient(135deg,#818cf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links{display:flex;gap:1.5rem;margin-left:auto;align-items:center}
+    .nav-links a{font-size:.88rem;color:rgba(255,255,255,.65);transition:color .2s}
+    .nav-links a:hover{color:#fff}
+    .nav-cta{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff!important;padding:.55rem 1.2rem;border-radius:8px;font-weight:600;font-size:.88rem;transition:opacity .2s!important}
+    .nav-cta:hover{opacity:.88}
+
+    /* Hero */
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7rem 1.5rem 4rem;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,.18),transparent 70%);pointer-events:none}
+    .hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;padding:.4rem .9rem;border-radius:99px;font-size:.8rem;font-weight:600;margin-bottom:1.5rem}
+    .hero h1{font-size:clamp(2.4rem,6vw,4.5rem);font-weight:900;line-height:1.1;margin-bottom:1.25rem;letter-spacing:-.03em}
+    .hero h1 span{background:linear-gradient(135deg,#818cf8,#a78bfa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero p{font-size:clamp(.95rem,2vw,1.2rem);color:#94a3b8;max-width:600px;line-height:1.65;margin-bottom:2.5rem}
+    .hero-buttons{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
+    .btn-hero{padding:.85rem 2rem;border-radius:10px;font-size:1rem;font-weight:700;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem}
+    .btn-hero-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.4)}
+    .btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.5)}
+    .btn-hero-secondary{background:rgba(255,255,255,.06);color:#e2e8f0;border:1px solid rgba(255,255,255,.12)}
+    .btn-hero-secondary:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+    .hero-stats{display:flex;gap:2.5rem;margin-top:3rem;flex-wrap:wrap;justify-content:center}
+    .stat{text-align:center}
+    .stat .num{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#818cf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat .lbl{font-size:.78rem;color:#64748b;margin-top:.2rem}
+
+    /* Features */
+    .section{padding:5rem 1.5rem;max-width:1100px;margin:0 auto}
+    .section-label{text-align:center;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6366f1;margin-bottom:.75rem}
+    .section h2{text-align:center;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.2;margin-bottom:.75rem}
+    .section p.sub{text-align:center;color:#64748b;font-size:1rem;max-width:550px;margin:0 auto 3rem}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem}
+    .feature-card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:1.75rem;transition:all .3s}
+    .feature-card:hover{border-color:#6366f1;transform:translateY(-3px);box-shadow:0 10px 30px rgba(99,102,241,.15)}
+    .feature-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(139,92,246,.2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.1rem;border:1px solid rgba(99,102,241,.2)}
+    .feature-card h3{font-size:1.05rem;font-weight:700;margin-bottom:.5rem}
+    .feature-card p{font-size:.88rem;color:#64748b;line-height:1.6}
+    .feature-tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:6px;margin-top:.75rem}
+
+    /* Architecture */
+    .arch-section{background:linear-gradient(135deg,#1e1b4b,#0f172a);border-radius:20px;padding:2.5rem;margin:2rem 0}
+    .arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
+    .arch-item h4{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#818cf8;margin-bottom:.75rem}
+    .arch-list{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+    .arch-list li{display:flex;align-items:center;gap:.6rem;font-size:.88rem;color:#94a3b8}
+    .arch-list li::before{content:'›';color:#6366f1;font-weight:700;font-size:1rem}
+
+    /* CTA */
+    .cta-section{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.08));border:1px solid rgba(99,102,241,.2);border-radius:20px;padding:3.5rem 2rem;text-align:center;margin:2rem 0}
+    .cta-section h2{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;margin-bottom:.75rem}
+    .cta-section p{color:#64748b;margin-bottom:2rem;font-size:1rem}
+
+    /* Footer */
+    footer{border-top:1px solid #1e293b;padding:1.75rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;font-size:.82rem;color:#475569}
+    footer strong{color:#94a3b8}
+
+    /* Responsive */
+    @media(max-width:640px){
+      .nav-links{gap:.75rem}
+      .hero-stats{gap:1.5rem}
+      .arch-grid{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 <body>
-  <!-- Skip to main content for accessibility -->
-  <a href="#main" class="skip-link">Skip to main content</a>
 
-  <!-- Header -->
-  <header class="header" role="banner">
-    <div class="header-inner">
-      <div class="logo">
-        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-        </svg>
-        <h1>Synapse Todo</h1>
-      </div>
-      <button id="theme-toggle" class="btn-icon" aria-label="Toggle dark mode" title="Toggle theme">
-        <svg class="icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-        <svg class="icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </button>
+<!-- Navigation -->
+<nav>
+  <div class="nav-logo">
+    <span>🧠</span>
+    <span>Synapse AI</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#stack">Stack</a>
+    <a href="https://github.com/Rameshsain070/Synapse_AI" target="_blank" rel="noopener">GitHub</a>
+    <a href="index-integrated.html" class="nav-cta">Launch App →</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">🚀 Powered by LangGraph + FastAPI + pgvector</div>
+  <h1>Meet <span>Synapse AI</span> —<br>Your Intelligent Assistant</h1>
+  <p>A full-stack AI platform with streaming LangGraph chat, smart task management, RAG-based long-term memory, and semantic search. All connected and ready to deploy.</p>
+  <div class="hero-buttons">
+    <a href="index-integrated.html" class="btn-hero btn-hero-primary">
+      🧠 Launch Full App
+    </a>
+    <a href="https://github.com/Rameshsain070/Synapse_AI" target="_blank" rel="noopener" class="btn-hero btn-hero-secondary">
+      ⭐ View on GitHub
+    </a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="num">LangGraph</div><div class="lbl">AI Orchestration</div></div>
+    <div class="stat"><div class="num">pgvector</div><div class="lbl">Semantic Search</div></div>
+    <div class="stat"><div class="num">mem0ai</div><div class="lbl">Long-term Memory</div></div>
+    <div class="stat"><div class="num">FastAPI</div><div class="lbl">High-perf Backend</div></div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="section-label">Features</div>
+  <h2>Everything you need in one platform</h2>
+  <p class="sub">A production-grade AI system with all the modern tooling you'd expect.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">💬</div>
+      <h3>LangGraph Streaming Chat</h3>
+      <p>Real-time streaming AI responses via Server-Sent Events. Powered by a LangGraph StateGraph with multi-session support and persistent checkpointing.</p>
+      <span class="feature-tag">SSE Streaming</span>
     </div>
-  </header>
-
-  <!-- Main Content -->
-  <main id="main" class="main" role="main">
-    <div class="container">
-
-      <!-- Task Form -->
-      <section class="card task-form-card" aria-label="Add new task">
-        <form id="task-form" autocomplete="off">
-          <div class="form-row">
-            <label for="task-input" class="sr-only">Task title</label>
-            <input
-              type="text"
-              id="task-input"
-              class="input task-input"
-              placeholder="What needs to be done?"
-              maxlength="200"
-              required
-              aria-required="true"
-            >
-            <button type="submit" class="btn btn-primary" id="add-btn" aria-label="Add task">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              <span>Add</span>
-            </button>
-          </div>
-          <div class="form-details">
-            <div class="form-group">
-              <label for="task-priority" class="sr-only">Priority</label>
-              <select id="task-priority" class="select" aria-label="Task priority">
-                <option value="medium">Medium Priority</option>
-                <option value="high">High Priority</option>
-                <option value="low">Low Priority</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="task-category" class="sr-only">Category</label>
-              <input
-                type="text"
-                id="task-category"
-                class="input"
-                placeholder="Category (optional)"
-                maxlength="30"
-                list="category-list"
-                aria-label="Task category"
-              >
-              <datalist id="category-list"></datalist>
-            </div>
-            <div class="form-group">
-              <label for="task-due-date" class="sr-only">Due date</label>
-              <input
-                type="date"
-                id="task-due-date"
-                class="input"
-                aria-label="Due date"
-              >
-            </div>
-          </div>
-        </form>
-      </section>
-
-      <!-- Filters & Search -->
-      <section class="card filters-card" aria-label="Filter and search tasks">
-        <div class="filters-row">
-          <div class="search-box">
-            <svg class="icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <label for="search-input" class="sr-only">Search tasks</label>
-            <input type="text" id="search-input" class="input search-input" placeholder="Search tasks…" aria-label="Search tasks">
-          </div>
-          <div class="filter-tabs" role="tablist" aria-label="Task status filter">
-            <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
-            <button class="filter-tab" data-filter="active" role="tab" aria-selected="false">Active</button>
-            <button class="filter-tab" data-filter="completed" role="tab" aria-selected="false">Completed</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Task Counter -->
-      <section class="counter-bar" aria-label="Task statistics">
-        <span class="counter" id="counter-total" title="Total tasks">
-          <strong id="total-count">0</strong> Total
-        </span>
-        <span class="counter" id="counter-active" title="Active tasks">
-          <strong id="active-count">0</strong> Active
-        </span>
-        <span class="counter" id="counter-completed" title="Completed tasks">
-          <strong id="completed-count">0</strong> Done
-        </span>
-        <button id="clear-completed" class="btn btn-text" aria-label="Clear completed tasks" hidden>
-          Clear completed
-        </button>
-      </section>
-
-      <!-- Task List -->
-      <section aria-label="Task list">
-        <ul id="task-list" class="task-list" role="list" aria-live="polite"></ul>
-        <!-- Empty State -->
-        <div id="empty-state" class="empty-state" hidden>
-          <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-            <rect x="9" y="3" width="6" height="4" rx="1"/>
-          </svg>
-          <p class="empty-title">No tasks yet</p>
-          <p class="empty-subtitle">Add a task above to get started!</p>
-        </div>
-      </section>
-
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <h3>Long-term Memory</h3>
+      <p>Remembers your preferences and past conversations using mem0ai and pgvector embeddings, so every interaction gets smarter over time.</p>
+      <span class="feature-tag">mem0ai + pgvector</span>
     </div>
-  </main>
-
-  <!-- Edit Modal -->
-  <div id="edit-modal" class="modal-overlay" hidden aria-modal="true" role="dialog" aria-label="Edit task">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Edit Task</h2>
-        <button id="modal-close" class="btn-icon" aria-label="Close dialog">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <form id="edit-form" autocomplete="off">
-        <div class="form-group">
-          <label for="edit-title">Title</label>
-          <input type="text" id="edit-title" class="input" maxlength="200" required>
-        </div>
-        <div class="form-row-modal">
-          <div class="form-group">
-            <label for="edit-priority">Priority</label>
-            <select id="edit-priority" class="select">
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="edit-category">Category</label>
-            <input type="text" id="edit-category" class="input" maxlength="30" list="edit-category-list">
-            <datalist id="edit-category-list"></datalist>
-          </div>
-          <div class="form-group">
-            <label for="edit-due-date">Due date</label>
-            <input type="date" id="edit-due-date" class="input">
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button type="button" id="modal-cancel" class="btn btn-secondary">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-      </form>
+    <div class="feature-card">
+      <div class="feature-icon">✅</div>
+      <h3>AI-powered Tasks</h3>
+      <p>Full CRUD task manager with AI priority scoring, due-date prediction, step-by-step task breakdown, and smart recommendations from a LangGraph TaskAgent.</p>
+      <span class="feature-tag">LangGraph Agent</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <h3>Semantic Search</h3>
+      <p>Search your tasks using natural language. pgvector powers cosine-similarity search over task embeddings so you find what you mean, not just what you typed.</p>
+      <span class="feature-tag">RAG Engine</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Secure Authentication</h3>
+      <p>JWT-based user accounts with bcrypt passwords, session management, and separate user/session tokens for fine-grained access control.</p>
+      <span class="feature-tag">JWT + bcrypt</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Observability Stack</h3>
+      <p>Prometheus metrics, Grafana dashboards, structlog JSON logging, and Langfuse LLM tracing with automated eval pipeline (hallucination, relevancy, toxicity).</p>
+      <span class="feature-tag">Prometheus + Langfuse</span>
     </div>
   </div>
+</section>
 
-  <!-- Footer -->
-  <footer class="footer" role="contentinfo">
-    <p>Synapse Todo &middot; Tasks are saved in your browser's local storage
-      &middot; <a href="index-integrated.html" style="color:var(--color-primary)">🧠 Try AI-Integrated Version</a>
-    </p>
-  </footer>
+<!-- Tech Stack -->
+<section class="section" id="stack">
+  <div class="section-label">Architecture</div>
+  <h2>Built on a modern, production stack</h2>
+  <p class="sub">Every layer is chosen for reliability, performance, and developer experience.</p>
+  <div class="arch-section">
+    <div class="arch-grid">
+      <div>
+        <div class="arch-item">
+          <h4>Backend (synapseai-platform)</h4>
+          <ul class="arch-list">
+            <li>FastAPI 0.115 on Python 3.13+</li>
+            <li>LangGraph StateGraph with AsyncPostgresSaver</li>
+            <li>mem0ai for persistent memory</li>
+            <li>OpenAI GPT-5/4o + Google Gemini fallback</li>
+            <li>PostgreSQL + pgvector (SQLModel ORM)</li>
+            <li>SlowAPI rate limiting</li>
+            <li>Prometheus + structlog + Langfuse</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="arch-item">
+          <h4>Frontend (this page)</h4>
+          <ul class="arch-list">
+            <li>Vanilla JS SPA (no build step required)</li>
+            <li>SSE streaming chat with async generators</li>
+            <li>Full auth flow (register, login, sessions)</li>
+            <li>Task CRUD with AI suggestions UI</li>
+            <li>Semantic search via REST</li>
+            <li>Dark/light theme, mobile responsive</li>
+            <li>Hosted on GitHub Pages</li>
+          </ul>
+        </div>
+        <div class="arch-item" style="margin-top:1.5rem">
+          <h4>Additional Components</h4>
+          <ul class="arch-list">
+            <li>React 19 + Vite frontend (synapse-ai-frontend)</li>
+            <li>Next.js 16 + Three.js (unified-web-interface)</li>
+            <li>Azure OpenAI proxy (synapseai-llm-service)</li>
+            <li>Docker Compose for local dev</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <!-- Toast Container -->
-  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<!-- CTA -->
+<section class="section">
+  <div class="cta-section">
+    <h2>Ready to try it?</h2>
+    <p>Deploy the FastAPI backend, paste the URL, and start chatting with your AI assistant — all in minutes.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="index-integrated.html" class="btn-hero btn-hero-primary">🧠 Launch Synapse AI</a>
+      <a href="https://github.com/Rameshsain070/Synapse_AI#readme" target="_blank" rel="noopener" class="btn-hero btn-hero-secondary">📖 Read the Docs</a>
+    </div>
+  </div>
+</section>
 
-  <script src="assets/js/app.js"></script>
+<!-- Footer -->
+<footer>
+  <div><strong>Synapse AI</strong> — LangGraph · FastAPI · pgvector · mem0ai</div>
+  <div>
+    <a href="index-integrated.html" style="color:#6366f1;font-weight:600">Launch App →</a>
+  </div>
+</footer>
+
 </body>
 </html>
