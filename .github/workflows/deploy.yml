@@ -38,6 +38,8 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install uv
-        run: pip install uv
+        run: |
+          pip install uv
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Deploy
         run: uv sync --all-groups --extras dev
