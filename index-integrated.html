@@ -614,7 +614,9 @@
   function fmtDate(s) {
     if (!s) return '';
     var p = s.split('-'); if (p.length !== 3) return s;
-    return MONTHS[parseInt(p[1], 10) - 1] + ' ' + parseInt(p[2], 10) + ', ' + p[0];
+    var mIdx = parseInt(p[1], 10) - 1;
+    if (mIdx < 0 || mIdx > 11) return s;
+    return MONTHS[mIdx] + ' ' + parseInt(p[2], 10) + ', ' + p[0];
   }
   function isOverdue(s) {
     if (!s) return false;
