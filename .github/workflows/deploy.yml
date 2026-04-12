@@ -39,7 +39,7 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --all-groups
 
       - name: Lint with ruff
         run: uv run ruff check app/ --exit-zero
