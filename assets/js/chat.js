@@ -55,11 +55,15 @@ var SynapseChat = (function () {
       });
     } catch (err) {
       clearTimeout(streamTimer);
+      console.error('[SynapseAI] Stream fetch error:', err);
       if (timedOut) throw new Error('Stream timed out — the AI may be taking too long. Please try again.');
       if (err.name === 'AbortError') throw new Error('Stream was cancelled.');
       var msg = err.message || '';
       if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
         throw new Error('Cannot reach the backend. Check your connection and ensure the backend URL is correct with CORS configured.');
+      }
+      if (msg.indexOf('CORS') !== -1 || msg.indexOf('blocked') !== -1) {
+        throw new Error('CORS error — the backend must allow requests from ' + window.location.origin + '. Check ALLOWED_ORIGINS setting.');
       }
       throw err;
     }
@@ -168,10 +172,12 @@ var SynapseChat = (function () {
     } catch (e) {
       typing.classList.remove('msg-typing');
       var errMsg = e.message || 'Unknown error';
-      if (errMsg.indexOf('Cannot reach') !== -1 || errMsg.indexOf('timed out') !== -1) {
+      console.error('[SynapseAI] Chat stream error:', e);
+      if (errMsg.indexOf('Cannot reach') !== -1 || errMsg.indexOf('timed out') !== -1 || errMsg.indexOf('CORS') !== -1) {
         SynapseUI.setStatus(false);
       }
-      bodyEl.textContent = '\u26A0 ' + errMsg;
+      var hasGuidance = errMsg.indexOf('Check') !== -1 || errMsg.indexOf('CORS') !== -1 || errMsg.indexOf('try again') !== -1;
+      bodyEl.textContent = '\u26A0 ' + errMsg + (hasGuidance ? '' : '\n\nPlease check your connection and try again.');
       SynapseUI.toast('Chat error: ' + errMsg, 'error');
     } finally {
       S().streaming = false;

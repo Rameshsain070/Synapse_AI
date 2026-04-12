@@ -5,9 +5,8 @@
  * Handles JWT authentication, task CRUD, AI suggestions,
  * semantic search, chat streaming, and automatic retry logic.
  *
- * Pre-configured with Railway backend URL.
- *
- * API_BASE = "https://synapseai-production-3489.up.railway.app/api/v1"
+ * Backend URL is configured dynamically via the setup screen
+ * and stored in localStorage.
  */
 
 /* global localStorage, fetch, AbortController */
@@ -15,9 +14,9 @@
 var SynapseAPI = (function () {
   'use strict';
 
-  // Production Railway backend URL — update this if the deployment changes.
-  // This is the single source of truth; other modules reference SynapseAPI.DEFAULT_API_URL.
-  var DEFAULT_API_URL = 'https://synapseai-production-3489.up.railway.app';
+  // Backend URL — configured dynamically via the setup screen.
+  // Other modules reference SynapseAPI.DEFAULT_API_URL.
+  var DEFAULT_API_URL = '';
   var TOKEN_KEY = 'synapse_user_token';
   var SESSION_TOKEN_KEY = 'synapse_session_token';
   var MAX_RETRIES = 3;
@@ -64,6 +63,7 @@ var SynapseAPI = (function () {
   function _friendlyNetworkError(err) {
     if (!err) return 'Unknown network error';
     var msg = err.message || '';
+    console.error('[SynapseAI] Network error:', msg, err);
     if (err.name === 'AbortError' || msg.indexOf('aborted') !== -1) {
       return 'Request timed out — the backend may be slow or unreachable. Please try again.';
     }
@@ -71,7 +71,7 @@ var SynapseAPI = (function () {
       return 'Cannot reach the backend. Check your internet connection and ensure the backend URL is correct and CORS is configured.';
     }
     if (msg.indexOf('CORS') !== -1 || msg.indexOf('blocked') !== -1) {
-      return 'CORS error — the backend must allow requests from this origin. Check the ALLOWED_ORIGINS setting.';
+      return 'CORS error — the backend must allow requests from ' + window.location.origin + '. Check the ALLOWED_ORIGINS setting.';
     }
     return msg || 'Unknown network error';
   }
@@ -101,12 +101,14 @@ var SynapseAPI = (function () {
         throw new Error(msg);
       });
     }).catch(function (err) {
+      console.error('[SynapseAI] API request failed:', method, path, err);
       if (err instanceof Error && (err.message.indexOf('Cannot reach') !== -1 || err.message.indexOf('CORS') !== -1 || err.message.indexOf('timed out') !== -1)) {
         throw err;
       }
       if (err.name === 'AbortError' || (err.message && (err.message.indexOf('Failed to fetch') !== -1 || err.message.indexOf('NetworkError') !== -1))) {
         if (attempt < MAX_RETRIES) {
           var retryDelay = Math.min(1000 * Math.pow(2, attempt), 8000);
+          console.warn('[SynapseAI] Retrying request (attempt ' + (attempt + 1) + '/' + MAX_RETRIES + '):', method, path);
           return new Promise(function (resolve) {
             setTimeout(function () {
               resolve(_request(method, path, body, useSession, attempt + 1, contentType));
@@ -247,14 +249,17 @@ var SynapseAPI = (function () {
   /* ── Connection validation ── */
   function validateConnection(url) {
     var testUrl = (url || _baseUrl).replace(/\/+$/, '');
+    console.log('[SynapseAI] Validating connection to:', testUrl);
     return _fetchWithTimeout(testUrl + '/health', {}, 10000).then(function (r) {
       if (!r.ok) throw new Error('Health check returned HTTP ' + r.status);
       return r.json();
     }).then(function (data) {
+      console.log('[SynapseAI] Health check response:', data);
       if (data && data.status === 'healthy') return data;
       if (data && typeof data === 'object') return data;
       throw new Error('Unexpected health response');
     }).catch(function (err) {
+      console.error('[SynapseAI] Connection validation failed:', err);
       throw new Error(_friendlyNetworkError(err));
     });
   }

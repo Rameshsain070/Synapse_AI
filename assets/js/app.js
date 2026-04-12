@@ -4,8 +4,8 @@
  * Application initialization, event listeners, routing, UI state
  * management, session handling, and auto-reconnection.
  *
- * Pre-configured Railway backend:
- *   https://synapseai-production-3489.up.railway.app
+ * Backend URL is configured dynamically via the setup screen and
+ * persisted in localStorage.
  *
  * Depends on: SynapseUI (ui.js), SynapseAuth (auth.js),
  *             SynapseChat (chat.js), SynapseTasks (tasks.js)
@@ -18,14 +18,14 @@
 (function () {
   'use strict';
 
-  /* ── Default backend URL — sourced from SynapseAPI to avoid duplication ── */
+  /* ── Default backend URL — sourced from SynapseAPI or localStorage ── */
   var DEFAULT_API_URL = (typeof SynapseAPI !== 'undefined' && SynapseAPI.DEFAULT_API_URL)
     ? SynapseAPI.DEFAULT_API_URL
-    : 'https://synapseai-production-3489.up.railway.app';
+    : '';
 
   /* ── Shared application state ── */
   window.SA = {
-    apiUrl: DEFAULT_API_URL,
+    apiUrl: '',
     userToken: '',
     sessionToken: '',
     userEmail: '',
@@ -121,6 +121,7 @@
 
   function checkHealth() {
     var base = S().apiUrl.replace(/\/+$/, '');
+    if (!base) return;
     fetch(base + '/health', { method: 'GET' })
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -131,7 +132,8 @@
         SynapseUI.setStatus(ok !== false);
         updateConnectionBanner(true);
       })
-      .catch(function () {
+      .catch(function (err) {
+        console.warn('[SynapseAI] Health check failed:', err.message || err);
         SynapseUI.setStatus(false);
         updateConnectionBanner(false);
       });
@@ -154,14 +156,14 @@
     var savedTheme = SynapseUI.getStoredTheme();
     S().theme = SynapseUI.applyTheme(savedTheme || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'));
 
-    /* Auto-connect: if no API URL is stored, use the default Railway URL */
-    if (!S().apiUrl) {
-      S().apiUrl = DEFAULT_API_URL;
+    /* Sync SynapseAPI base URL with the restored state */
+    if (S().apiUrl && typeof SynapseAPI !== 'undefined') {
+      SynapseAPI.configure({ baseUrl: S().apiUrl });
     }
 
-    /* Pre-fill setup URL */
+    /* Pre-fill setup URL only if we have a stored URL */
     var setupUrl = document.getElementById('setup-url');
-    if (setupUrl && !setupUrl.value) {
+    if (setupUrl && !setupUrl.value && S().apiUrl) {
       setupUrl.value = S().apiUrl;
     }
 
@@ -177,6 +179,7 @@
     }
 
     /* No URL configured: show setup */
+    console.info('[SynapseAI] No backend URL configured. Showing setup screen.');
     SynapseUI.showScreen('setup');
   }
 
@@ -193,19 +196,31 @@
         if (!url) { setupStatus.textContent = 'Please enter a URL'; setupStatus.style.color = 'var(--danger)'; return; }
         if (!/^https?:\/\/.+/.test(url)) { setupStatus.textContent = 'Please enter a valid URL starting with http:// or https://'; setupStatus.style.color = 'var(--danger)'; return; }
         setupBtn.disabled = true; setupBtn.textContent = 'Testing\u2026';
-        setupStatus.textContent = 'Connecting\u2026'; setupStatus.style.color = 'var(--text2)';
+        setupStatus.innerHTML = '<span class="spinner"></span> Connecting to backend\u2026';
+        setupStatus.style.color = 'var(--text2)';
+        setupStatus.style.whiteSpace = 'normal';
+        var cleanUrl = url.replace(/\/+$/, '');
+        console.log('[SynapseAI] Testing backend connection:', cleanUrl);
         try {
-          var cleanUrl = url.replace(/\/+$/, '');
-          var r = await fetch(cleanUrl + '/health');
+          var controller = new AbortController();
+          var timer = setTimeout(function () { controller.abort(); }, 30000);
+          var r = await fetch(cleanUrl + '/health', { signal: controller.signal });
+          clearTimeout(timer);
+          if (!r.ok) throw new Error('Backend returned HTTP ' + r.status + '. Please verify the URL is correct and the backend is running.');
           var d = await r.json();
+          console.log('[SynapseAI] Backend health response:', d);
           SynapseAuth.saveApiUrl(cleanUrl);
-          setupStatus.textContent = '\u2705 Connected!' + (d.version ? ' (v' + d.version + ')' : '');
+          if (typeof SynapseAPI !== 'undefined') SynapseAPI.configure({ baseUrl: cleanUrl });
+          setupStatus.innerHTML = '\u2705 Connected!' + (d.version ? ' (v' + d.version + ')' : '');
           setupStatus.style.color = 'var(--success)';
           setTimeout(function () { SynapseUI.showScreen('auth'); }, 600);
         } catch (e) {
-          var errMsg = 'Cannot reach backend.';
-          if (e.message && e.message.indexOf('Failed to fetch') !== -1) {
-            errMsg = '\u274C Cannot reach backend. Possible causes:\n\u2022 Backend is not running\n\u2022 CORS not configured (add your GitHub Pages URL to ALLOWED_ORIGINS)\n\u2022 URL is incorrect';
+          console.error('[SynapseAI] Connection failed:', e);
+          var errMsg;
+          if (e.name === 'AbortError') {
+            errMsg = '\u274C Connection timed out after 30s.\n\u2022 The backend may be starting up \u2014 try again in a minute\n\u2022 Check that the URL is correct';
+          } else if (e.message && (e.message.indexOf('Failed to fetch') !== -1 || e.message.indexOf('NetworkError') !== -1)) {
+            errMsg = '\u274C Cannot reach backend. Possible causes:\n\u2022 Backend is not running or URL is incorrect\n\u2022 CORS not configured \u2014 add ' + window.location.origin + ' to ALLOWED_ORIGINS in your backend .env';
           } else if (e.message) {
             errMsg = '\u274C Connection error: ' + e.message;
           } else {
