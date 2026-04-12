@@ -12,6 +12,13 @@ const navItems = [
   { href: "/diagnostics", label: "Diagnostics", icon: Activity },
 ];
 
+const sectionLinks = [
+  { href: "#models", label: "Models" },
+  { href: "#chat", label: "Chat Demo" },
+  { href: "#tasks", label: "Tasks" },
+  { href: "#faq", label: "FAQ" },
+];
+
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -57,6 +64,15 @@ export function Navbar() {
                 </Link>
               );
             })}
+            {pathname === "/" && sectionLinks.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-200 hover:bg-gray-800 transition-colors"
+              >
+                {item.label}
+              </a>
+            ))}
           </div>
 
           {/* Auth controls (desktop) */}
@@ -130,6 +146,20 @@ export function Navbar() {
                 </Link>
               );
             })}
+            {pathname === "/" && (
+              <div className="border-t border-gray-800 pt-2 mt-1">
+                {sectionLinks.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            )}
             {/* Mobile auth */}
             <div className="border-t border-gray-800 pt-3 mt-2">
               {isAuthenticated ? (
