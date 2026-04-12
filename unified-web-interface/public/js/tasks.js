@@ -37,7 +37,7 @@
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       tasks = raw ? JSON.parse(raw) : [];
-    } catch (e) {
+    } catch {
       tasks = [];
     }
     if (tasks.length === 0) {
@@ -46,7 +46,7 @@
   }
 
   function saveTasks() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch (e) { /* */ }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch { /* */ }
   }
 
   function seedTasks() {
@@ -55,6 +55,7 @@
       var seed = SEED_TASKS[i];
       var id = newTaskId();
       tasks.push({
+        id: id,
         title: seed.title,
         description: seed.description,
         priority: seed.priority,

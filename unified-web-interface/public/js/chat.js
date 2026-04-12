@@ -25,7 +25,7 @@
       var sess = localStorage.getItem(SESSIONS_KEY);
       state.messages = msgs ? JSON.parse(msgs) : [];
       state.sessions = sess ? JSON.parse(sess) : [];
-    } catch (e) {
+    } catch {
       state.messages = [];
       state.sessions = [];
     }
@@ -37,11 +37,11 @@
   }
 
   function saveMessages() {
-    try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(state.messages)); } catch (e) { /* */ }
+    try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(state.messages)); } catch { /* */ }
   }
 
   function saveSessions() {
-    try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(state.sessions)); } catch (e) { /* */ }
+    try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(state.sessions)); } catch { /* */ }
   }
 
   // ── Session Management ───────────────────────────────────────────
@@ -261,7 +261,6 @@
     };
     state.messages.push(aiMsg);
 
-    var container = document.getElementById('chat-messages');
     var charIndex = 0;
 
     function tick() {

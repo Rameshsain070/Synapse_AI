@@ -11,7 +11,7 @@
   function getTheme() {
     try {
       return localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
-    } catch (e) {
+    } catch {
       return DEFAULT_THEME;
     }
   }
@@ -33,7 +33,7 @@
     var next = current === 'dark' ? 'light' : 'dark';
     try {
       localStorage.setItem(STORAGE_KEY, next);
-    } catch (e) {
+    } catch {
       // Storage unavailable
     }
     applyTheme(next);
