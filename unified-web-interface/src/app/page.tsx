@@ -32,6 +32,7 @@ export default function HomePage() {
               &copy; {new Date().getFullYear()} SynapseAI — Unified AI Platform
             </p>
             <div className="flex items-center gap-4 text-sm text-gray-500">
+              <a href="./index-integrated.html" className="hover:text-indigo-400 transition-colors">Synapse AI App</a>
               <Link href="/chat" className="hover:text-indigo-400 transition-colors">Chat</Link>
               <Link href="/diagnostics" className="hover:text-indigo-400 transition-colors">Diagnostics</Link>
               <Link href="/login" className="hover:text-indigo-400 transition-colors">Sign in</Link>
