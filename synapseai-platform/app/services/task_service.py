@@ -23,7 +23,12 @@ class TaskService:
 
     def __init__(self):
         """Initialize TaskService with the shared database engine."""
-        self.engine = database_service.engine
+        self.engine = database_service.engine if database_service is not None else None
+
+    def _require_engine(self):
+        """Raise an error if the database engine is not available."""
+        if self.engine is None:
+            raise RuntimeError("Database is not available. Task operations require a working database connection.")
 
     async def create_task(
         self,
@@ -47,6 +52,7 @@ class TaskService:
         Returns:
             Task: The created task
         """
+        self._require_engine()
         with Session(self.engine) as session:
             task = Task(
                 user_id=user_id,
@@ -72,6 +78,7 @@ class TaskService:
         Returns:
             Optional[Task]: The task if found, None otherwise
         """
+        self._require_engine()
         with Session(self.engine) as session:
             statement = select(Task).where(Task.id == task_id, Task.user_id == user_id)
             return session.exec(statement).first()
@@ -94,6 +101,7 @@ class TaskService:
         Returns:
             List[Task]: Matching tasks
         """
+        self._require_engine()
         with Session(self.engine) as session:
             statement = select(Task).where(Task.user_id == user_id)
             if completed is not None:
@@ -124,6 +132,7 @@ class TaskService:
         Returns:
             Optional[Task]: The updated task, or None if not found
         """
+        self._require_engine()
         with Session(self.engine) as session:
             statement = select(Task).where(Task.id == task_id, Task.user_id == user_id)
             task = session.exec(statement).first()
@@ -148,6 +157,7 @@ class TaskService:
         Returns:
             bool: True if deleted, False if not found
         """
+        self._require_engine()
         with Session(self.engine) as session:
             statement = select(Task).where(Task.id == task_id, Task.user_id == user_id)
             task = session.exec(statement).first()
@@ -171,6 +181,7 @@ class TaskService:
         Returns:
             List[Task]: Matching tasks
         """
+        self._require_engine()
         with Session(self.engine) as session:
             pattern = f"%{query}%"
             statement = (

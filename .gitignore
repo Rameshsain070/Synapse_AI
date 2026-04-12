@@ -18,7 +18,9 @@ build/
 
 # Logs
 *.log
+*.jsonl
 npm-debug.log*
+logs/
 
 # OS files
 .DS_Store

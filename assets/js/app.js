@@ -128,7 +128,7 @@
         return r.json();
       })
       .then(function (data) {
-        var ok = data && (data.status === 'healthy' || data.status === 'ok');
+        var ok = data && (data.status === 'healthy' || data.status === 'degraded' || data.status === 'ok');
         SynapseUI.setStatus(ok !== false);
         updateConnectionBanner(true);
       })

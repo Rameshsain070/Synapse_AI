@@ -118,9 +118,10 @@ def parse_dict_of_lists_from_env(prefix, default_dict=None):
 
 
 # GitHub Pages origins (shared across environments)
+# NOTE: GitHub Pages hostnames are always lowercase — the Origin header
+# sent by the browser will be lowercase, so CORS matching requires lowercase.
 _GITHUB_PAGES_ORIGINS = [
-    "https://Rameshsain070.github.io",
-    "https://Rameshsain070.github.io/Synapse_AI",
+    "https://rameshsain070.github.io",
 ]
 
 # Local development origins

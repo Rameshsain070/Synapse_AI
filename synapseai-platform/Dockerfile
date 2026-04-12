@@ -22,11 +22,12 @@ RUN apt-get update && apt-get install -y \
     && pip install uv \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy pyproject.toml first to leverage Docker cache
-COPY pyproject.toml .
-RUN uv venv && . .venv/bin/activate && uv pip install -e .
+# Create venv and install dependencies from requirements.txt first
+# (leverages Docker cache — rebuilds only when requirements change)
+COPY requirements.txt .
+RUN uv venv && . .venv/bin/activate && uv pip install -r requirements.txt
 
-# Copy the application
+# Copy the application source
 COPY . .
 
 # Make entrypoint script executable - do this before changing user
