@@ -48,7 +48,7 @@ export function HeroSection() {
           long-term memory, and comprehensive diagnostics — all in one unified interface.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
           {isAuthenticated ? (
             <>
               <Link
@@ -84,6 +84,17 @@ export function HeroSection() {
               </Link>
             </>
           )}
+        </div>
+
+        {/* Launch Synapse AI standalone app */}
+        <div className="mb-12">
+          <a
+            href="./index-integrated.html"
+            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm text-indigo-300 hover:text-white border border-indigo-500/30 hover:border-indigo-400/60 rounded-lg transition-colors backdrop-blur-sm bg-indigo-600/10 hover:bg-indigo-600/20"
+          >
+            <Brain size={16} />
+            Launch Synapse AI App (Chat + Tasks)
+          </a>
         </div>
 
         {/* Stats strip */}
