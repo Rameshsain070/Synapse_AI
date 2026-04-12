@@ -4,9 +4,7 @@ import type { ChatResponse, Message, SessionResponse, UserResponse, StreamChunk,
 const APP_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 const DEFAULT_PRODUCTION_API_URL = "https://synapseai-production-3489.up.railway.app";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ||
-  (typeof window !== "undefined" && window.location.hostname.endsWith("github.io")
-    ? DEFAULT_PRODUCTION_API_URL
-    : "http://localhost:8000");
+  (process.env.NODE_ENV === "production" ? DEFAULT_PRODUCTION_API_URL : "http://localhost:8000");
 const USER_TOKEN_KEY = "synapse_user_token";
 const SESSION_TOKEN_KEY = "synapse_session_token";
 
