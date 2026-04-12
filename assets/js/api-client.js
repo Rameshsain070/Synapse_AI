@@ -15,6 +15,8 @@
 var SynapseAPI = (function () {
   'use strict';
 
+  // Production Railway backend URL — update this if the deployment changes.
+  // This is the single source of truth; other modules reference SynapseAPI.DEFAULT_API_URL.
   var DEFAULT_API_URL = 'https://synapseai-production-3489.up.railway.app';
   var TOKEN_KEY = 'synapse_user_token';
   var SESSION_TOKEN_KEY = 'synapse_session_token';

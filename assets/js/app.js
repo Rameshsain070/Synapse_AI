@@ -18,8 +18,10 @@
 (function () {
   'use strict';
 
-  /* ── Default backend URL (Railway deployment) ── */
-  var DEFAULT_API_URL = 'https://synapseai-production-3489.up.railway.app';
+  /* ── Default backend URL — sourced from SynapseAPI to avoid duplication ── */
+  var DEFAULT_API_URL = (typeof SynapseAPI !== 'undefined' && SynapseAPI.DEFAULT_API_URL)
+    ? SynapseAPI.DEFAULT_API_URL
+    : 'https://synapseai-production-3489.up.railway.app';
 
   /* ── Shared application state ── */
   window.SA = {
