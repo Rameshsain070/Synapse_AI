@@ -1,9 +1,20 @@
 import axios from "axios";
 import type { ChatResponse, Message, SessionResponse, UserResponse, StreamChunk, ServiceHealth } from "./types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+const APP_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const DEFAULT_PRODUCTION_API_URL = "https://synapseai-production-3489.up.railway.app";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ||
+  (typeof window !== "undefined" && window.location.hostname.endsWith("github.io")
+    ? DEFAULT_PRODUCTION_API_URL
+    : "http://localhost:8000");
 const USER_TOKEN_KEY = "synapse_user_token";
 const SESSION_TOKEN_KEY = "synapse_session_token";
+
+function withBasePath(path: string): string {
+  const normalizedBase = APP_BASE_PATH.replace(/\/$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return normalizedBase ? `${normalizedBase}${normalizedPath}` : normalizedPath;
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -28,7 +39,7 @@ api.interceptors.response.use(
     if (typeof window !== "undefined" && error?.response?.status === 401) {
       localStorage.removeItem(USER_TOKEN_KEY);
       localStorage.removeItem(SESSION_TOKEN_KEY);
-      window.location.href = "/login";
+      window.location.href = withBasePath("/login");
     }
     return Promise.reject(error);
   }
