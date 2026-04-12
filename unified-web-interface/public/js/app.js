@@ -88,7 +88,10 @@
   function openModal(id) {
     var modal = document.getElementById(id);
     if (!modal) return;
-    modal.classList.add('modal-open');
+    modal.style.display = '';
+    // Force reflow
+    void modal.offsetHeight;
+    modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
@@ -100,23 +103,20 @@
   function closeModal(id) {
     var modal = document.getElementById(id);
     if (!modal) return;
-    modal.classList.remove('modal-open');
+    modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
 
   function initModals() {
-    // Close on overlay/backdrop click (only direct clicks, not clicks on modal content)
+    // Close on overlay/backdrop click (only direct clicks on the overlay itself)
     document.addEventListener('click', function (e) {
-      if (e.target.classList.contains('modal-overlay')) {
-        var modal = e.target.closest('.modal');
-        if (modal && modal.id) closeModal(modal.id);
-      } else if (e.target.classList.contains('modal') && e.target.id) {
+      if (e.target.classList.contains('modal-overlay') && e.target.id) {
         closeModal(e.target.id);
       }
       // Close button
       if (e.target.closest('.modal-close')) {
-        var parent = e.target.closest('.modal');
+        var parent = e.target.closest('.modal-overlay');
         if (parent && parent.id) closeModal(parent.id);
       }
     });
@@ -124,7 +124,7 @@
     // Close on Escape
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        var openModals = document.querySelectorAll('.modal.modal-open');
+        var openModals = document.querySelectorAll('.modal-overlay.active');
         for (var i = 0; i < openModals.length; i++) {
           closeModal(openModals[i].id);
         }
@@ -189,11 +189,29 @@
     document.body.appendChild(banner);
   }
 
+  // ── Sidebar Toggle (Chat & Docs) ────────────────────────────────
+
+  function initSidebarToggles() {
+    document.addEventListener('click', function (e) {
+      // Chat sidebar toggle
+      if (e.target.closest('#chat-sidebar-toggle')) {
+        var sidebar = document.getElementById('chat-sidebar');
+        if (sidebar) sidebar.classList.toggle('active');
+      }
+      // Docs sidebar toggle
+      if (e.target.closest('#docs-sidebar-toggle')) {
+        var docsSidebar = document.querySelector('.docs-sidebar');
+        if (docsSidebar) docsSidebar.classList.toggle('active');
+      }
+    });
+  }
+
   // ── Initialization ───────────────────────────────────────────────
 
   function init() {
     initFAQ();
     initModals();
+    initSidebarToggles();
     initDemoBanner();
   }
 

@@ -26,16 +26,31 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Quick Links to Static Pages */}
+        <section className="border-t border-gray-800/60 py-12">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h3 className="text-lg font-semibold text-white mb-6">Standalone Tools (No Backend Required)</h3>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <a href="./pages/chat.html" className="px-5 py-2.5 bg-indigo-600/20 border border-indigo-500/30 rounded-lg text-indigo-300 hover:text-white hover:bg-indigo-600/30 transition-colors text-sm font-medium">💬 AI Chat Demo</a>
+              <a href="./pages/tasks.html" className="px-5 py-2.5 bg-emerald-600/20 border border-emerald-500/30 rounded-lg text-emerald-300 hover:text-white hover:bg-emerald-600/30 transition-colors text-sm font-medium">✅ Task Manager</a>
+              <a href="./pages/docs.html" className="px-5 py-2.5 bg-yellow-600/20 border border-yellow-500/30 rounded-lg text-yellow-300 hover:text-white hover:bg-yellow-600/30 transition-colors text-sm font-medium">📖 API Docs</a>
+              <a href="./pages/about.html" className="px-5 py-2.5 bg-purple-600/20 border border-purple-500/30 rounded-lg text-purple-300 hover:text-white hover:bg-purple-600/30 transition-colors text-sm font-medium">ℹ️ About</a>
+            </div>
+          </div>
+        </section>
+
         <footer className="border-t border-gray-800 py-8">
           <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-500">
               &copy; {new Date().getFullYear()} SynapseAI — Unified AI Platform
             </p>
             <div className="flex items-center gap-4 text-sm text-gray-500">
-              <a href="./index-integrated.html" className="hover:text-indigo-400 transition-colors">Synapse AI App</a>
-              <Link href="/chat" className="hover:text-indigo-400 transition-colors">Chat</Link>
+              <a href="./pages/chat.html" className="hover:text-indigo-400 transition-colors">Chat</a>
+              <a href="./pages/tasks.html" className="hover:text-indigo-400 transition-colors">Tasks</a>
+              <a href="./pages/docs.html" className="hover:text-indigo-400 transition-colors">Docs</a>
+              <a href="./pages/about.html" className="hover:text-indigo-400 transition-colors">About</a>
+              <Link href="/chat" className="hover:text-indigo-400 transition-colors">React Chat</Link>
               <Link href="/diagnostics" className="hover:text-indigo-400 transition-colors">Diagnostics</Link>
-              <Link href="/login" className="hover:text-indigo-400 transition-colors">Sign in</Link>
               <a
                 href="https://github.com/Rameshsain070/Synapse_AI"
                 target="_blank"
