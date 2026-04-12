@@ -23,7 +23,7 @@ class TaskService:
 
     def __init__(self):
         """Initialize TaskService with the shared database engine."""
-        self.engine = database_service.engine
+        self.engine = database_service.engine if database_service is not None else None
 
     async def create_task(
         self,

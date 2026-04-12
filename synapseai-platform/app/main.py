@@ -35,12 +35,19 @@ from app.services.database import database_service
 # Load environment variables
 load_dotenv()
 
-# Initialize Langfuse
-langfuse = Langfuse(
-    public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
-    secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
-    host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"),
-)
+# Initialize Langfuse (optional – gracefully skip if keys are not configured)
+langfuse = None
+_langfuse_public = os.getenv("LANGFUSE_PUBLIC_KEY")
+_langfuse_secret = os.getenv("LANGFUSE_SECRET_KEY")
+if _langfuse_public and _langfuse_secret:
+    try:
+        langfuse = Langfuse(
+            public_key=_langfuse_public,
+            secret_key=_langfuse_secret,
+            host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"),
+        )
+    except Exception:
+        pass  # Langfuse is optional; the app works without it
 
 
 @asynccontextmanager
@@ -149,7 +156,9 @@ async def health_check(request: Request) -> Dict[str, Any]:
     logger.info("health_check_called")
 
     # Check database connectivity
-    db_healthy = await database_service.health_check()
+    db_healthy = False
+    if database_service is not None:
+        db_healthy = await database_service.health_check()
 
     response = {
         "status": "healthy" if db_healthy else "degraded",

@@ -33,6 +33,7 @@ class DatabaseService:
 
     def __init__(self):
         """Initialize database service with connection pool."""
+        self.engine = None
         try:
             # Configure environment-specific database connection pool settings
             pool_size = settings.POSTGRES_POOL_SIZE
@@ -247,5 +248,12 @@ class DatabaseService:
             return False
 
 
-# Create a singleton instance
-database_service = DatabaseService()
+# Create a singleton instance.
+# Wrap in try/except so the module can still be imported even when the
+# database is temporarily unreachable (e.g. during Docker build or
+# Railway healthcheck before the DB addon is ready).
+try:
+    database_service = DatabaseService()
+except Exception as _db_init_err:
+    logger.error("database_service_init_failed", error=str(_db_init_err))
+    database_service = None  # type: ignore[assignment]
