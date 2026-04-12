@@ -179,7 +179,7 @@
     }
 
     /* No URL configured: show setup */
-    console.log('[SynapseAI] No backend URL configured. Showing setup screen.');
+    console.info('[SynapseAI] No backend URL configured. Showing setup screen.');
     SynapseUI.showScreen('setup');
   }
 
@@ -206,7 +206,7 @@
           var timer = setTimeout(function () { controller.abort(); }, 30000);
           var r = await fetch(cleanUrl + '/health', { signal: controller.signal });
           clearTimeout(timer);
-          if (!r.ok) throw new Error('Health check returned HTTP ' + r.status);
+          if (!r.ok) throw new Error('Backend returned HTTP ' + r.status + '. Please verify the URL is correct and the backend is running.');
           var d = await r.json();
           console.log('[SynapseAI] Backend health response:', d);
           SynapseAuth.saveApiUrl(cleanUrl);
@@ -220,7 +220,7 @@
           if (e.name === 'AbortError') {
             errMsg = '\u274C Connection timed out after 30s.\n\u2022 The backend may be starting up \u2014 try again in a minute\n\u2022 Check that the URL is correct';
           } else if (e.message && (e.message.indexOf('Failed to fetch') !== -1 || e.message.indexOf('NetworkError') !== -1)) {
-            errMsg = '\u274C Cannot reach backend. Possible causes:\n\u2022 Backend is not running or URL is incorrect\n\u2022 CORS not configured \u2014 add ' + window.location.origin + ' to ALLOWED_ORIGINS in your backend .env\n\u2022 Backend must use HTTPS (not HTTP)';
+            errMsg = '\u274C Cannot reach backend. Possible causes:\n\u2022 Backend is not running or URL is incorrect\n\u2022 CORS not configured \u2014 add ' + window.location.origin + ' to ALLOWED_ORIGINS in your backend .env';
           } else if (e.message) {
             errMsg = '\u274C Connection error: ' + e.message;
           } else {

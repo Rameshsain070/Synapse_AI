@@ -176,7 +176,8 @@ var SynapseChat = (function () {
       if (errMsg.indexOf('Cannot reach') !== -1 || errMsg.indexOf('timed out') !== -1 || errMsg.indexOf('CORS') !== -1) {
         SynapseUI.setStatus(false);
       }
-      bodyEl.textContent = '\u26A0 ' + errMsg + '\n\nPlease check your connection and try again.';
+      var hasGuidance = errMsg.indexOf('Check') !== -1 || errMsg.indexOf('CORS') !== -1 || errMsg.indexOf('try again') !== -1;
+      bodyEl.textContent = '\u26A0 ' + errMsg + (hasGuidance ? '' : '\n\nPlease check your connection and try again.');
       SynapseUI.toast('Chat error: ' + errMsg, 'error');
     } finally {
       S().streaming = false;
