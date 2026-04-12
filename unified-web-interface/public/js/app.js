@@ -106,11 +106,13 @@
   }
 
   function initModals() {
-    // Close on overlay click
+    // Close on overlay/backdrop click (only direct clicks, not clicks on modal content)
     document.addEventListener('click', function (e) {
-      if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('modal')) {
-        var modal = e.target.closest('.modal') || e.target;
+      if (e.target.classList.contains('modal-overlay')) {
+        var modal = e.target.closest('.modal');
         if (modal && modal.id) closeModal(modal.id);
+      } else if (e.target.classList.contains('modal') && e.target.id) {
+        closeModal(e.target.id);
       }
       // Close button
       if (e.target.closest('.modal-close')) {

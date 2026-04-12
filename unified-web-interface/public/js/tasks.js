@@ -17,6 +17,10 @@
 
   var esc = function (s) { return window.SynapseApp ? window.SynapseApp.escapeHtml(s) : s; };
 
+  function newTaskId() {
+    return window.SynapseApp ? window.SynapseApp.generateId() : 'task_' + Math.random().toString(36).substring(2, 9);
+  }
+
   // ── Demo Seed Data ───────────────────────────────────────────────
 
   var SEED_TASKS = [
@@ -49,9 +53,8 @@
     var now = new Date();
     for (var i = 0; i < SEED_TASKS.length; i++) {
       var seed = SEED_TASKS[i];
-      var id = window.SynapseApp ? window.SynapseApp.generateId() : 'task_' + Math.random().toString(36).substring(2, 9);
+      var id = newTaskId();
       tasks.push({
-        id: id,
         title: seed.title,
         description: seed.description,
         priority: seed.priority,
@@ -68,7 +71,7 @@
 
   function addTask(taskData) {
     var now = new Date().toISOString();
-    var id = window.SynapseApp ? window.SynapseApp.generateId() : 'task_' + Math.random().toString(36).substring(2, 9);
+    var id = newTaskId();
     var task = {
       id: id,
       title: (taskData.title || '').trim(),
