@@ -3,314 +3,1236 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Synapse AI Todo – An AI-powered to-do list application with LangGraph agents, Pinecone RAG, and smart recommendations.">
-  <title>Synapse AI Todo</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="description" content="Synapse AI – Full-stack AI assistant with LangGraph chat, smart task management, RAG-powered search, and memory.">
+  <title>Synapse AI – AI Assistant &amp; Task Manager</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
   <style>
-    /* ---- AI Sidebar ---- */
-    .layout{display:flex;min-height:100vh;flex-direction:column}
-    .layout-body{display:flex;flex:1;position:relative}
-    .layout-main{flex:1;overflow-y:auto}
-    #ai-sidebar{position:fixed;top:0;right:-380px;width:370px;height:100vh;background:var(--color-surface);box-shadow:-2px 0 20px rgba(0,0,0,.12);transition:right .3s ease;z-index:1000;display:flex;flex-direction:column}
-    #ai-sidebar.open{right:0}
-    .ai-sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid var(--color-bg);font-weight:700;font-size:1.05rem}
-    .ai-sidebar-header button{background:none;border:none;cursor:pointer;color:var(--color-text);font-size:1.3rem}
-    #ai-chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
-    .ai-bubble{padding:.6rem 1rem;border-radius:12px;max-width:90%;font-size:.92rem;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-    .ai-bubble--user{align-self:flex-end;background:var(--color-primary);color:#fff;border-bottom-right-radius:4px}
-    .ai-bubble--assistant{align-self:flex-start;background:var(--color-bg);color:var(--color-text);border-bottom-left-radius:4px}
-    .ai-chat-bar{display:flex;gap:.5rem;padding:.8rem 1rem;border-top:1px solid var(--color-bg)}
-    .ai-chat-bar input{flex:1;padding:.55rem .8rem;border:1px solid var(--color-bg);border-radius:8px;font-size:.92rem;background:var(--color-bg);color:var(--color-text)}
-    .ai-chat-bar button{background:var(--color-primary);border:none;color:#fff;padding:.55rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;font-size:.92rem}
-    .ai-fab{position:fixed;bottom:1.5rem;right:1.5rem;width:54px;height:54px;border-radius:50%;background:var(--color-primary);color:#fff;border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(59,130,246,.35);z-index:999;display:flex;align-items:center;justify-content:center;transition:transform .2s}
-    .ai-fab:hover{transform:scale(1.08)}
-    /* AI suggestions inside task cards */
-    .ai-suggestions{font-size:.88rem;padding:.6rem;background:var(--color-bg);border-radius:8px;margin-top:.5rem}
-    .ai-suggestions ol,.ai-suggestions ul{margin:.3rem 0 .3rem 1.2rem;padding:0}
-    .ai-suggestions li{margin-bottom:.2rem}
-    .ai-score{opacity:.65;font-size:.82rem}
-    .ai-loading{font-style:italic;opacity:.7;font-size:.88rem}
-    .ai-suggestions--offline{opacity:.75}
-    /* Settings panel */
-    .settings-panel{background:var(--color-surface);border-radius:var(--radius-md);padding:1.2rem;margin-bottom:1rem;box-shadow:var(--shadow-md)}
-    .settings-panel h3{margin:0 0 .8rem;font-size:1rem}
-    .settings-panel label{display:block;font-size:.88rem;margin-bottom:.25rem;font-weight:600}
-    .settings-panel .input{width:100%;margin-bottom:.7rem}
-    .settings-panel .btn{width:100%}
-    .settings-toggle{font-size:.82rem;cursor:pointer;background:none;border:none;color:var(--color-primary);text-decoration:underline;margin-bottom:.5rem}
-    .badge-ai{display:inline-block;font-size:.7rem;background:var(--color-primary);color:#fff;padding:1px 6px;border-radius:6px;margin-left:.4rem;vertical-align:middle}
-    /* task AI button */
-    .btn-ai{background:none;border:1px solid var(--color-primary);color:var(--color-primary);padding:2px 8px;border-radius:6px;font-size:.78rem;cursor:pointer;margin-left:.3rem}
-    .btn-ai:hover{background:var(--color-primary);color:#fff}
-    .ai-result-box{margin-top:.4rem}
+    /* ======================================================
+       SYNAPSE AI — Complete SPA Styles
+       ====================================================== */
+    :root {
+      --bg:#f1f5f9; --surface:#fff; --surface2:#f8fafc;
+      --text:#0f172a; --text2:#64748b; --border:#e2e8f0;
+      --primary:#6366f1; --primary-h:#4f46e5; --primary-l:#eef2ff;
+      --success:#22c55e; --danger:#ef4444; --warning:#f59e0b;
+      --radius:12px; --shadow:0 4px 20px rgba(0,0,0,.08);
+      --shadow-lg:0 10px 40px rgba(0,0,0,.14); --tr:.2s ease;
+      --sidebar-w:260px;
+    }
+    [data-theme="dark"] {
+      --bg:#0f172a; --surface:#1e293b; --surface2:#162032;
+      --text:#f1f5f9; --text2:#94a3b8; --border:#334155;
+      --primary:#818cf8; --primary-h:#6366f1; --primary-l:#1e1b4b;
+      --success:#4ade80; --danger:#f87171; --warning:#fbbf24;
+      --shadow:0 4px 20px rgba(0,0,0,.4);
+      --shadow-lg:0 10px 40px rgba(0,0,0,.6);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px;scroll-behavior:smooth}
+    body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--tr),color var(--tr)}
+    button{cursor:pointer;font-family:inherit}
+    input,select,textarea{font-family:inherit}
+    a{color:var(--primary)}
+    .hidden{display:none!important}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+    .w-full{width:100%}
+    .text-sm{font-size:.875rem}
+    .text-xs{font-size:.76rem}
+    .text-danger{color:var(--danger)}
+    .font-semibold{font-weight:600}
+    .mt-1{margin-top:.4rem}
+    .ml-auto{margin-left:auto}
+
+    /* Inputs */
+    .input{width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.92rem;background:var(--surface2);color:var(--text);outline:none;transition:border-color var(--tr)}
+    .input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+    .input::placeholder{color:var(--text2)}
+    .select{appearance:none;width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.92rem;background:var(--surface2);color:var(--text);outline:none;cursor:pointer}
+    .select:focus{border-color:var(--primary)}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.25rem;border-radius:8px;font-size:.9rem;font-weight:600;border:none;transition:all var(--tr);white-space:nowrap}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{background:var(--primary-h);transform:translateY(-1px)}
+    .btn-secondary{background:var(--surface);color:var(--text);border:1.5px solid var(--border)}
+    .btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+    .btn-ghost{background:transparent;border:none;color:var(--text2);padding:.4rem .6rem;border-radius:6px}
+    .btn-ghost:hover{background:var(--surface2);color:var(--text)}
+    .btn-icon{background:transparent;border:none;padding:.4rem;border-radius:6px;color:var(--text2);display:inline-flex;align-items:center;justify-content:center}
+    .btn-icon:hover{background:var(--surface2);color:var(--text)}
+    .btn-sm{padding:.4rem .85rem;font-size:.82rem}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+
+    /* ---- SETUP SCREEN ---- */
+    .screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:var(--bg)}
+    .setup-card{background:var(--surface);border-radius:20px;padding:2.5rem;max-width:500px;width:100%;box-shadow:var(--shadow-lg);text-align:center}
+    .hero-icon{font-size:4rem;margin-bottom:.75rem;display:block}
+    .setup-card h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.35rem}
+    .setup-card .tagline{color:var(--text2);margin-bottom:2rem;font-size:.95rem}
+    .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:2rem;text-align:left}
+    .feature-item{background:var(--surface2);border-radius:10px;padding:.8rem;border:1px solid var(--border)}
+    .feature-item .fi-icon{font-size:1.3rem;margin-bottom:.3rem;display:block}
+    .feature-item .fi-title{font-size:.82rem;font-weight:700;color:var(--text)}
+    .feature-item .fi-desc{font-size:.76rem;color:var(--text2)}
+    .input-group{text-align:left;margin-bottom:1rem}
+    .input-group label{display:block;font-weight:600;font-size:.88rem;margin-bottom:.4rem}
+    #setup-status{font-size:.85rem;margin-top:.6rem;min-height:1.3em}
+
+    /* ---- AUTH SCREEN ---- */
+    .auth-card{background:var(--surface);border-radius:20px;padding:2.5rem;max-width:420px;width:100%;box-shadow:var(--shadow-lg)}
+    .auth-header{text-align:center;margin-bottom:1.75rem}
+    .auth-header .auth-logo{font-size:2.5rem;display:block;margin-bottom:.5rem}
+    .auth-header h1{font-size:1.5rem;font-weight:800}
+    .auth-header p{color:var(--text2);font-size:.88rem;margin-top:.25rem}
+    .auth-tabs{display:flex;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:1.5rem;gap:4px}
+    .auth-tab{flex:1;padding:.55rem;border-radius:7px;border:none;background:transparent;font-size:.9rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all var(--tr)}
+    .auth-tab.active{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .form-group{margin-bottom:1rem}
+    .form-group label{display:block;font-weight:600;font-size:.88rem;margin-bottom:.4rem}
+    .form-error{color:var(--danger);font-size:.82rem;margin-top:.35rem;padding:.4rem .6rem;background:#fef2f2;border-radius:6px;border:1px solid #fecaca}
+    [data-theme="dark"] .form-error{background:#3b1c1c;border-color:#7f1d1d}
+    .pw-hint{font-size:.76rem;color:var(--text2);margin-top:.3rem}
+    .auth-change-link{text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text2);cursor:pointer}
+    .auth-change-link span{color:var(--primary);text-decoration:underline}
+
+    /* ---- APP LAYOUT ---- */
+    #screen-app{display:flex;min-height:100vh;background:var(--bg)}
+    .sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;top:0;left:0;z-index:100;transition:transform var(--tr)}
+    .sidebar-header{padding:1.25rem 1rem .9rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem}
+    .sidebar-logo{font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar-logo-icon{font-size:1.4rem}
+    .sidebar-nav{flex:1;overflow-y:auto;padding:.75rem .5rem}
+    .nav-section{margin-bottom:1.25rem}
+    .nav-label{font-size:.71rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);padding:.2rem .5rem .35rem;display:flex;align-items:center;justify-content:space-between}
+    .nav-link{display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;border-radius:8px;color:var(--text2);font-size:.9rem;font-weight:500;cursor:pointer;transition:all var(--tr);border:none;background:transparent;width:100%;text-align:left}
+    .nav-link:hover{background:var(--surface2);color:var(--text)}
+    .nav-link.active{background:var(--primary-l);color:var(--primary);font-weight:600}
+    .nav-link .ni{font-size:1.1rem;flex-shrink:0}
+    .sess-item{display:flex;align-items:center;padding:.4rem .75rem;border-radius:6px;cursor:pointer;color:var(--text2);font-size:.84rem;transition:background var(--tr)}
+    .sess-item:hover{background:var(--surface2);color:var(--text)}
+    .sess-item.active{background:var(--primary-l);color:var(--primary)}
+    .sess-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .new-sess-btn{border:1px dashed var(--border);background:transparent;color:var(--text2);font-size:.8rem;padding:.35rem .75rem;border-radius:6px;cursor:pointer;width:calc(100% - 1rem);margin:.25rem .5rem;text-align:left;transition:all var(--tr)}
+    .new-sess-btn:hover{border-color:var(--primary);color:var(--primary)}
+    .sidebar-footer{padding:.75rem .5rem;border-top:1px solid var(--border)}
+    .user-row{display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-radius:8px}
+    .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.82rem;flex-shrink:0}
+    .user-email-txt{font-size:.8rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+    .app-content{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.7rem 1.5rem;display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:50;flex-shrink:0}
+    .topbar-title{font-size:1rem;font-weight:700;flex:1}
+    .status-badge{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--text2)}
+    .status-dot{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0}
+    .status-dot.offline{background:var(--danger)}
+    .hamburger{display:none;background:none;border:none;padding:.5rem;cursor:pointer;font-size:1.2rem;color:var(--text)}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+
+    /* ---- CHAT VIEW ---- */
+    #view-chat{display:flex;flex-direction:column;height:calc(100vh - 57px)}
+    .messages-area{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
+    .msg{display:flex;gap:.75rem;max-width:84%;animation:fadeUp .25s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .msg.user{align-self:flex-end;flex-direction:row-reverse}
+    .msg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;font-weight:700}
+    .msg.assistant .msg-av{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+    .msg.user .msg-av{background:var(--primary);color:#fff;font-size:.82rem}
+    .msg-body{border-radius:14px;padding:.75rem 1rem;font-size:.9rem;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+    .msg.assistant .msg-body{background:var(--surface);border:1px solid var(--border)}
+    .msg.user .msg-body{background:var(--primary);color:#fff}
+    .msg-typing .msg-body{color:var(--text2);font-style:italic}
+    .chat-hint{color:var(--text2);font-size:.82rem;animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+    .chat-input-bar{padding:1rem 1.5rem;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+    .chat-row{display:flex;gap:.65rem;align-items:flex-end}
+    .chat-ta{flex:1;resize:none;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;background:var(--surface2);color:var(--text);font-size:.9rem;outline:none;max-height:120px;overflow-y:auto;line-height:1.5;transition:border-color var(--tr)}
+    .chat-ta:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+    .chat-ta::placeholder{color:var(--text2)}
+    .send-btn{width:42px;height:42px;border-radius:10px;background:var(--primary);color:#fff;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--tr)}
+    .send-btn:hover:not(:disabled){background:var(--primary-h)}
+    .send-btn:disabled{opacity:.5;cursor:not-allowed}
+    .clear-chat-btn{font-size:.78rem;color:var(--text2);background:none;border:none;cursor:pointer;padding:.2rem .5rem;border-radius:4px}
+    .clear-chat-btn:hover{color:var(--danger)}
+
+    /* ---- TASKS VIEW ---- */
+    #view-tasks{padding:1.5rem;overflow-y:auto;flex:1}
+    .add-task-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+    .add-task-top{display:flex;gap:.65rem;margin-bottom:.6rem}
+    .add-task-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+    .tasks-controls{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+    .search-box{display:flex;align-items:center;gap:.5rem;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:.5rem .8rem;flex:1;min-width:160px;transition:border-color var(--tr)}
+    .search-box:focus-within{border-color:var(--primary)}
+    .search-box input{border:none;background:transparent;color:var(--text);outline:none;font-size:.9rem;width:100%}
+    .search-box input::placeholder{color:var(--text2)}
+    .filter-group{display:flex;gap:.3rem}
+    .fbtn{padding:.4rem .75rem;border-radius:6px;border:1.5px solid var(--border);background:var(--surface);font-size:.82rem;color:var(--text2);cursor:pointer;transition:all var(--tr)}
+    .fbtn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .fbtn:hover:not(.active){border-color:var(--primary);color:var(--primary)}
+    .task-stats-bar{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+    .stat-chip{background:var(--surface);border-radius:8px;padding:.35rem .9rem;font-size:.8rem;color:var(--text2);border:1px solid var(--border)}
+    .stat-chip strong{color:var(--text)}
+    .task-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:.9rem 1rem;margin-bottom:.6rem;display:flex;align-items:flex-start;gap:.85rem;transition:all var(--tr);box-shadow:var(--shadow)}
+    .task-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+    .task-card.completed .task-title{text-decoration:line-through;opacity:.5}
+    .task-cb{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:2px;appearance:none;accent-color:var(--success)}
+    .task-cb:checked{background:var(--success);border-color:var(--success)}
+    .task-body-wrap{flex:1;min-width:0}
+    .task-title{font-size:.9rem;font-weight:500;margin-bottom:.35rem;word-break:break-word}
+    .task-meta-row{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+    .badge{padding:2px 8px;border-radius:20px;font-size:.73rem;font-weight:600;display:inline-block}
+    .badge-high{background:#fef2f2;color:#dc2626}
+    [data-theme="dark"] .badge-high{background:#3b1c1c;color:#fca5a5}
+    .badge-medium{background:#fffbeb;color:#d97706}
+    [data-theme="dark"] .badge-medium{background:#3b2f1c;color:#fcd34d}
+    .badge-low{background:#f0fdf4;color:#16a34a}
+    [data-theme="dark"] .badge-low{background:#1c3b24;color:#86efac}
+    .badge-cat{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+    .badge-due{background:var(--primary-l);color:var(--primary)}
+    .badge-overdue{background:#fef2f2;color:var(--danger)}
+    [data-theme="dark"] .badge-overdue{background:#3b1c1c;color:#fca5a5}
+    .badge-ai{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+    .task-actions-row{display:flex;gap:.3rem;flex-shrink:0}
+    .tab-btn{padding:.3rem .45rem;border-radius:6px;border:none;background:transparent;color:var(--text2);font-size:.88rem;cursor:pointer;transition:all var(--tr)}
+    .tab-btn:hover{background:var(--surface2);color:var(--text)}
+    .tab-btn.del:hover{color:var(--danger)}
+    .ai-panel{margin-top:.65rem;padding:.75rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:.85rem;line-height:1.55}
+    .ai-panel h4{font-size:.8rem;font-weight:700;margin-bottom:.5rem;color:var(--primary)}
+    .ai-panel ul,.ai-panel ol{padding-left:1.2rem;margin:.25rem 0}
+    .ai-panel li{margin-bottom:.2rem}
+
+    /* Modals */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:1rem}
+    .modal{background:var(--surface);border-radius:16px;padding:1.75rem;width:100%;max-width:480px;box-shadow:var(--shadow-lg);animation:fadeUp .2s ease}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+    .modal-header h2{font-size:1.05rem;font-weight:700}
+    .modal-footer{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.25rem}
+    .field-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:.8rem}
+
+    /* Toast */
+    .toast-wrap{position:fixed;bottom:1.5rem;right:1.5rem;display:flex;flex-direction:column;gap:.45rem;z-index:500}
+    .toast{background:var(--surface);color:var(--text);border:1px solid var(--border);padding:.65rem 1rem;border-radius:10px;box-shadow:var(--shadow-lg);font-size:.88rem;display:flex;align-items:center;gap:.5rem;animation:slideIn .25s ease;max-width:320px}
+    @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .toast.out{animation:slideOut .25s ease forwards}
+    @keyframes slideOut{to{transform:translateX(110%);opacity:0}}
+    .toast.success::before{content:'✓';color:var(--success);font-weight:700}
+    .toast.error::before{content:'✗';color:var(--danger);font-weight:700}
+    .toast.info::before{content:'ℹ';color:var(--primary);font-weight:700}
+
+    /* Misc */
+    .spinner{display:inline-block;width:16px;height:16px;border:2.5px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-row{display:flex;align-items:center;gap:.6rem;color:var(--text2);font-size:.88rem;padding:1.5rem 0}
+    .empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text2)}
+    .empty-state .ei{font-size:3rem;margin-bottom:.75rem}
+    .empty-state h3{font-size:1rem;font-weight:600;color:var(--text)}
+    .empty-state p{font-size:.88rem;margin-top:.25rem}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+    /* Responsive */
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-260px);width:260px}
+      .sidebar.open{transform:translateX(0)}
+      .sidebar-overlay.open{display:block}
+      .app-content{margin-left:0}
+      .hamburger{display:flex}
+      .add-task-fields{grid-template-columns:1fr 1fr}
+      .field-grid{grid-template-columns:1fr 1fr}
+      .tasks-controls{flex-wrap:wrap}
+      .feature-grid{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
-  <a href="#main" class="skip-link">Skip to main content</a>
 
-  <div class="layout">
-    <!-- Header -->
-    <header class="header" role="banner">
-      <div class="header-inner">
-        <div class="logo">
-          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-          </svg>
-          <h1>Synapse AI Todo <span class="badge-ai">AI</span></h1>
+<!-- SETUP SCREEN -->
+<div id="screen-setup" class="screen">
+  <div class="setup-card">
+    <span class="hero-icon">🧠</span>
+    <h1>Synapse AI</h1>
+    <p class="tagline">AI-powered chat, smart tasks &amp; RAG-based memory — connect your backend to begin</p>
+    <div class="feature-grid">
+      <div class="feature-item">
+        <span class="fi-icon">💬</span>
+        <div class="fi-title">LangGraph Chat</div>
+        <div class="fi-desc">Streaming AI with long-term memory</div>
+      </div>
+      <div class="feature-item">
+        <span class="fi-icon">✅</span>
+        <div class="fi-title">Smart Tasks</div>
+        <div class="fi-desc">AI priority scoring &amp; due-date prediction</div>
+      </div>
+      <div class="feature-item">
+        <span class="fi-icon">🔍</span>
+        <div class="fi-title">Semantic Search</div>
+        <div class="fi-desc">Find tasks with natural language (pgvector)</div>
+      </div>
+      <div class="feature-item">
+        <span class="fi-icon">🔒</span>
+        <div class="fi-title">Secure Auth</div>
+        <div class="fi-desc">JWT accounts with session management</div>
+      </div>
+    </div>
+    <div class="input-group">
+      <label for="setup-url">FastAPI Backend URL</label>
+      <input id="setup-url" class="input" type="url" placeholder="https://your-synapse-api.example.com" autocomplete="url">
+      <div class="text-xs" style="color:var(--text2);margin-top:.3rem">Your deployed Synapse AI FastAPI URL (Railway, Render, Fly.io, VPS, etc.)</div>
+    </div>
+    <button id="setup-connect-btn" class="btn btn-primary w-full" style="margin-bottom:.6rem">Connect &amp; Continue →</button>
+    <div id="setup-status" style="font-size:.85rem;min-height:1.3em"></div>
+  </div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div id="screen-auth" class="screen hidden">
+  <div class="auth-card">
+    <div class="auth-header">
+      <span class="auth-logo">🧠</span>
+      <h1>Synapse AI</h1>
+      <p>Sign in to your account</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Sign In</button>
+      <button class="auth-tab" data-tab="register">Create Account</button>
+    </div>
+    <!-- Login form -->
+    <div id="login-form">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input id="login-email" class="input" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input id="login-password" class="input" type="password" placeholder="Your password" autocomplete="current-password">
+      </div>
+      <div id="login-error" class="form-error hidden"></div>
+      <button id="login-btn" class="btn btn-primary w-full mt-1">Sign In</button>
+    </div>
+    <!-- Register form -->
+    <div id="register-form" class="hidden">
+      <div class="form-group">
+        <label for="reg-email">Email</label>
+        <input id="reg-email" class="input" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Password</label>
+        <input id="reg-password" class="input" type="password" placeholder="Create a strong password" autocomplete="new-password">
+        <div class="pw-hint">8+ chars with uppercase, lowercase, number &amp; special character</div>
+      </div>
+      <div id="reg-error" class="form-error hidden"></div>
+      <button id="reg-btn" class="btn btn-primary w-full mt-1">Create Account</button>
+    </div>
+    <div class="auth-change-link" id="change-backend-link">&#9881; <span>Change backend URL</span></div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="screen-app" class="hidden">
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="sidebar-header">
+      <span class="sidebar-logo-icon">🧠</span>
+      <span class="sidebar-logo">Synapse AI</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">Navigation</div>
+        <button class="nav-link active" data-view="chat"><span class="ni">💬</span> AI Chat</button>
+        <button class="nav-link" data-view="tasks"><span class="ni">✅</span> Tasks</button>
+      </div>
+      <div class="nav-section" id="sessions-section">
+        <div class="nav-label">
+          Chat Sessions
+          <button id="new-session-btn" class="btn-icon" title="New session" style="font-size:.9rem;padding:.1rem .3rem">&#xFF0B;</button>
         </div>
-        <div style="display:flex;gap:.5rem;align-items:center">
-          <button id="theme-toggle" class="btn-icon" aria-label="Toggle dark mode" title="Toggle theme">
-            <svg class="icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="5"/>
-              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-            </svg>
-            <svg class="icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            </svg>
+        <div id="sessions-list"></div>
+        <button class="new-sess-btn" id="new-session-btn2">+ New chat session</button>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-email-txt" id="user-email-display">user@example.com</div>
+        <button class="btn-icon ml-auto" id="logout-btn" title="Sign out" style="font-size:1rem">&#x1F6AA;</button>
+      </div>
+      <button id="theme-toggle-btn" class="btn-ghost w-full" style="font-size:.8rem;justify-content:center;margin-top:.3rem">
+        <span id="theme-icon">🌙</span>&nbsp; Toggle theme
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="app-content">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">&#9776;</button>
+      <h2 class="topbar-title" id="topbar-title">💬 AI Chat</h2>
+      <div class="status-badge">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Connecting…</span>
+      </div>
+    </div>
+
+    <!-- Chat view -->
+    <div id="view-chat">
+      <div class="messages-area" id="messages-area">
+        <div class="msg assistant">
+          <div class="msg-av">🧠</div>
+          <div class="msg-body">Hi! I&#8217;m Synapse AI &#8212; your intelligent assistant powered by LangGraph and long-term memory. I can chat, help manage tasks, search the web, and remember your preferences. What can I help you with today? 🚀</div>
+        </div>
+      </div>
+      <div class="chat-input-bar">
+        <div class="chat-row">
+          <textarea id="chat-ta" class="chat-ta" placeholder="Message Synapse AI… (Enter to send, Shift+Enter for new line)" rows="1" aria-label="Chat input"></textarea>
+          <button id="send-btn" class="send-btn" aria-label="Send message">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:.3rem">
+          <button class="clear-chat-btn" id="clear-chat-btn">&#x1F5D1; Clear chat</button>
+        </div>
       </div>
-    </header>
-
-    <div class="layout-body">
-      <div class="layout-main">
-        <main id="main" class="main" role="main">
-          <div class="container">
-
-            <!-- Backend Connection Settings -->
-            <section class="settings-panel" id="settings-panel">
-              <button class="settings-toggle" id="settings-toggle" aria-label="Toggle settings">⚙ Backend Settings</button>
-              <div id="settings-body" hidden>
-                <h3>Connect to Synapse AI Backend</h3>
-                <label for="api-url">API Base URL</label>
-                <input type="url" id="api-url" class="input" placeholder="https://your-api.example.com" value="">
-                <label for="api-token">JWT Token (optional)</label>
-                <input type="text" id="api-token" class="input" placeholder="Paste your JWT token">
-                <button class="btn btn-primary" id="connect-btn">Connect</button>
-                <p id="connection-status" style="font-size:.82rem;margin-top:.4rem"></p>
-              </div>
-            </section>
-
-            <!-- Task Form -->
-            <section class="card task-form-card" aria-label="Add new task">
-              <form id="task-form" autocomplete="off">
-                <div class="form-row">
-                  <label for="task-input" class="sr-only">Task title</label>
-                  <input type="text" id="task-input" class="input task-input" placeholder="What needs to be done?" maxlength="200" required aria-required="true">
-                  <button type="submit" class="btn btn-primary" id="add-btn" aria-label="Add task">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    <span>Add</span>
-                  </button>
-                </div>
-                <div class="form-details">
-                  <div class="form-group">
-                    <label for="task-priority" class="sr-only">Priority</label>
-                    <select id="task-priority" class="select" aria-label="Task priority">
-                      <option value="medium">Medium Priority</option>
-                      <option value="high">High Priority</option>
-                      <option value="low">Low Priority</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="task-category" class="sr-only">Category</label>
-                    <input type="text" id="task-category" class="input" placeholder="Category (optional)" maxlength="30" list="category-list" aria-label="Task category">
-                    <datalist id="category-list"></datalist>
-                  </div>
-                  <div class="form-group">
-                    <label for="task-due-date" class="sr-only">Due date</label>
-                    <input type="date" id="task-due-date" class="input" aria-label="Due date">
-                  </div>
-                </div>
-              </form>
-            </section>
-
-            <!-- Filters & Search -->
-            <section class="card filters-card" aria-label="Filter and search tasks">
-              <div class="filters-row">
-                <div class="search-box">
-                  <svg class="icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                  </svg>
-                  <label for="search-input" class="sr-only">Search tasks</label>
-                  <input type="text" id="search-input" class="input search-input" placeholder="Search tasks…" aria-label="Search tasks">
-                </div>
-                <div class="filter-tabs" role="tablist" aria-label="Task status filter">
-                  <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
-                  <button class="filter-tab" data-filter="active" role="tab" aria-selected="false">Active</button>
-                  <button class="filter-tab" data-filter="completed" role="tab" aria-selected="false">Completed</button>
-                </div>
-              </div>
-            </section>
-
-            <!-- Task Counter -->
-            <section class="counter-bar" aria-label="Task statistics">
-              <span class="counter" id="counter-total" title="Total tasks"><strong id="total-count">0</strong> Total</span>
-              <span class="counter" id="counter-active" title="Active tasks"><strong id="active-count">0</strong> Active</span>
-              <span class="counter" id="counter-completed" title="Completed tasks"><strong id="completed-count">0</strong> Done</span>
-              <button id="clear-completed" class="btn btn-text" aria-label="Clear completed tasks" hidden>Clear completed</button>
-            </section>
-
-            <!-- Task List -->
-            <section aria-label="Task list">
-              <ul id="task-list" class="task-list" role="list" aria-live="polite"></ul>
-              <div id="empty-state" class="empty-state" hidden>
-                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-                  <rect x="9" y="3" width="6" height="4" rx="1"/>
-                </svg>
-                <p class="empty-title">No tasks yet</p>
-                <p class="empty-subtitle">Add a task above to get started!</p>
-              </div>
-            </section>
-          </div>
-        </main>
-      </div>
-
-      <!-- AI Chat Sidebar -->
-      <aside id="ai-sidebar" aria-label="AI Assistant">
-        <div class="ai-sidebar-header">
-          <span>🧠 Synapse AI Chat</span>
-          <button id="ai-sidebar-close" aria-label="Close AI sidebar">&times;</button>
-        </div>
-        <div id="ai-chat-messages">
-          <div class="ai-bubble ai-bubble--assistant">Hi! I'm Synapse AI. Ask me to help with your tasks – prioritisation, due dates, breakdowns, or just chat! 🚀</div>
-        </div>
-        <div class="ai-chat-bar">
-          <input type="text" id="ai-chat-input" placeholder="Ask Synapse AI…" aria-label="AI chat input">
-          <button id="ai-chat-send" aria-label="Send message">Send</button>
-        </div>
-      </aside>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer" role="contentinfo">
-      <p>Synapse AI Todo &middot; Powered by LangGraph, FastAPI &amp; Pinecone RAG</p>
-    </footer>
-  </div>
-
-  <!-- AI Floating Action Button -->
-  <button class="ai-fab" id="ai-fab" aria-label="Open AI Assistant" title="Synapse AI Chat">🧠</button>
-
-  <!-- Edit Modal -->
-  <div id="edit-modal" class="modal-overlay" hidden aria-modal="true" role="dialog" aria-label="Edit task">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Edit Task</h2>
-        <button id="modal-close" class="btn-icon" aria-label="Close dialog">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
+    <!-- Tasks view -->
+    <div id="view-tasks" class="hidden">
+      <div class="add-task-card">
+        <div class="add-task-top">
+          <input id="new-task-title" class="input" placeholder="What needs to be done?" maxlength="200" style="flex:1">
+          <button id="add-task-btn" class="btn btn-primary">+ Add Task</button>
+        </div>
+        <div class="add-task-fields">
+          <select id="new-task-priority" class="select">
+            <option value="medium">⚡ Medium Priority</option>
+            <option value="high">🔴 High Priority</option>
+            <option value="low">🟢 Low Priority</option>
+          </select>
+          <input id="new-task-category" class="input" placeholder="Category (optional)" maxlength="30">
+          <input id="new-task-due" class="input" type="date" aria-label="Due date">
+        </div>
+        <textarea id="new-task-desc" class="input" placeholder="Description (optional)" rows="1" style="margin-top:.5rem;resize:none"></textarea>
       </div>
-      <form id="edit-form" autocomplete="off">
-        <div class="form-group">
-          <label for="edit-title">Title</label>
-          <input type="text" id="edit-title" class="input" maxlength="200" required>
+      <div class="tasks-controls">
+        <div class="search-box">
+          <span>🔍</span>
+          <input id="task-search-input" placeholder="Search tasks…" aria-label="Search tasks">
         </div>
-        <div class="form-row-modal">
-          <div class="form-group">
-            <label for="edit-priority">Priority</label>
-            <select id="edit-priority" class="select">
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="edit-category">Category</label>
-            <input type="text" id="edit-category" class="input" maxlength="30" list="edit-category-list">
-            <datalist id="edit-category-list"></datalist>
-          </div>
-          <div class="form-group">
-            <label for="edit-due-date">Due date</label>
-            <input type="date" id="edit-due-date" class="input">
-          </div>
+        <div class="filter-group">
+          <button class="fbtn active" data-filter="all">All</button>
+          <button class="fbtn" data-filter="active">Active</button>
+          <button class="fbtn" data-filter="completed">Done</button>
         </div>
-        <div class="modal-actions">
-          <button type="button" id="modal-cancel" class="btn btn-secondary">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-      </form>
+        <button id="ai-search-btn" class="btn btn-secondary btn-sm">🤖 AI Search</button>
+      </div>
+      <div class="task-stats-bar" id="task-stats-bar"></div>
+      <div id="task-list-wrap"></div>
     </div>
   </div>
+</div>
 
-  <!-- Toast Container -->
-  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<!-- Edit Task Modal -->
+<div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit task">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✏ Edit Task</h2>
+      <button class="btn-icon" id="close-edit-modal" aria-label="Close">✕</button>
+    </div>
+    <div class="form-group">
+      <label for="edit-title">Title <span style="color:var(--danger)">*</span></label>
+      <input id="edit-title" class="input" maxlength="200">
+    </div>
+    <div class="form-group">
+      <label for="edit-desc">Description</label>
+      <textarea id="edit-desc" class="input" rows="2" style="resize:vertical"></textarea>
+    </div>
+    <div class="field-grid">
+      <div class="form-group" style="margin:0">
+        <label for="edit-priority">Priority</label>
+        <select id="edit-priority" class="select">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label for="edit-category">Category</label>
+        <input id="edit-category" class="input" maxlength="30">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label for="edit-due">Due Date</label>
+        <input id="edit-due" class="input" type="date">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="cancel-edit">Cancel</button>
+      <button class="btn btn-primary" id="save-edit">Save Changes</button>
+    </div>
+  </div>
+</div>
 
-  <!-- Scripts -->
-  <script src="assets/js/api-client.js"></script>
-  <script src="assets/js/ai-integration.js"></script>
-  <script src="assets/js/app.js"></script>
-  <script>
-    (function () {
-      'use strict';
+<!-- AI Semantic Search Modal -->
+<div id="ai-search-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="AI Semantic Search">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🤖 AI Semantic Search</h2>
+      <button class="btn-icon" id="close-ai-search" aria-label="Close">✕</button>
+    </div>
+    <div class="form-group">
+      <label for="ai-q">Describe what you're looking for</label>
+      <input id="ai-q" class="input" placeholder="e.g. urgent work tasks due this week">
+    </div>
+    <button id="run-ai-search" class="btn btn-primary w-full">Search with AI</button>
+    <div id="ai-search-results" style="margin-top:1rem"></div>
+  </div>
+</div>
 
-      // ---- Settings panel ----
-      var settingsToggle = document.getElementById('settings-toggle');
-      var settingsBody = document.getElementById('settings-body');
-      var connectBtn = document.getElementById('connect-btn');
-      var connectionStatus = document.getElementById('connection-status');
+<!-- Toast notifications -->
+<div id="toast-wrap" class="toast-wrap" aria-live="assertive" aria-atomic="true"></div>
 
-      if (settingsToggle && settingsBody) {
-        settingsToggle.addEventListener('click', function () {
-          settingsBody.hidden = !settingsBody.hidden;
-        });
+<script>
+(function () {
+  'use strict';
+
+  /* ── STATE ── */
+  var S = {
+    apiUrl: '', userToken: '', sessionToken: '',
+    userEmail: '', currentSessionId: '',
+    sessions: [], messages: [], tasks: [],
+    taskFilter: 'all', taskSearch: '',
+    editingId: null, streaming: false, theme: 'light'
+  };
+  var K = {
+    URL: 'synapse_api_url', USER: 'synapse_user_token',
+    SESS: 'synapse_session_token', EMAIL: 'synapse_user_email',
+    SID: 'synapse_current_session_id', THEME: 'synapse_theme'
+  };
+
+  /* ── STORAGE ── */
+  function ls(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function ss(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function rs(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+  /* ── HTTP HELPERS ── */
+  function base() { return S.apiUrl.replace(/\/+$/, ''); }
+  function hdr(useSess) {
+    var tok = useSess ? S.sessionToken : S.userToken;
+    var h = { 'Content-Type': 'application/json' };
+    if (tok) h['Authorization'] = 'Bearer ' + tok;
+    return h;
+  }
+  function extractErr(e) {
+    if (!e) return 'Unknown error';
+    if (typeof e === 'string') return e;
+    if (typeof e.detail === 'string') return e.detail;
+    if (Array.isArray(e.detail)) return e.detail.map(function (d) { return d.msg || JSON.stringify(d); }).join(', ');
+    return JSON.stringify(e);
+  }
+  async function GET(path, useSess) {
+    var r = await fetch(base() + path, { headers: hdr(useSess) });
+    if (!r.ok) { var e = await r.json().catch(function () { return { detail: r.statusText }; }); throw new Error(extractErr(e)); }
+    return r.json();
+  }
+  async function POST(path, body, useSess, ct) {
+    var opts = { method: 'POST', headers: hdr(useSess) };
+    if (ct) opts.headers['Content-Type'] = ct;
+    if (body !== undefined) opts.body = (typeof body === 'string') ? body : JSON.stringify(body);
+    var r = await fetch(base() + path, opts);
+    if (!r.ok) { var e = await r.json().catch(function () { return { detail: r.statusText }; }); throw new Error(extractErr(e)); }
+    if (r.status === 204) return null;
+    return r.json();
+  }
+  async function PUT(path, body, useSess) {
+    var r = await fetch(base() + path, { method: 'PUT', headers: hdr(useSess), body: JSON.stringify(body) });
+    if (!r.ok) { var e = await r.json().catch(function () { return { detail: r.statusText }; }); throw new Error(extractErr(e)); }
+    return r.json();
+  }
+  async function DEL(path, useSess) {
+    var r = await fetch(base() + path, { method: 'DELETE', headers: hdr(useSess) });
+    if (!r.ok) { var e = await r.json().catch(function () { return { detail: r.statusText }; }); throw new Error(extractErr(e)); }
+  }
+
+  /* ── AUTH API ── */
+  async function apiLogin(email, pw) {
+    var body = new URLSearchParams({ username: email, password: pw, grant_type: 'password' }).toString();
+    return POST('/api/v1/auth/login', body, false, 'application/x-www-form-urlencoded');
+  }
+  async function apiRegister(email, pw) {
+    return POST('/api/v1/auth/register', { email: email, password: pw }, false);
+  }
+  async function apiCreateSession(name) {
+    var r = await fetch(base() + '/api/v1/auth/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.userToken },
+      body: name ? JSON.stringify({ name: name }) : undefined
+    });
+    if (!r.ok) { var e = await r.json().catch(function () { return {}; }); throw new Error(extractErr(e)); }
+    return r.json();
+  }
+  async function apiGetSessions() { return GET('/api/v1/auth/sessions', false); }
+
+  /* ── CHAT API (SSE) ── */
+  async function* streamChat(messages) {
+    var r = await fetch(base() + '/api/v1/chatbot/chat/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.sessionToken },
+      body: JSON.stringify({ messages: messages })
+    });
+    if (!r.ok) throw new Error('Stream failed (' + r.status + ')');
+    var reader = r.body.getReader();
+    var dec = new TextDecoder();
+    var buf = '';
+    while (true) {
+      var read = await reader.read();
+      if (read.done) break;
+      buf += dec.decode(read.value, { stream: true });
+      var lines = buf.split('\n');
+      buf = lines.pop() || '';
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line.startsWith('data:')) continue;
+        var json = line.slice(5).trim();
+        if (json === '[DONE]') return;
+        try { var d = JSON.parse(json); if (d.done) return; if (d.content) yield d.content; } catch (ex) { /* skip */ }
       }
+    }
+  }
+  async function apiGetMessages() { return GET('/api/v1/chatbot/messages', true); }
+  async function apiClearMessages() { return DEL('/api/v1/chatbot/messages', true); }
 
-      // Restore saved API URL
-      var savedUrl = localStorage.getItem('synapse_api_url') || '';
-      var apiUrlInput = document.getElementById('api-url');
-      if (apiUrlInput && savedUrl) apiUrlInput.value = savedUrl;
+  /* ── TASK API ── */
+  async function apiListTasks() { return GET('/api/v1/tasks', false); }
+  async function apiCreateTask(t) { return POST('/api/v1/tasks', t, false); }
+  async function apiUpdateTask(id, t) { return PUT('/api/v1/tasks/' + id, t, false); }
+  async function apiDeleteTask(id) { return DEL('/api/v1/tasks/' + id, false); }
+  async function apiAISuggestions(id) { return GET('/api/v1/tasks/' + id + '/ai-suggestions', false); }
+  async function apiSearchTasks(q) { return POST('/api/v1/tasks/search', { query: q }, false); }
 
-      if (connectBtn) {
-        connectBtn.addEventListener('click', function () {
-          var url = (apiUrlInput && apiUrlInput.value.trim()) || '';
-          var token = (document.getElementById('api-token') && document.getElementById('api-token').value.trim()) || '';
-          if (!url) {
-            connectionStatus.textContent = '⚠ Please enter an API URL';
-            return;
-          }
-          localStorage.setItem('synapse_api_url', url);
-          var opts = { baseUrl: url };
-          if (token) opts.token = token;
-          SynapseAPI.configure(opts);
+  /* ── UTIL ── */
+  function esc(s) { var d = document.createElement('div'); d.appendChild(document.createTextNode(s || '')); return d.innerHTML; }
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtDate(s) {
+    if (!s) return '';
+    var p = s.split('-'); if (p.length !== 3) return s;
+    var mIdx = parseInt(p[1], 10) - 1;
+    if (mIdx < 0 || mIdx > 11) return s;
+    return MONTHS[mIdx] + ' ' + parseInt(p[2], 10) + ', ' + p[0];
+  }
+  function isOverdue(s) {
+    if (!s) return false;
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var d = new Date(s + 'T00:00:00');
+    return !isNaN(d.getTime()) && d < today;
+  }
+  function toast(msg, type) {
+    var c = document.getElementById('toast-wrap');
+    var el = document.createElement('div');
+    el.className = 'toast ' + (type || 'info');
+    el.textContent = msg;
+    c.appendChild(el);
+    setTimeout(function () { el.classList.add('out'); setTimeout(function () { el.remove(); }, 260); }, 2800);
+  }
 
-          connectionStatus.textContent = '🔄 Testing connection…';
-          fetch(url.replace(/\/+$/, '') + '/health')
-            .then(function (r) { return r.json(); })
-            .then(function (d) {
-              if (d && d.status === 'healthy') {
-                connectionStatus.textContent = '✅ Connected! Backend v' + (d.version || '?');
-                connectionStatus.style.color = 'var(--color-low)';
-              } else {
-                connectionStatus.textContent = '⚠ Unexpected response';
-              }
-            })
-            .catch(function () {
-              connectionStatus.textContent = '❌ Cannot reach backend – tasks saved locally';
-              connectionStatus.style.color = 'var(--color-danger)';
-            });
-        });
+  /* ── SCREEN / VIEW ── */
+  function showScreen(name) {
+    ['setup', 'auth', 'app'].forEach(function (s) {
+      var el = document.getElementById('screen-' + s);
+      if (el) el.classList.toggle('hidden', s !== name);
+    });
+  }
+  function showView(name) {
+    ['chat', 'tasks'].forEach(function (v) {
+      var el = document.getElementById('view-' + v);
+      if (el) el.classList.toggle('hidden', v !== name);
+    });
+    document.querySelectorAll('.nav-link[data-view]').forEach(function (l) {
+      l.classList.toggle('active', l.getAttribute('data-view') === name);
+    });
+    var titles = { chat: '💬 AI Chat', tasks: '✅ Tasks' };
+    var el = document.getElementById('topbar-title');
+    if (el) el.textContent = titles[name] || '';
+  }
+
+  /* ── THEME ── */
+  function applyTheme(t) {
+    S.theme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    ss(K.THEME, t);
+    var ic = document.getElementById('theme-icon');
+    if (ic) ic.textContent = t === 'dark' ? '☀' : '🌙';
+  }
+
+  /* ── STATUS ── */
+  function setStatus(ok) {
+    var d = document.getElementById('status-dot');
+    var t = document.getElementById('status-text');
+    if (d) d.className = 'status-dot' + (ok ? '' : ' offline');
+    if (t) t.textContent = ok ? 'Connected' : 'Offline';
+  }
+
+  /* ── SIDEBAR ── */
+  function closeSidebar() {
+    var sb = document.getElementById('sidebar');
+    var ov = document.getElementById('sidebar-overlay');
+    if (sb) sb.classList.remove('open');
+    if (ov) ov.classList.remove('open');
+  }
+
+  /* ── SESSIONS ── */
+  function renderSessions() {
+    var c = document.getElementById('sessions-list');
+    if (!c) return;
+    c.innerHTML = '';
+    if (!S.sessions.length) {
+      c.innerHTML = '<div class="text-xs" style="padding:.35rem .75rem;color:var(--text2)">No sessions yet</div>';
+      return;
+    }
+    S.sessions.forEach(function (s) {
+      var el = document.createElement('div');
+      el.className = 'sess-item' + (s.session_id === S.currentSessionId ? ' active' : '');
+      el.innerHTML = '<span class="sess-title">' + esc(s.name || 'Chat ' + (s.session_id || '').slice(0, 6)) + '</span>';
+      el.addEventListener('click', function () { switchSession(s); });
+      c.appendChild(el);
+    });
+  }
+  async function loadSessions() {
+    try {
+      var list = await apiGetSessions();
+      S.sessions = Array.isArray(list) ? list : [];
+      renderSessions();
+    } catch (e) { /* non-fatal */ }
+  }
+  async function createNewSession(name) {
+    try {
+      var sess = await apiCreateSession(name || 'New Chat');
+      S.currentSessionId = sess.session_id;
+      S.sessionToken = sess.token.access_token;
+      ss(K.SESS, S.sessionToken); ss(K.SID, S.currentSessionId);
+      S.sessions.unshift(sess); renderSessions();
+      S.messages = []; renderMessages();
+      toast('New chat session created', 'success');
+    } catch (e) { toast('Session error: ' + e.message, 'error'); }
+  }
+  async function switchSession(sess) {
+    S.currentSessionId = sess.session_id;
+    S.sessionToken = sess.token.access_token;
+    ss(K.SESS, S.sessionToken); ss(K.SID, S.currentSessionId);
+    renderSessions();
+    try { var data = await apiGetMessages(); S.messages = (data && data.messages) ? data.messages : []; }
+    catch (e) { S.messages = []; }
+    renderMessages();
+    toast('Switched: ' + (sess.name || 'Chat'), 'info');
+    closeSidebar();
+  }
+
+  /* ── CHAT ── */
+  function renderMessages() {
+    var area = document.getElementById('messages-area');
+    if (!area) return;
+    area.innerHTML = '';
+    if (!S.messages.length) {
+      area.innerHTML = '<div class="msg assistant"><div class="msg-av">🧠</div><div class="msg-body">Hi! I\'m Synapse AI. How can I help you today? 🚀</div></div>';
+      return;
+    }
+    S.messages.forEach(function (m) {
+      if (m.role === 'user' || m.role === 'assistant') appendMsg(m.role, m.content);
+    });
+  }
+  function appendMsg(role, content) {
+    var area = document.getElementById('messages-area');
+    if (!area) return null;
+    var msg = document.createElement('div');
+    msg.className = 'msg ' + role;
+    var av = document.createElement('div');
+    av.className = 'msg-av';
+    av.textContent = role === 'assistant' ? '🧠' : ((S.userEmail[0] || 'U').toUpperCase());
+    var body = document.createElement('div');
+    body.className = 'msg-body';
+    body.textContent = content;
+    msg.appendChild(av); msg.appendChild(body);
+    area.appendChild(msg);
+    area.scrollTop = area.scrollHeight;
+    return body;
+  }
+  async function sendChat() {
+    var ta = document.getElementById('chat-ta');
+    var text = ta ? ta.value.trim() : '';
+    if (!text || S.streaming) return;
+    ta.value = ''; ta.style.height = 'auto';
+    if (!S.sessionToken) {
+      try { await createNewSession('Chat'); } catch (e) { toast('Session error: ' + e.message, 'error'); return; }
+    }
+    S.messages.push({ role: 'user', content: text });
+    appendMsg('user', text);
+    S.streaming = true;
+    var btn = document.getElementById('send-btn');
+    if (btn) btn.disabled = true;
+    var area = document.getElementById('messages-area');
+    var typing = document.createElement('div');
+    typing.className = 'msg assistant msg-typing';
+    typing.innerHTML = '<div class="msg-av">🧠</div><div class="msg-body"><span class="chat-hint">Thinking…</span></div>';
+    area.appendChild(typing);
+    area.scrollTop = area.scrollHeight;
+    var bodyEl = typing.querySelector('.msg-body');
+    var full = '';
+    try {
+      for await (var chunk of streamChat(S.messages)) {
+        if (full === '') bodyEl.textContent = '';
+        full += chunk; bodyEl.textContent = full;
+        area.scrollTop = area.scrollHeight;
       }
+      typing.classList.remove('msg-typing');
+      if (!full) { bodyEl.textContent = 'No response received.'; full = 'No response received.'; }
+      S.messages.push({ role: 'assistant', content: full });
+    } catch (e) {
+      typing.classList.remove('msg-typing');
+      bodyEl.textContent = 'Error: ' + e.message;
+      toast('Chat error: ' + e.message, 'error');
+    } finally {
+      S.streaming = false;
+      if (btn) btn.disabled = false;
+    }
+  }
 
-      // Auto-connect if URL was saved
-      if (savedUrl) {
-        SynapseAPI.configure({ baseUrl: savedUrl });
+  /* ── TASKS ── */
+  function filtered() {
+    return S.tasks.filter(function (t) {
+      if (S.taskFilter === 'active' && t.completed) return false;
+      if (S.taskFilter === 'completed' && !t.completed) return false;
+      if (S.taskSearch) {
+        var q = S.taskSearch.toLowerCase();
+        return ((t.title || '').toLowerCase().includes(q) ||
+                (t.description || '').toLowerCase().includes(q) ||
+                (t.category || '').toLowerCase().includes(q));
       }
+      return true;
+    });
+  }
+  function renderTaskStats() {
+    var c = document.getElementById('task-stats-bar');
+    if (!c) return;
+    var total = S.tasks.length, done = S.tasks.filter(function (t) { return t.completed; }).length;
+    c.innerHTML =
+      '<span class="stat-chip"><strong>' + total + '</strong> Total</span>' +
+      '<span class="stat-chip"><strong>' + (total - done) + '</strong> Active</span>' +
+      '<span class="stat-chip"><strong>' + done + '</strong> Done</span>';
+  }
+  function renderTasks() {
+    renderTaskStats();
+    var wrap = document.getElementById('task-list-wrap');
+    if (!wrap) return;
+    var list = filtered();
+    if (!list.length) {
+      wrap.innerHTML = '<div class="empty-state"><div class="ei">📋</div><h3>No tasks</h3><p>' +
+        (S.taskSearch || S.taskFilter !== 'all' ? 'No tasks match your filter.' : 'Add your first task above!') + '</p></div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    list.forEach(function (task) {
+      var p = task.priority || 'medium';
+      var ov = !task.completed && isOverdue(task.due_date);
+      var card = document.createElement('div');
+      card.className = 'task-card' + (task.completed ? ' completed' : '');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.className = 'task-cb'; cb.checked = !!task.completed;
+      cb.setAttribute('aria-label', 'Toggle complete');
+      cb.addEventListener('change', function () { toggleTask(task.id, cb.checked); });
+      var bwrap = document.createElement('div');
+      bwrap.className = 'task-body-wrap';
+      var tTitle = document.createElement('div');
+      tTitle.className = 'task-title'; tTitle.textContent = task.title;
+      var meta = document.createElement('div');
+      meta.className = 'task-meta-row';
+      meta.innerHTML =
+        '<span class="badge badge-' + p + '">' + p + '</span>' +
+        (task.category ? '<span class="badge badge-cat">' + esc(task.category) + '</span>' : '') +
+        (task.due_date ? '<span class="badge ' + (ov ? 'badge-overdue' : 'badge-due') + '">' + (ov ? '⚠ ' : '📅 ') + fmtDate(task.due_date) + '</span>' : '') +
+        (task.ai_priority_score != null ? '<span class="badge badge-ai">AI ' + Math.round(task.ai_priority_score * 100) + '%</span>' : '');
+      bwrap.appendChild(tTitle); bwrap.appendChild(meta);
+      var acts = document.createElement('div');
+      acts.className = 'task-actions-row';
+      var aiBtn = document.createElement('button');
+      aiBtn.className = 'tab-btn'; aiBtn.title = 'AI Suggestions'; aiBtn.textContent = '🤖';
+      aiBtn.addEventListener('click', function () { toggleAIPanel(task, card, bwrap); });
+      var editBtn = document.createElement('button');
+      editBtn.className = 'tab-btn'; editBtn.title = 'Edit'; editBtn.textContent = '✏';
+      editBtn.addEventListener('click', function () { openEditModal(task); });
+      var delBtn = document.createElement('button');
+      delBtn.className = 'tab-btn del'; delBtn.title = 'Delete'; delBtn.textContent = '🗑';
+      delBtn.addEventListener('click', function () { deleteTask(task.id); });
+      acts.appendChild(aiBtn); acts.appendChild(editBtn); acts.appendChild(delBtn);
+      card.appendChild(cb); card.appendChild(bwrap); card.appendChild(acts);
+      wrap.appendChild(card);
+    });
+  }
+  async function loadTasks() {
+    var wrap = document.getElementById('task-list-wrap');
+    if (wrap) wrap.innerHTML = '<div class="loading-row"><span class="spinner"></span> Loading tasks…</div>';
+    try { var data = await apiListTasks(); S.tasks = (data && data.tasks) ? data.tasks : []; renderTasks(); }
+    catch (e) { toast('Failed to load tasks: ' + e.message, 'error'); renderTasks(); }
+  }
+  async function addTask() {
+    var titleEl = document.getElementById('new-task-title');
+    var title = titleEl ? titleEl.value.trim() : '';
+    if (!title) { toast('Please enter a task title', 'error'); if (titleEl) titleEl.focus(); return; }
+    var btn = document.getElementById('add-task-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
+    try {
+      var t = await apiCreateTask({
+        title: title,
+        description: (document.getElementById('new-task-desc') || {}).value || '',
+        priority: (document.getElementById('new-task-priority') || {}).value || 'medium',
+        category: (document.getElementById('new-task-category') || {}).value || '',
+        due_date: (document.getElementById('new-task-due') || {}).value || ''
+      });
+      S.tasks.unshift(t); renderTasks();
+      titleEl.value = '';
+      ['new-task-category','new-task-due','new-task-desc'].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
+      document.getElementById('new-task-priority').value = 'medium';
+      toast('Task added!', 'success');
+    } catch (e) { toast('Failed: ' + e.message, 'error'); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = '+ Add Task'; } }
+  }
+  async function toggleTask(id, completed) {
+    try {
+      var updated = await apiUpdateTask(id, { completed: completed });
+      var idx = S.tasks.findIndex(function (t) { return t.id === id; });
+      if (idx !== -1) S.tasks[idx] = updated; renderTasks();
+    } catch (e) { toast('Update failed', 'error'); renderTasks(); }
+  }
+  async function deleteTask(id) {
+    if (!confirm('Delete this task?')) return;
+    try { await apiDeleteTask(id); S.tasks = S.tasks.filter(function (t) { return t.id !== id; }); renderTasks(); toast('Deleted', 'error'); }
+    catch (e) { toast('Delete failed: ' + e.message, 'error'); }
+  }
+  function openEditModal(task) {
+    S.editingId = task.id;
+    document.getElementById('edit-title').value = task.title || '';
+    document.getElementById('edit-desc').value = task.description || '';
+    document.getElementById('edit-priority').value = task.priority || 'medium';
+    document.getElementById('edit-category').value = task.category || '';
+    document.getElementById('edit-due').value = task.due_date || '';
+    document.getElementById('edit-modal').classList.remove('hidden');
+    document.getElementById('edit-title').focus();
+  }
+  function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); S.editingId = null; }
+  async function saveEdit() {
+    if (!S.editingId) return;
+    var title = document.getElementById('edit-title').value.trim();
+    if (!title) { toast('Title required', 'error'); return; }
+    var btn = document.getElementById('save-edit');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    try {
+      var updated = await apiUpdateTask(S.editingId, {
+        title: title,
+        description: document.getElementById('edit-desc').value.trim(),
+        priority: document.getElementById('edit-priority').value,
+        category: document.getElementById('edit-category').value.trim(),
+        due_date: document.getElementById('edit-due').value
+      });
+      var idx = S.tasks.findIndex(function (t) { return t.id === S.editingId; });
+      if (idx !== -1) S.tasks[idx] = updated;
+      closeEditModal(); renderTasks(); toast('Task updated!', 'success');
+    } catch (e) { toast('Update failed: ' + e.message, 'error'); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; } }
+  }
+  async function toggleAIPanel(task, card, bwrap) {
+    var existing = card.querySelector('.ai-panel');
+    if (existing) { existing.remove(); return; }
+    var panel = document.createElement('div');
+    panel.className = 'ai-panel';
+    panel.innerHTML = '<div style="display:flex;align-items:center;gap:.5rem"><span class="spinner"></span><span style="color:var(--text2)">Getting AI suggestions…</span></div>';
+    bwrap.appendChild(panel);
+    try {
+      var s = await apiAISuggestions(task.id);
+      var html = '<h4>🤖 AI Suggestions</h4>';
+      if (s.priority_suggestion) {
+        html += '<p><strong>Priority:</strong> ' + esc(s.priority_suggestion);
+        if (s.priority_score != null) html += ' <em style="color:var(--text2)">(' + Math.round(s.priority_score * 100) + '% confidence)</em>';
+        html += '</p>';
+      }
+      if (s.suggested_due_date) html += '<p><strong>Suggested due date:</strong> ' + esc(s.suggested_due_date) + '</p>';
+      if (s.breakdown && s.breakdown.length) {
+        html += '<p><strong>Steps:</strong></p><ol>';
+        s.breakdown.forEach(function (b) { html += '<li>' + esc(b) + '</li>'; });
+        html += '</ol>';
+      }
+      if (s.recommendations && s.recommendations.length) {
+        html += '<p><strong>Recommendations:</strong></p><ul>';
+        s.recommendations.forEach(function (r) { html += '<li>' + esc(r) + '</li>'; });
+        html += '</ul>';
+      }
+      panel.innerHTML = html;
+      var idx = S.tasks.findIndex(function (t) { return t.id === task.id; });
+      if (idx !== -1 && s.priority_score != null) S.tasks[idx].ai_priority_score = s.priority_score;
+    } catch (e) {
+      panel.innerHTML = '<p class="text-danger">AI suggestions failed: ' + esc(e.message) + '</p>';
+    }
+  }
+  async function runAISearch(q) {
+    var c = document.getElementById('ai-search-results');
+    c.innerHTML = '<div class="loading-row"><span class="spinner"></span> Searching…</div>';
+    try {
+      var data = await apiSearchTasks(q);
+      var results = (data && data.results) ? data.results : [];
+      if (!results.length) { c.innerHTML = '<p class="text-sm" style="color:var(--text2)">No results for "' + esc(q) + '"</p>'; return; }
+      c.innerHTML = '<p class="font-semibold text-sm" style="margin-bottom:.5rem">' + results.length + ' result(s) for "' + esc(q) + '":</p>';
+      results.forEach(function (t) {
+        var el = document.createElement('div');
+        el.className = 'task-card';
+        el.innerHTML = '<div class="task-body-wrap"><div class="task-title">' + esc(t.title) + '</div>' +
+          '<div class="task-meta-row"><span class="badge badge-' + (t.priority || 'medium') + '">' + (t.priority || 'medium') + '</span>' +
+          (t.category ? '<span class="badge badge-cat">' + esc(t.category) + '</span>' : '') + '</div></div>';
+        c.appendChild(el);
+      });
+    } catch (e) { c.innerHTML = '<p class="text-danger text-sm">Search failed: ' + esc(e.message) + '</p>'; }
+  }
 
-      // ---- AI Sidebar ----
-      SynapseAI.init();
-      var fab = document.getElementById('ai-fab');
-      var closeBtn = document.getElementById('ai-sidebar-close');
-      if (fab) fab.addEventListener('click', function () { SynapseAI.toggleSidebar(); });
-      if (closeBtn) closeBtn.addEventListener('click', function () { SynapseAI.closeSidebar(); });
-    })();
-  </script>
+  /* ── ENTER APP ── */
+  async function enterApp() {
+    showScreen('app');
+    var emailEl = document.getElementById('user-email-display');
+    var avEl = document.getElementById('user-avatar');
+    if (emailEl) emailEl.textContent = S.userEmail || 'User';
+    if (avEl && S.userEmail) avEl.textContent = S.userEmail[0].toUpperCase();
+    fetch(base() + '/health').then(function () { setStatus(true); }).catch(function () { setStatus(false); });
+    await loadSessions();
+    if (!S.sessionToken) {
+      try { await createNewSession('My Chat'); } catch (e) { /* non-fatal */ }
+    }
+    if (S.sessionToken) {
+      try { var data = await apiGetMessages(); S.messages = (data && data.messages) ? data.messages : []; }
+      catch (e) { S.messages = []; }
+      renderMessages();
+    }
+    showView('chat');
+  }
+
+  /* ── INIT ── */
+  async function init() {
+    S.apiUrl = ls(K.URL); S.userToken = ls(K.USER); S.sessionToken = ls(K.SESS);
+    S.userEmail = ls(K.EMAIL); S.currentSessionId = ls(K.SID);
+    var savedTheme = ls(K.THEME);
+    applyTheme(savedTheme || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'));
+    if (!S.apiUrl) { showScreen('setup'); return; }
+    if (!S.userToken) { showScreen('auth'); return; }
+    await enterApp();
+  }
+
+  /* ── EVENT LISTENERS ── */
+  document.addEventListener('DOMContentLoaded', function () {
+
+    /* Setup */
+    var setupUrl = document.getElementById('setup-url');
+    var setupBtn = document.getElementById('setup-connect-btn');
+    var setupStatus = document.getElementById('setup-status');
+    if (setupBtn) {
+      setupBtn.addEventListener('click', async function () {
+        var url = setupUrl ? setupUrl.value.trim() : '';
+        if (!url) { setupStatus.textContent = 'Please enter a URL'; setupStatus.style.color = 'var(--danger)'; return; }
+        setupBtn.disabled = true; setupBtn.textContent = 'Testing…';
+        setupStatus.textContent = 'Connecting…'; setupStatus.style.color = 'var(--text2)';
+        try {
+          var r = await fetch(url.replace(/\/+$/, '') + '/health');
+          var d = await r.json();
+          S.apiUrl = url; ss(K.URL, url);
+          setupStatus.textContent = '✅ Connected! (v' + (d.version || '?') + ')';
+          setupStatus.style.color = 'var(--success)';
+          setTimeout(function () { showScreen('auth'); }, 600);
+        } catch (e) {
+          setupStatus.textContent = '❌ Cannot reach backend. Check URL and CORS settings.';
+          setupStatus.style.color = 'var(--danger)';
+        } finally { setupBtn.disabled = false; setupBtn.textContent = 'Connect & Continue →'; }
+      });
+    }
+    if (setupUrl) setupUrl.addEventListener('keydown', function (e) { if (e.key === 'Enter' && setupBtn) setupBtn.click(); });
+
+    /* Auth tabs */
+    document.querySelectorAll('.auth-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.auth-tab').forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        var name = tab.getAttribute('data-tab');
+        document.getElementById('login-form').classList.toggle('hidden', name !== 'login');
+        document.getElementById('register-form').classList.toggle('hidden', name !== 'register');
+      });
+    });
+
+    /* Login */
+    var loginBtn = document.getElementById('login-btn');
+    if (loginBtn) {
+      loginBtn.addEventListener('click', async function () {
+        var email = document.getElementById('login-email').value.trim();
+        var pw = document.getElementById('login-password').value;
+        var errEl = document.getElementById('login-error');
+        if (!email || !pw) { errEl.textContent = 'Email and password required'; errEl.classList.remove('hidden'); return; }
+        loginBtn.disabled = true; loginBtn.textContent = 'Signing in…'; errEl.classList.add('hidden');
+        try {
+          var data = await apiLogin(email, pw);
+          S.userToken = data.access_token; S.userEmail = email;
+          ss(K.USER, S.userToken); ss(K.EMAIL, email);
+          toast('Welcome back, ' + email + '!', 'success');
+          await enterApp();
+        } catch (e) { errEl.textContent = e.message; errEl.classList.remove('hidden'); }
+        finally { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
+      });
+    }
+    ['login-email','login-password'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('keydown', function (e) { if (e.key === 'Enter' && loginBtn) loginBtn.click(); });
+    });
+
+    /* Register */
+    var regBtn = document.getElementById('reg-btn');
+    if (regBtn) {
+      regBtn.addEventListener('click', async function () {
+        var email = document.getElementById('reg-email').value.trim();
+        var pw = document.getElementById('reg-password').value;
+        var errEl = document.getElementById('reg-error');
+        if (!email || !pw) { errEl.textContent = 'Email and password required'; errEl.classList.remove('hidden'); return; }
+        regBtn.disabled = true; regBtn.textContent = 'Creating account…'; errEl.classList.add('hidden');
+        try {
+          var data = await apiRegister(email, pw);
+          S.userToken = data.token.access_token; S.userEmail = email;
+          ss(K.USER, S.userToken); ss(K.EMAIL, email);
+          toast('Account created! Welcome, ' + email + '!', 'success');
+          await enterApp();
+        } catch (e) { errEl.textContent = e.message; errEl.classList.remove('hidden'); }
+        finally { regBtn.disabled = false; regBtn.textContent = 'Create Account'; }
+      });
+    }
+    ['reg-email','reg-password'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('keydown', function (e) { if (e.key === 'Enter' && regBtn) regBtn.click(); });
+    });
+
+    /* Change backend */
+    var changeLink = document.getElementById('change-backend-link');
+    if (changeLink) {
+      changeLink.addEventListener('click', function () {
+        rs(K.URL); S.apiUrl = '';
+        showScreen('setup');
+      });
+    }
+
+    /* Nav links */
+    document.querySelectorAll('.nav-link[data-view]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        var v = link.getAttribute('data-view');
+        showView(v);
+        if (v === 'tasks' && !S.tasks.length) loadTasks();
+        closeSidebar();
+      });
+    });
+
+    /* New session */
+    function handleNewSession() {
+      var name = prompt('Session name (optional):') || 'New Chat';
+      createNewSession(name);
+    }
+    var ns1 = document.getElementById('new-session-btn');
+    var ns2 = document.getElementById('new-session-btn2');
+    if (ns1) ns1.addEventListener('click', handleNewSession);
+    if (ns2) ns2.addEventListener('click', handleNewSession);
+
+    /* Logout */
+    var logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function () {
+        if (!confirm('Sign out of Synapse AI?')) return;
+        [K.USER, K.SESS, K.EMAIL, K.SID].forEach(rs);
+        S.userToken = S.sessionToken = S.userEmail = S.currentSessionId = '';
+        S.messages = []; S.tasks = []; S.sessions = [];
+        showScreen('auth'); toast('Signed out', 'info');
+      });
+    }
+
+    /* Theme */
+    var themeBtn = document.getElementById('theme-toggle-btn');
+    if (themeBtn) themeBtn.addEventListener('click', function () { applyTheme(S.theme === 'dark' ? 'light' : 'dark'); });
+
+    /* Hamburger */
+    var hamburger = document.getElementById('hamburger');
+    if (hamburger) {
+      hamburger.addEventListener('click', function () {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebar-overlay').classList.toggle('open');
+      });
+    }
+    var sov = document.getElementById('sidebar-overlay');
+    if (sov) sov.addEventListener('click', closeSidebar);
+
+    /* Chat textarea */
+    var chatTa = document.getElementById('chat-ta');
+    if (chatTa) {
+      chatTa.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
+      chatTa.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+    }
+    var sendBtn = document.getElementById('send-btn');
+    if (sendBtn) sendBtn.addEventListener('click', sendChat);
+
+    var clearChatBtn = document.getElementById('clear-chat-btn');
+    if (clearChatBtn) {
+      clearChatBtn.addEventListener('click', async function () {
+        if (!confirm('Clear chat history?')) return;
+        try { if (S.sessionToken) await apiClearMessages(); S.messages = []; renderMessages(); toast('Chat cleared', 'info'); }
+        catch (e) { toast('Clear failed: ' + e.message, 'error'); }
+      });
+    }
+
+    /* Add task */
+    var addTaskBtn = document.getElementById('add-task-btn');
+    if (addTaskBtn) addTaskBtn.addEventListener('click', addTask);
+    var newTitleEl = document.getElementById('new-task-title');
+    if (newTitleEl) newTitleEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') addTask(); });
+
+    /* Task search */
+    var tsearch = document.getElementById('task-search-input');
+    if (tsearch) tsearch.addEventListener('input', function () { S.taskSearch = this.value; renderTasks(); });
+
+    /* Filter buttons */
+    document.querySelectorAll('.fbtn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.fbtn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active'); S.taskFilter = btn.getAttribute('data-filter'); renderTasks();
+      });
+    });
+
+    /* Edit modal */
+    var closeEdit = document.getElementById('close-edit-modal');
+    var cancelEdit = document.getElementById('cancel-edit');
+    var saveEditBtn = document.getElementById('save-edit');
+    if (closeEdit) closeEdit.addEventListener('click', closeEditModal);
+    if (cancelEdit) cancelEdit.addEventListener('click', closeEditModal);
+    if (saveEditBtn) saveEditBtn.addEventListener('click', saveEdit);
+    var editModal = document.getElementById('edit-modal');
+    if (editModal) editModal.addEventListener('click', function (e) { if (e.target === this) closeEditModal(); });
+
+    /* AI Search modal */
+    var aiSearchBtn = document.getElementById('ai-search-btn');
+    if (aiSearchBtn) aiSearchBtn.addEventListener('click', function () { document.getElementById('ai-search-modal').classList.remove('hidden'); document.getElementById('ai-q').focus(); });
+    var closeAiSearch = document.getElementById('close-ai-search');
+    if (closeAiSearch) closeAiSearch.addEventListener('click', function () { document.getElementById('ai-search-modal').classList.add('hidden'); });
+    var aiSearchModal = document.getElementById('ai-search-modal');
+    if (aiSearchModal) aiSearchModal.addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
+    var runSearch = document.getElementById('run-ai-search');
+    if (runSearch) runSearch.addEventListener('click', function () { var q = document.getElementById('ai-q').value.trim(); if (q) runAISearch(q); });
+    var aiQEl = document.getElementById('ai-q');
+    if (aiQEl) aiQEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { var q = this.value.trim(); if (q) runAISearch(q); } });
+
+    /* Global Escape key */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closeEditModal();
+        var aim = document.getElementById('ai-search-modal');
+        if (aim) aim.classList.add('hidden');
+      }
+    });
+
+    init();
+  });
+
+})();
+</script>
 </body>
 </html>
