@@ -1,232 +1,2118 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Synapse AI – Full-stack AI assistant with LangGraph chat, smart task management, RAG memory, and pgvector semantic search.">
+  <meta name="description" content="Synapse AI – Full-stack AI assistant with LangGraph chat, smart task management, RAG-powered search, and memory.">
   <title>Synapse AI – AI Assistant &amp; Task Manager</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#f1f5f9;min-height:100vh}
-    a{text-decoration:none;color:inherit}
+/* ======================================================
+   SYNAPSE AI — Complete SPA Styles
+   ====================================================== */
+:root {
+  --bg:#f1f5f9; --surface:#fff; --surface2:#f8fafc;
+  --text:#0f172a; --text2:#64748b; --border:#e2e8f0;
+  --primary:#6366f1; --primary-h:#4f46e5; --primary-l:#eef2ff;
+  --success:#22c55e; --danger:#ef4444; --warning:#f59e0b;
+  --radius:12px; --shadow:0 4px 20px rgba(0,0,0,.08);
+  --shadow-lg:0 10px 40px rgba(0,0,0,.14); --tr:.2s ease;
+  --sidebar-w:260px;
+}
+[data-theme="dark"] {
+  --bg:#0f172a; --surface:#1e293b; --surface2:#162032;
+  --text:#f1f5f9; --text2:#94a3b8; --border:#334155;
+  --primary:#818cf8; --primary-h:#6366f1; --primary-l:#1e1b4b;
+  --success:#4ade80; --danger:#f87171; --warning:#fbbf24;
+  --shadow:0 4px 20px rgba(0,0,0,.4);
+  --shadow-lg:0 10px 40px rgba(0,0,0,.6);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--tr),color var(--tr)}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+a{color:var(--primary)}
+.hidden{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.w-full{width:100%}
+.text-sm{font-size:.875rem}
+.text-xs{font-size:.76rem}
+.text-danger{color:var(--danger)}
+.font-semibold{font-weight:600}
+.mt-1{margin-top:.4rem}
+.ml-auto{margin-left:auto}
 
-    /* Nav */
-    nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:.9rem 2rem;display:flex;align-items:center;gap:1rem;background:rgba(15,23,42,.85);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.07)}
-    .nav-logo{display:flex;align-items:center;gap:.6rem;font-size:1.05rem;font-weight:800}
-    .nav-logo span{background:linear-gradient(135deg,#818cf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .nav-links{display:flex;gap:1.5rem;margin-left:auto;align-items:center}
-    .nav-links a{font-size:.88rem;color:rgba(255,255,255,.65);transition:color .2s}
-    .nav-links a:hover{color:#fff}
-    .nav-cta{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff!important;padding:.55rem 1.2rem;border-radius:8px;font-weight:600;font-size:.88rem;transition:opacity .2s!important}
-    .nav-cta:hover{opacity:.88}
+/* Inputs */
+.input{width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.92rem;background:var(--surface2);color:var(--text);outline:none;transition:border-color var(--tr)}
+.input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+.input::placeholder{color:var(--text2)}
+.select{appearance:none;width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.92rem;background:var(--surface2);color:var(--text);outline:none;cursor:pointer}
+.select:focus{border-color:var(--primary)}
 
-    /* Hero */
-    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7rem 1.5rem 4rem;position:relative;overflow:hidden}
-    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,.18),transparent 70%);pointer-events:none}
-    .hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;padding:.4rem .9rem;border-radius:99px;font-size:.8rem;font-weight:600;margin-bottom:1.5rem}
-    .hero h1{font-size:clamp(2.4rem,6vw,4.5rem);font-weight:900;line-height:1.1;margin-bottom:1.25rem;letter-spacing:-.03em}
-    .hero h1 span{background:linear-gradient(135deg,#818cf8,#a78bfa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .hero p{font-size:clamp(.95rem,2vw,1.2rem);color:#94a3b8;max-width:600px;line-height:1.65;margin-bottom:2.5rem}
-    .hero-buttons{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
-    .btn-hero{padding:.85rem 2rem;border-radius:10px;font-size:1rem;font-weight:700;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem}
-    .btn-hero-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.4)}
-    .btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.5)}
-    .btn-hero-secondary{background:rgba(255,255,255,.06);color:#e2e8f0;border:1px solid rgba(255,255,255,.12)}
-    .btn-hero-secondary:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
-    .hero-stats{display:flex;gap:2.5rem;margin-top:3rem;flex-wrap:wrap;justify-content:center}
-    .stat{text-align:center}
-    .stat .num{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#818cf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .stat .lbl{font-size:.78rem;color:#64748b;margin-top:.2rem}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.25rem;border-radius:8px;font-size:.9rem;font-weight:600;border:none;transition:all var(--tr);white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-h);transform:translateY(-1px)}
+.btn-secondary{background:var(--surface);color:var(--text);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.btn-ghost{background:transparent;border:none;color:var(--text2);padding:.4rem .6rem;border-radius:6px}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-icon{background:transparent;border:none;padding:.4rem;border-radius:6px;color:var(--text2);display:inline-flex;align-items:center;justify-content:center}
+.btn-icon:hover{background:var(--surface2);color:var(--text)}
+.btn-sm{padding:.4rem .85rem;font-size:.82rem}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 
-    /* Features */
-    .section{padding:5rem 1.5rem;max-width:1100px;margin:0 auto}
-    .section-label{text-align:center;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6366f1;margin-bottom:.75rem}
-    .section h2{text-align:center;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.2;margin-bottom:.75rem}
-    .section p.sub{text-align:center;color:#64748b;font-size:1rem;max-width:550px;margin:0 auto 3rem}
-    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem}
-    .feature-card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:1.75rem;transition:all .3s}
-    .feature-card:hover{border-color:#6366f1;transform:translateY(-3px);box-shadow:0 10px 30px rgba(99,102,241,.15)}
-    .feature-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(139,92,246,.2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.1rem;border:1px solid rgba(99,102,241,.2)}
-    .feature-card h3{font-size:1.05rem;font-weight:700;margin-bottom:.5rem}
-    .feature-card p{font-size:.88rem;color:#64748b;line-height:1.6}
-    .feature-tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:6px;margin-top:.75rem}
+/* ---- SETUP SCREEN ---- */
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:var(--bg)}
+.setup-card{background:var(--surface);border-radius:20px;padding:2.5rem;max-width:500px;width:100%;box-shadow:var(--shadow-lg);text-align:center}
+.hero-icon{font-size:4rem;margin-bottom:.75rem;display:block}
+.setup-card h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.35rem}
+.setup-card .tagline{color:var(--text2);margin-bottom:2rem;font-size:.95rem}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:2rem;text-align:left}
+.feature-item{background:var(--surface2);border-radius:10px;padding:.8rem;border:1px solid var(--border)}
+.feature-item .fi-icon{font-size:1.3rem;margin-bottom:.3rem;display:block}
+.feature-item .fi-title{font-size:.82rem;font-weight:700;color:var(--text)}
+.feature-item .fi-desc{font-size:.76rem;color:var(--text2)}
+.input-group{text-align:left;margin-bottom:1rem}
+.input-group label{display:block;font-weight:600;font-size:.88rem;margin-bottom:.4rem}
+#setup-status{font-size:.85rem;margin-top:.6rem;min-height:1.3em}
 
-    /* Architecture */
-    .arch-section{background:linear-gradient(135deg,#1e1b4b,#0f172a);border-radius:20px;padding:2.5rem;margin:2rem 0}
-    .arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
-    .arch-item h4{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#818cf8;margin-bottom:.75rem}
-    .arch-list{list-style:none;display:flex;flex-direction:column;gap:.5rem}
-    .arch-list li{display:flex;align-items:center;gap:.6rem;font-size:.88rem;color:#94a3b8}
-    .arch-list li::before{content:'›';color:#6366f1;font-weight:700;font-size:1rem}
+/* ---- AUTH SCREEN ---- */
+.auth-card{background:var(--surface);border-radius:20px;padding:2.5rem;max-width:420px;width:100%;box-shadow:var(--shadow-lg)}
+.auth-header{text-align:center;margin-bottom:1.75rem}
+.auth-header .auth-logo{font-size:2.5rem;display:block;margin-bottom:.5rem}
+.auth-header h1{font-size:1.5rem;font-weight:800}
+.auth-header p{color:var(--text2);font-size:.88rem;margin-top:.25rem}
+.auth-tabs{display:flex;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:1.5rem;gap:4px}
+.auth-tab{flex:1;padding:.55rem;border-radius:7px;border:none;background:transparent;font-size:.9rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all var(--tr)}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-weight:600;font-size:.88rem;margin-bottom:.4rem}
+.form-error{color:var(--danger);font-size:.82rem;margin-top:.35rem;padding:.4rem .6rem;background:#fef2f2;border-radius:6px;border:1px solid #fecaca}
+[data-theme="dark"] .form-error{background:#3b1c1c;border-color:#7f1d1d}
+.pw-hint{font-size:.76rem;color:var(--text2);margin-top:.3rem}
+.auth-change-link{text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text2);cursor:pointer}
+.auth-change-link span{color:var(--primary);text-decoration:underline}
 
-    /* CTA */
-    .cta-section{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.08));border:1px solid rgba(99,102,241,.2);border-radius:20px;padding:3.5rem 2rem;text-align:center;margin:2rem 0}
-    .cta-section h2{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;margin-bottom:.75rem}
-    .cta-section p{color:#64748b;margin-bottom:2rem;font-size:1rem}
+/* ---- APP LAYOUT ---- */
+#screen-app{display:flex;min-height:100vh;background:var(--bg)}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;top:0;left:0;z-index:100;transition:transform var(--tr)}
+.sidebar-header{padding:1.25rem 1rem .9rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem}
+.sidebar-logo{font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-logo-icon{font-size:1.4rem}
+.sidebar-nav{flex:1;overflow-y:auto;padding:.75rem .5rem}
+.nav-section{margin-bottom:1.25rem}
+.nav-label{font-size:.71rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);padding:.2rem .5rem .35rem;display:flex;align-items:center;justify-content:space-between}
+.nav-link{display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;border-radius:8px;color:var(--text2);font-size:.9rem;font-weight:500;cursor:pointer;transition:all var(--tr);border:none;background:transparent;width:100%;text-align:left}
+.nav-link:hover{background:var(--surface2);color:var(--text)}
+.nav-link.active{background:var(--primary-l);color:var(--primary);font-weight:600}
+.nav-link .ni{font-size:1.1rem;flex-shrink:0}
+.sess-item{display:flex;align-items:center;padding:.4rem .75rem;border-radius:6px;cursor:pointer;color:var(--text2);font-size:.84rem;transition:background var(--tr)}
+.sess-item:hover{background:var(--surface2);color:var(--text)}
+.sess-item.active{background:var(--primary-l);color:var(--primary)}
+.sess-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.new-sess-btn{border:1px dashed var(--border);background:transparent;color:var(--text2);font-size:.8rem;padding:.35rem .75rem;border-radius:6px;cursor:pointer;width:calc(100% - 1rem);margin:.25rem .5rem;text-align:left;transition:all var(--tr)}
+.new-sess-btn:hover{border-color:var(--primary);color:var(--primary)}
+.sidebar-footer{padding:.75rem .5rem;border-top:1px solid var(--border)}
+.user-row{display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-radius:8px}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.82rem;flex-shrink:0}
+.user-email-txt{font-size:.8rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.app-content{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.7rem 1.5rem;display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:50;flex-shrink:0}
+.topbar-title{font-size:1rem;font-weight:700;flex:1}
+.status-badge{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--text2)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0}
+.status-dot.offline{background:var(--danger)}
+.hamburger{display:none;background:none;border:none;padding:.5rem;cursor:pointer;font-size:1.2rem;color:var(--text)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
 
-    /* Footer */
-    footer{border-top:1px solid #1e293b;padding:1.75rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;font-size:.82rem;color:#475569}
-    footer strong{color:#94a3b8}
+/* ---- CHAT VIEW ---- */
+#view-chat{display:flex;flex-direction:column;height:calc(100vh - 57px)}
+.messages-area{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
+.msg{display:flex;gap:.75rem;max-width:84%;animation:fadeUp .25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;font-weight:700}
+.msg.assistant .msg-av{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.msg.user .msg-av{background:var(--primary);color:#fff;font-size:.82rem}
+.msg-body{border-radius:14px;padding:.75rem 1rem;font-size:.9rem;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.msg.assistant .msg-body{background:var(--surface);border:1px solid var(--border)}
+.msg.user .msg-body{background:var(--primary);color:#fff}
+.msg-typing .msg-body{color:var(--text2);font-style:italic}
+.chat-hint{color:var(--text2);font-size:.82rem;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.chat-input-bar{padding:1rem 1.5rem;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+.chat-row{display:flex;gap:.65rem;align-items:flex-end}
+.chat-ta{flex:1;resize:none;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;background:var(--surface2);color:var(--text);font-size:.9rem;outline:none;max-height:120px;overflow-y:auto;line-height:1.5;transition:border-color var(--tr)}
+.chat-ta:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+.chat-ta::placeholder{color:var(--text2)}
+.send-btn{width:42px;height:42px;border-radius:10px;background:var(--primary);color:#fff;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--tr)}
+.send-btn:hover:not(:disabled){background:var(--primary-h)}
+.send-btn:disabled{opacity:.5;cursor:not-allowed}
+.clear-chat-btn{font-size:.78rem;color:var(--text2);background:none;border:none;cursor:pointer;padding:.2rem .5rem;border-radius:4px}
+.clear-chat-btn:hover{color:var(--danger)}
 
-    /* Responsive */
-    @media(max-width:640px){
-      .nav-links{gap:.75rem}
-      .hero-stats{gap:1.5rem}
-      .arch-grid{grid-template-columns:1fr}
-    }
+/* ---- TASKS VIEW ---- */
+#view-tasks{padding:1.5rem;overflow-y:auto;flex:1}
+.add-task-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.add-task-top{display:flex;gap:.65rem;margin-bottom:.6rem}
+.add-task-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+.tasks-controls{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.search-box{display:flex;align-items:center;gap:.5rem;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:.5rem .8rem;flex:1;min-width:160px;transition:border-color var(--tr)}
+.search-box:focus-within{border-color:var(--primary)}
+.search-box input{border:none;background:transparent;color:var(--text);outline:none;font-size:.9rem;width:100%}
+.search-box input::placeholder{color:var(--text2)}
+.filter-group{display:flex;gap:.3rem}
+.fbtn{padding:.4rem .75rem;border-radius:6px;border:1.5px solid var(--border);background:var(--surface);font-size:.82rem;color:var(--text2);cursor:pointer;transition:all var(--tr)}
+.fbtn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.fbtn:hover:not(.active){border-color:var(--primary);color:var(--primary)}
+.task-stats-bar{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.stat-chip{background:var(--surface);border-radius:8px;padding:.35rem .9rem;font-size:.8rem;color:var(--text2);border:1px solid var(--border)}
+.stat-chip strong{color:var(--text)}
+.task-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:.9rem 1rem;margin-bottom:.6rem;display:flex;align-items:flex-start;gap:.85rem;transition:all var(--tr);box-shadow:var(--shadow)}
+.task-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.task-card.completed .task-title{text-decoration:line-through;opacity:.5}
+.task-cb{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:2px;appearance:none;accent-color:var(--success)}
+.task-cb:checked{background:var(--success);border-color:var(--success)}
+.task-body-wrap{flex:1;min-width:0}
+.task-title{font-size:.9rem;font-weight:500;margin-bottom:.35rem;word-break:break-word}
+.task-meta-row{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+.badge{padding:2px 8px;border-radius:20px;font-size:.73rem;font-weight:600;display:inline-block}
+.badge-high{background:#fef2f2;color:#dc2626}
+[data-theme="dark"] .badge-high{background:#3b1c1c;color:#fca5a5}
+.badge-medium{background:#fffbeb;color:#d97706}
+[data-theme="dark"] .badge-medium{background:#3b2f1c;color:#fcd34d}
+.badge-low{background:#f0fdf4;color:#16a34a}
+[data-theme="dark"] .badge-low{background:#1c3b24;color:#86efac}
+.badge-cat{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.badge-due{background:var(--primary-l);color:var(--primary)}
+.badge-overdue{background:#fef2f2;color:var(--danger)}
+[data-theme="dark"] .badge-overdue{background:#3b1c1c;color:#fca5a5}
+.badge-ai{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.task-actions-row{display:flex;gap:.3rem;flex-shrink:0}
+.tab-btn{padding:.3rem .45rem;border-radius:6px;border:none;background:transparent;color:var(--text2);font-size:.88rem;cursor:pointer;transition:all var(--tr)}
+.tab-btn:hover{background:var(--surface2);color:var(--text)}
+.tab-btn.del:hover{color:var(--danger)}
+.ai-panel{margin-top:.65rem;padding:.75rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:.85rem;line-height:1.55}
+.ai-panel h4{font-size:.8rem;font-weight:700;margin-bottom:.5rem;color:var(--primary)}
+.ai-panel ul,.ai-panel ol{padding-left:1.2rem;margin:.25rem 0}
+.ai-panel li{margin-bottom:.2rem}
+
+/* Modals */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.modal{background:var(--surface);border-radius:16px;padding:1.75rem;width:100%;max-width:480px;box-shadow:var(--shadow-lg);animation:fadeUp .2s ease}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.modal-header h2{font-size:1.05rem;font-weight:700}
+.modal-footer{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.25rem}
+.field-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:.8rem}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:1.5rem;right:1.5rem;display:flex;flex-direction:column;gap:.45rem;z-index:500}
+.toast{background:var(--surface);color:var(--text);border:1px solid var(--border);padding:.65rem 1rem;border-radius:10px;box-shadow:var(--shadow-lg);font-size:.88rem;display:flex;align-items:center;gap:.5rem;animation:slideIn .25s ease;max-width:320px}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.out{animation:slideOut .25s ease forwards}
+@keyframes slideOut{to{transform:translateX(110%);opacity:0}}
+.toast.success::before{content:'✓';color:var(--success);font-weight:700}
+.toast.error::before{content:'✗';color:var(--danger);font-weight:700}
+.toast.info::before{content:'ℹ';color:var(--primary);font-weight:700}
+
+/* Misc */
+.spinner{display:inline-block;width:16px;height:16px;border:2.5px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row{display:flex;align-items:center;gap:.6rem;color:var(--text2);font-size:.88rem;padding:1.5rem 0}
+.empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text2)}
+.empty-state .ei{font-size:3rem;margin-bottom:.75rem}
+.empty-state h3{font-size:1rem;font-weight:600;color:var(--text)}
+.empty-state p{font-size:.88rem;margin-top:.25rem}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-260px);width:260px}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.open{display:block}
+  .app-content{margin-left:0}
+  .hamburger{display:flex}
+  .add-task-fields{grid-template-columns:1fr 1fr}
+  .field-grid{grid-template-columns:1fr 1fr}
+  .tasks-controls{flex-wrap:wrap}
+  .feature-grid{grid-template-columns:1fr}
+  .messages-area{padding:1rem}
+  .chat-input-bar{padding:.75rem 1rem}
+  .topbar{padding:.6rem 1rem}
+  .topbar-title{font-size:.95rem}
+  #view-tasks{padding:1rem}
+  .modal{width:95vw;max-width:95vw;padding:1.25rem}
+  .setup-card{padding:1.75rem;margin:0 .5rem}
+  .auth-card{padding:1.75rem;margin:0 .5rem}
+  /* Prevent iOS zoom on input focus */
+  input,select,textarea{font-size:16px!important}
+}
+@media(max-width:480px){
+  .sidebar{width:100%}
+  .sidebar.open{width:100%}
+  .add-task-fields{grid-template-columns:1fr}
+  .add-task-top{flex-direction:column}
+  .field-grid{grid-template-columns:1fr}
+  .msg{max-width:95%}
+  .msg-body{max-width:85vw}
+  .chat-row{gap:.5rem}
+  .feature-grid{grid-template-columns:1fr;gap:.5rem}
+  .setup-card{padding:1.5rem .75rem}
+  .auth-card{padding:1.5rem .75rem}
+  .setup-card h1{font-size:1.5rem}
+  .auth-header h1{font-size:1.25rem}
+  .nav-link{padding:.5rem .75rem;font-size:.88rem}
+  .tasks-controls{gap:.4rem}
+  .filter-group{flex-wrap:wrap;gap:.25rem}
+}
+
+/* Touch-friendly targets (min 44px for mobile) */
+button,.btn,.nav-link,.auth-tab,.fbtn,.tab-btn,.send-btn,.clear-chat-btn{min-height:44px}
+input,select,textarea{min-height:44px}
+.task-cb{width:22px;height:22px;min-width:22px;min-height:22px}
+
+/* Prevent horizontal scroll */
+html,body{overflow-x:hidden;max-width:100vw}
+
+/* Connection banner */
+.connection-banner{background:var(--danger);color:#fff;text-align:center;padding:.5rem 1rem;font-size:.85rem;display:flex;align-items:center;justify-content:center;gap:.5rem;flex-shrink:0}
+.connection-banner.hidden{display:none}
   </style>
 </head>
 <body>
 
-<!-- Navigation -->
-<nav>
-  <div class="nav-logo">
-    <span>🧠</span>
-    <span>Synapse AI</span>
-  </div>
-  <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#stack">Stack</a>
-    <a href="https://github.com/Rameshsain070/Synapse_AI" target="_blank" rel="noopener">GitHub</a>
-    <a href="index-integrated.html" class="nav-cta">Launch App →</a>
-  </div>
-</nav>
-
-<!-- Hero -->
-<section class="hero">
-  <div class="hero-badge">🚀 Powered by LangGraph + FastAPI + pgvector</div>
-  <h1>Meet <span>Synapse AI</span> —<br>Your Intelligent Assistant</h1>
-  <p>A full-stack AI platform with streaming LangGraph chat, smart task management, RAG-based long-term memory, and semantic search. All connected and ready to deploy.</p>
-  <div class="hero-buttons">
-    <a href="index-integrated.html" class="btn-hero btn-hero-primary">
-      🧠 Launch Full App
-    </a>
-    <a href="https://github.com/Rameshsain070/Synapse_AI" target="_blank" rel="noopener" class="btn-hero btn-hero-secondary">
-      ⭐ View on GitHub
-    </a>
-  </div>
-  <div class="hero-stats">
-    <div class="stat"><div class="num">LangGraph</div><div class="lbl">AI Orchestration</div></div>
-    <div class="stat"><div class="num">pgvector</div><div class="lbl">Semantic Search</div></div>
-    <div class="stat"><div class="num">mem0ai</div><div class="lbl">Long-term Memory</div></div>
-    <div class="stat"><div class="num">FastAPI</div><div class="lbl">High-perf Backend</div></div>
-  </div>
-</section>
-
-<!-- Features -->
-<section class="section" id="features">
-  <div class="section-label">Features</div>
-  <h2>Everything you need in one platform</h2>
-  <p class="sub">A production-grade AI system with all the modern tooling you'd expect.</p>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">💬</div>
-      <h3>LangGraph Streaming Chat</h3>
-      <p>Real-time streaming AI responses via Server-Sent Events. Powered by a LangGraph StateGraph with multi-session support and persistent checkpointing.</p>
-      <span class="feature-tag">SSE Streaming</span>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🧠</div>
-      <h3>Long-term Memory</h3>
-      <p>Remembers your preferences and past conversations using mem0ai and pgvector embeddings, so every interaction gets smarter over time.</p>
-      <span class="feature-tag">mem0ai + pgvector</span>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">✅</div>
-      <h3>AI-powered Tasks</h3>
-      <p>Full CRUD task manager with AI priority scoring, due-date prediction, step-by-step task breakdown, and smart recommendations from a LangGraph TaskAgent.</p>
-      <span class="feature-tag">LangGraph Agent</span>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔍</div>
-      <h3>Semantic Search</h3>
-      <p>Search your tasks using natural language. pgvector powers cosine-similarity search over task embeddings so you find what you mean, not just what you typed.</p>
-      <span class="feature-tag">RAG Engine</span>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔒</div>
-      <h3>Secure Authentication</h3>
-      <p>JWT-based user accounts with bcrypt passwords, session management, and separate user/session tokens for fine-grained access control.</p>
-      <span class="feature-tag">JWT + bcrypt</span>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📊</div>
-      <h3>Observability Stack</h3>
-      <p>Prometheus metrics, Grafana dashboards, structlog JSON logging, and Langfuse LLM tracing with automated eval pipeline (hallucination, relevancy, toxicity).</p>
-      <span class="feature-tag">Prometheus + Langfuse</span>
-    </div>
-  </div>
-</section>
-
-<!-- Tech Stack -->
-<section class="section" id="stack">
-  <div class="section-label">Architecture</div>
-  <h2>Built on a modern, production stack</h2>
-  <p class="sub">Every layer is chosen for reliability, performance, and developer experience.</p>
-  <div class="arch-section">
-    <div class="arch-grid">
-      <div>
-        <div class="arch-item">
-          <h4>Backend (synapseai-platform)</h4>
-          <ul class="arch-list">
-            <li>FastAPI 0.115 on Python 3.13+</li>
-            <li>LangGraph StateGraph with AsyncPostgresSaver</li>
-            <li>mem0ai for persistent memory</li>
-            <li>OpenAI GPT-5/4o + Google Gemini fallback</li>
-            <li>PostgreSQL + pgvector (SQLModel ORM)</li>
-            <li>SlowAPI rate limiting</li>
-            <li>Prometheus + structlog + Langfuse</li>
-          </ul>
-        </div>
+<!-- SETUP SCREEN -->
+<div id="screen-setup" class="screen">
+  <div class="setup-card">
+    <span class="hero-icon">🧠</span>
+    <h1>Synapse AI</h1>
+    <p class="tagline">AI-powered chat, smart tasks &amp; RAG-based memory — connect your backend to begin</p>
+    <div class="feature-grid">
+      <div class="feature-item">
+        <span class="fi-icon">💬</span>
+        <div class="fi-title">LangGraph Chat</div>
+        <div class="fi-desc">Streaming AI with long-term memory</div>
       </div>
-      <div>
-        <div class="arch-item">
-          <h4>Frontend (this page)</h4>
-          <ul class="arch-list">
-            <li>Vanilla JS SPA (no build step required)</li>
-            <li>SSE streaming chat with async generators</li>
-            <li>Full auth flow (register, login, sessions)</li>
-            <li>Task CRUD with AI suggestions UI</li>
-            <li>Semantic search via REST</li>
-            <li>Dark/light theme, mobile responsive</li>
-            <li>Hosted on GitHub Pages</li>
-          </ul>
-        </div>
-        <div class="arch-item" style="margin-top:1.5rem">
-          <h4>Additional Components</h4>
-          <ul class="arch-list">
-            <li>React 19 + Vite frontend (synapse-ai-frontend)</li>
-            <li>Next.js 16 + Three.js (unified-web-interface)</li>
-            <li>Azure OpenAI proxy (synapseai-llm-service)</li>
-            <li>Docker Compose for local dev</li>
-          </ul>
-        </div>
+      <div class="feature-item">
+        <span class="fi-icon">✅</span>
+        <div class="fi-title">Smart Tasks</div>
+        <div class="fi-desc">AI priority scoring &amp; due-date prediction</div>
+      </div>
+      <div class="feature-item">
+        <span class="fi-icon">🔍</span>
+        <div class="fi-title">Semantic Search</div>
+        <div class="fi-desc">Find tasks with natural language (pgvector)</div>
+      </div>
+      <div class="feature-item">
+        <span class="fi-icon">🔒</span>
+        <div class="fi-title">Secure Auth</div>
+        <div class="fi-desc">JWT accounts with session management</div>
       </div>
     </div>
+    <div class="input-group">
+      <label for="setup-url">FastAPI Backend URL</label>
+      <input id="setup-url" class="input" type="url" value="" placeholder="https://your-synapse-api.example.com" autocomplete="url">
+      <div class="text-xs" style="color:var(--text2);margin-top:.3rem">Your deployed Synapse AI FastAPI URL (Railway, Render, Fly.io, VPS, etc.)</div>
+    </div>
+    <button id="setup-connect-btn" class="btn btn-primary w-full" style="margin-bottom:.6rem">Connect &amp; Continue →</button>
+    <div id="setup-status" style="font-size:.85rem;min-height:1.3em"></div>
   </div>
-</section>
+</div>
 
-<!-- CTA -->
-<section class="section">
-  <div class="cta-section">
-    <h2>Ready to try it?</h2>
-    <p>Deploy the FastAPI backend, paste the URL, and start chatting with your AI assistant — all in minutes.</p>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-      <a href="index-integrated.html" class="btn-hero btn-hero-primary">🧠 Launch Synapse AI</a>
-      <a href="https://github.com/Rameshsain070/Synapse_AI#readme" target="_blank" rel="noopener" class="btn-hero btn-hero-secondary">📖 Read the Docs</a>
+<!-- AUTH SCREEN -->
+<div id="screen-auth" class="screen hidden">
+  <div class="auth-card">
+    <div class="auth-header">
+      <span class="auth-logo">🧠</span>
+      <h1>Synapse AI</h1>
+      <p>Sign in to your account</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Sign In</button>
+      <button class="auth-tab" data-tab="register">Create Account</button>
+    </div>
+    <!-- Login form -->
+    <div id="login-form">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input id="login-email" class="input" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input id="login-password" class="input" type="password" placeholder="Your password" autocomplete="current-password">
+      </div>
+      <div id="login-error" class="form-error hidden"></div>
+      <button id="login-btn" class="btn btn-primary w-full mt-1">Sign In</button>
+    </div>
+    <!-- Register form -->
+    <div id="register-form" class="hidden">
+      <div class="form-group">
+        <label for="reg-email">Email</label>
+        <input id="reg-email" class="input" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Password</label>
+        <input id="reg-password" class="input" type="password" placeholder="Create a strong password" autocomplete="new-password">
+        <div class="pw-hint">8+ chars with uppercase, lowercase, number &amp; special character</div>
+      </div>
+      <div id="reg-error" class="form-error hidden"></div>
+      <button id="reg-btn" class="btn btn-primary w-full mt-1">Create Account</button>
+    </div>
+    <div class="auth-change-link" id="change-backend-link">&#9881; <span>Change backend URL</span></div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="screen-app" class="hidden">
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="sidebar-header">
+      <span class="sidebar-logo-icon">🧠</span>
+      <span class="sidebar-logo">Synapse AI</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">Navigation</div>
+        <button class="nav-link active" data-view="chat"><span class="ni">💬</span> AI Chat</button>
+        <button class="nav-link" data-view="tasks"><span class="ni">✅</span> Tasks</button>
+      </div>
+      <div class="nav-section" id="sessions-section">
+        <div class="nav-label">
+          Chat Sessions
+          <button id="new-session-btn" class="btn-icon" title="New session" style="font-size:.9rem;padding:.1rem .3rem">&#xFF0B;</button>
+        </div>
+        <div id="sessions-list"></div>
+        <button class="new-sess-btn" id="new-session-btn2">+ New chat session</button>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-email-txt" id="user-email-display">user@example.com</div>
+        <button class="btn-icon ml-auto" id="logout-btn" title="Sign out" style="font-size:1rem">&#x1F6AA;</button>
+      </div>
+      <button id="theme-toggle-btn" class="btn-ghost w-full" style="font-size:.8rem;justify-content:center;margin-top:.3rem">
+        <span id="theme-icon">🌙</span>&nbsp; Toggle theme
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="app-content">
+    <div id="connection-banner" class="connection-banner hidden">
+      ⚠ Backend is unreachable. Retrying automatically…
+    </div>
+    <div class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">&#9776;</button>
+      <h2 class="topbar-title" id="topbar-title">💬 AI Chat</h2>
+      <div class="status-badge">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Connecting…</span>
+      </div>
+    </div>
+
+    <!-- Chat view -->
+    <div id="view-chat">
+      <div class="messages-area" id="messages-area">
+        <div class="msg assistant">
+          <div class="msg-av">🧠</div>
+          <div class="msg-body">Hi! I&#8217;m Synapse AI &#8212; your intelligent assistant powered by LangGraph and long-term memory. I can chat, help manage tasks, search the web, and remember your preferences. What can I help you with today? 🚀</div>
+        </div>
+      </div>
+      <div class="chat-input-bar">
+        <div class="chat-row">
+          <textarea id="chat-ta" class="chat-ta" placeholder="Message Synapse AI… (Enter to send, Shift+Enter for new line)" rows="1" aria-label="Chat input"></textarea>
+          <button id="send-btn" class="send-btn" aria-label="Send message">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:.3rem">
+          <button class="clear-chat-btn" id="clear-chat-btn">&#x1F5D1; Clear chat</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks view -->
+    <div id="view-tasks" class="hidden">
+      <div class="add-task-card">
+        <div class="add-task-top">
+          <input id="new-task-title" class="input" placeholder="What needs to be done?" maxlength="200" style="flex:1">
+          <button id="add-task-btn" class="btn btn-primary">+ Add Task</button>
+        </div>
+        <div class="add-task-fields">
+          <select id="new-task-priority" class="select">
+            <option value="medium">⚡ Medium Priority</option>
+            <option value="high">🔴 High Priority</option>
+            <option value="low">🟢 Low Priority</option>
+          </select>
+          <input id="new-task-category" class="input" placeholder="Category (optional)" maxlength="30">
+          <input id="new-task-due" class="input" type="date" aria-label="Due date">
+        </div>
+        <textarea id="new-task-desc" class="input" placeholder="Description (optional)" rows="1" style="margin-top:.5rem;resize:none"></textarea>
+      </div>
+      <div class="tasks-controls">
+        <div class="search-box">
+          <span>🔍</span>
+          <input id="task-search-input" placeholder="Search tasks…" aria-label="Search tasks">
+        </div>
+        <div class="filter-group">
+          <button class="fbtn active" data-filter="all">All</button>
+          <button class="fbtn" data-filter="active">Active</button>
+          <button class="fbtn" data-filter="completed">Done</button>
+        </div>
+        <button id="ai-search-btn" class="btn btn-secondary btn-sm">🤖 AI Search</button>
+      </div>
+      <div class="task-stats-bar" id="task-stats-bar"></div>
+      <div id="task-list-wrap"></div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- Footer -->
-<footer>
-  <div><strong>Synapse AI</strong> — LangGraph · FastAPI · pgvector · mem0ai</div>
-  <div>
-    <a href="index-integrated.html" style="color:#6366f1;font-weight:600">Launch App →</a>
+<!-- Edit Task Modal -->
+<div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit task">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✏ Edit Task</h2>
+      <button class="btn-icon" id="close-edit-modal" aria-label="Close">✕</button>
+    </div>
+    <div class="form-group">
+      <label for="edit-title">Title <span style="color:var(--danger)">*</span></label>
+      <input id="edit-title" class="input" maxlength="200">
+    </div>
+    <div class="form-group">
+      <label for="edit-desc">Description</label>
+      <textarea id="edit-desc" class="input" rows="2" style="resize:vertical"></textarea>
+    </div>
+    <div class="field-grid">
+      <div class="form-group" style="margin:0">
+        <label for="edit-priority">Priority</label>
+        <select id="edit-priority" class="select">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label for="edit-category">Category</label>
+        <input id="edit-category" class="input" maxlength="30">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label for="edit-due">Due Date</label>
+        <input id="edit-due" class="input" type="date">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="cancel-edit">Cancel</button>
+      <button class="btn btn-primary" id="save-edit">Save Changes</button>
+    </div>
   </div>
-</footer>
+</div>
 
+<!-- AI Semantic Search Modal -->
+<div id="ai-search-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="AI Semantic Search">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🤖 AI Semantic Search</h2>
+      <button class="btn-icon" id="close-ai-search" aria-label="Close">✕</button>
+    </div>
+    <div class="form-group">
+      <label for="ai-q">Describe what you're looking for</label>
+      <input id="ai-q" class="input" placeholder="e.g. urgent work tasks due this week">
+    </div>
+    <button id="run-ai-search" class="btn btn-primary w-full">Search with AI</button>
+    <div id="ai-search-results" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+<!-- Toast notifications -->
+<div id="toast-wrap" class="toast-wrap" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- All JavaScript inlined - no external dependencies -->
+<script>
+// === assets/js/ui.js ===
+/**
+ * Synapse AI – UI Helpers
+ *
+ * Toast notifications, screen/view management, theme toggle,
+ * loading states, and utility functions.
+ */
+
+/* global document, window, localStorage */
+
+var SynapseUI = (function () {
+  'use strict';
+
+  /* ── HTML escape ── */
+  function esc(s) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(s || ''));
+    return d.innerHTML;
+  }
+
+  /* ── Date formatting ── */
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtDate(s) {
+    if (!s) return '';
+    var p = s.split('-');
+    if (p.length !== 3) return s;
+    var mIdx = parseInt(p[1], 10) - 1;
+    if (mIdx < 0 || mIdx > 11) return s;
+    return MONTHS[mIdx] + ' ' + parseInt(p[2], 10) + ', ' + p[0];
+  }
+
+  function isOverdue(s) {
+    if (!s) return false;
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var d = new Date(s + 'T00:00:00');
+    return !isNaN(d.getTime()) && d < today;
+  }
+
+  /* ── Toast notifications ── */
+  function toast(msg, type) {
+    var c = document.getElementById('toast-wrap');
+    if (!c) return;
+    var el = document.createElement('div');
+    el.className = 'toast ' + (type || 'info');
+    el.textContent = msg;
+    c.appendChild(el);
+    setTimeout(function () {
+      el.classList.add('out');
+      setTimeout(function () { el.remove(); }, 260);
+    }, 2800);
+  }
+
+  /* ── Screen management ── */
+  function showScreen(name) {
+    ['setup', 'auth', 'app'].forEach(function (s) {
+      var el = document.getElementById('screen-' + s);
+      if (el) el.classList.toggle('hidden', s !== name);
+    });
+  }
+
+  /* ── View switching (chat / tasks) ── */
+  function showView(name) {
+    ['chat', 'tasks'].forEach(function (v) {
+      var el = document.getElementById('view-' + v);
+      if (el) el.classList.toggle('hidden', v !== name);
+    });
+    document.querySelectorAll('.nav-link[data-view]').forEach(function (l) {
+      l.classList.toggle('active', l.getAttribute('data-view') === name);
+    });
+    var titles = { chat: '\uD83D\uDCAC AI Chat', tasks: '\u2705 Tasks' };
+    var el = document.getElementById('topbar-title');
+    if (el) el.textContent = titles[name] || '';
+  }
+
+  /* ── Theme ── */
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('synapse_theme', t); } catch (e) { /* ignore */ }
+    var ic = document.getElementById('theme-icon');
+    if (ic) ic.textContent = t === 'dark' ? '\u2600' : '\uD83C\uDF19';
+    return t;
+  }
+
+  function getStoredTheme() {
+    try { return localStorage.getItem('synapse_theme') || ''; } catch (e) { return ''; }
+  }
+
+  /* ── Status indicator ── */
+  function setStatus(ok) {
+    var d = document.getElementById('status-dot');
+    var t = document.getElementById('status-text');
+    if (d) d.className = 'status-dot' + (ok ? '' : ' offline');
+    if (t) t.textContent = ok ? 'Connected' : 'Offline';
+  }
+
+  /* ── Sidebar ── */
+  function closeSidebar() {
+    var sb = document.getElementById('sidebar');
+    var ov = document.getElementById('sidebar-overlay');
+    if (sb) sb.classList.remove('open');
+    if (ov) ov.classList.remove('open');
+  }
+
+  function toggleSidebar() {
+    var sb = document.getElementById('sidebar');
+    var ov = document.getElementById('sidebar-overlay');
+    if (sb) sb.classList.toggle('open');
+    if (ov) ov.classList.toggle('open');
+  }
+
+  /* ── Public API ── */
+  return {
+    esc: esc,
+    fmtDate: fmtDate,
+    isOverdue: isOverdue,
+    toast: toast,
+    showScreen: showScreen,
+    showView: showView,
+    applyTheme: applyTheme,
+    getStoredTheme: getStoredTheme,
+    setStatus: setStatus,
+    closeSidebar: closeSidebar,
+    toggleSidebar: toggleSidebar
+  };
+})();
+
+// === assets/js/auth.js ===
+/**
+ * Synapse AI – Authentication Module
+ *
+ * User registration, login, session creation, JWT token management,
+ * auto-logout on 401, and protected route helpers.
+ *
+ * Depends on: SynapseUI (ui.js)
+ *
+ * Uses the shared global state at window.SA.
+ */
+
+/* global window, document, localStorage, fetch, SynapseUI */
+
+var SynapseAuth = (function () {
+  'use strict';
+
+  var K = {
+    URL:   'synapse_api_url',
+    USER:  'synapse_user_token',
+    SESS:  'synapse_session_token',
+    EMAIL: 'synapse_user_email',
+    SID:   'synapse_current_session_id'
+  };
+
+  /* ── Storage helpers ── */
+  function ls(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function ss(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
+  function rs(k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } }
+
+  /* ── State access ── */
+  function S() { return window.SA; }
+
+  /* ── HTTP helpers ── */
+  function base() { return S().apiUrl.replace(/\/+$/, ''); }
+
+  function extractErr(e) {
+    if (!e) return 'Unknown error';
+    if (typeof e === 'string') return e;
+    if (typeof e.detail === 'string') return e.detail;
+    if (Array.isArray(e.detail)) return e.detail.map(function (d) { return d.msg || JSON.stringify(d); }).join(', ');
+    return JSON.stringify(e);
+  }
+
+  /* ── Auth API calls ── */
+  function login(email, pw) {
+    var body = new URLSearchParams({ username: email, password: pw, grant_type: 'password' }).toString();
+    return fetch(base() + '/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body
+    }).then(function (r) {
+      if (!r.ok) return r.json().catch(function () { return { detail: r.statusText }; }).then(function (e) { throw new Error(extractErr(e)); });
+      return r.json();
+    }).then(function (data) {
+      S().userToken = data.access_token;
+      S().userEmail = email;
+      ss(K.USER, data.access_token);
+      ss(K.EMAIL, email);
+      return data;
+    });
+  }
+
+  function register(email, pw) {
+    return fetch(base() + '/api/v1/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pw })
+    }).then(function (r) {
+      if (!r.ok) return r.json().catch(function () { return { detail: r.statusText }; }).then(function (e) { throw new Error(extractErr(e)); });
+      return r.json();
+    }).then(function (data) {
+      S().userToken = data.token.access_token;
+      S().userEmail = email;
+      ss(K.USER, data.token.access_token);
+      ss(K.EMAIL, email);
+      return data;
+    });
+  }
+
+  function createSession(name) {
+    return fetch(base() + '/api/v1/auth/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S().userToken },
+      body: name ? JSON.stringify({ name: name }) : undefined
+    }).then(function (r) {
+      if (!r.ok) return r.json().catch(function () { return {}; }).then(function (e) { throw new Error(extractErr(e)); });
+      return r.json();
+    }).then(function (sess) {
+      S().currentSessionId = sess.session_id;
+      S().sessionToken = sess.token.access_token;
+      ss(K.SESS, sess.token.access_token);
+      ss(K.SID, sess.session_id);
+      return sess;
+    });
+  }
+
+  function getSessions() {
+    return fetch(base() + '/api/v1/auth/sessions', {
+      headers: { 'Authorization': 'Bearer ' + S().userToken }
+    }).then(function (r) {
+      if (!r.ok) throw new Error('Failed to load sessions');
+      return r.json();
+    });
+  }
+
+  function logout() {
+    [K.USER, K.SESS, K.EMAIL, K.SID].forEach(rs);
+    var s = S();
+    s.userToken = s.sessionToken = s.userEmail = s.currentSessionId = '';
+    s.messages = [];
+    s.tasks = [];
+    s.sessions = [];
+  }
+
+  /* ── Restore state from storage ── */
+  function restoreState() {
+    var s = S();
+    var stored = ls(K.URL);
+    if (stored) s.apiUrl = stored;
+    s.userToken = ls(K.USER);
+    s.sessionToken = ls(K.SESS);
+    s.userEmail = ls(K.EMAIL);
+    s.currentSessionId = ls(K.SID);
+  }
+
+  function isLoggedIn() {
+    return !!S().userToken;
+  }
+
+  function saveApiUrl(url) {
+    S().apiUrl = url;
+    ss(K.URL, url);
+  }
+
+  function clearApiUrl() {
+    rs(K.URL);
+    S().apiUrl = '';
+  }
+
+  /* ── Public API ── */
+  return {
+    K: K,
+    login: login,
+    register: register,
+    createSession: createSession,
+    getSessions: getSessions,
+    logout: logout,
+    restoreState: restoreState,
+    isLoggedIn: isLoggedIn,
+    saveApiUrl: saveApiUrl,
+    clearApiUrl: clearApiUrl
+  };
+})();
+
+// === assets/js/api-client.js ===
+/**
+ * Synapse AI – API Client
+ *
+ * Full API integration with the Synapse AI FastAPI backend.
+ * Handles JWT authentication, task CRUD, AI suggestions,
+ * semantic search, chat streaming, and automatic retry logic.
+ *
+ * Backend URL is configured dynamically via the setup screen
+ * and stored in localStorage.
+ */
+
+/* global localStorage, fetch, AbortController */
+
+var SynapseAPI = (function () {
+  'use strict';
+
+  // Backend URL — configured dynamically via the setup screen.
+  // Other modules reference SynapseAPI.DEFAULT_API_URL.
+  var DEFAULT_API_URL = '';
+  var TOKEN_KEY = 'synapse_user_token';
+  var SESSION_TOKEN_KEY = 'synapse_session_token';
+  var MAX_RETRIES = 3;
+  var REQUEST_TIMEOUT_MS = 30000;
+
+  var _baseUrl = DEFAULT_API_URL;
+  var _token = '';
+  var _sessionToken = '';
+
+  function configure(opts) {
+    if (opts.baseUrl) _baseUrl = opts.baseUrl.replace(/\/+$/, '');
+    if (opts.token) { _token = opts.token; _store(TOKEN_KEY, _token); }
+    if (opts.sessionToken) { _sessionToken = opts.sessionToken; _store(SESSION_TOKEN_KEY, _sessionToken); }
+  }
+
+  function getBaseUrl() { return _baseUrl; }
+
+  function _store(k, v) { try { localStorage.setItem(k, v); } catch (_) { /* ignore */ } }
+  function _load(k) { try { return localStorage.getItem(k) || ''; } catch (_) { return ''; } }
+  function _remove(k) { try { localStorage.removeItem(k); } catch (_) { /* ignore */ } }
+
+  function getToken() { if (!_token) _token = _load(TOKEN_KEY); return _token; }
+  function getSessionToken() { if (!_sessionToken) _sessionToken = _load(SESSION_TOKEN_KEY); return _sessionToken; }
+  function clearToken() { _token = ''; _sessionToken = ''; _remove(TOKEN_KEY); _remove(SESSION_TOKEN_KEY); }
+  function isAuthenticated() { return !!getToken(); }
+
+  function _headers(useSession) {
+    var tok = useSession ? getSessionToken() : getToken();
+    var h = { 'Content-Type': 'application/json' };
+    if (tok) h['Authorization'] = 'Bearer ' + tok;
+    return h;
+  }
+
+  /** Wrap fetch with a timeout so requests don't hang forever. */
+  function _fetchWithTimeout(url, opts, timeoutMs) {
+    timeoutMs = timeoutMs || REQUEST_TIMEOUT_MS;
+    var controller = new AbortController();
+    opts.signal = controller.signal;
+    var timer = setTimeout(function () { controller.abort(); }, timeoutMs);
+    return fetch(url, opts).finally(function () { clearTimeout(timer); });
+  }
+
+  /** Classify a fetch error into a user-friendly message. */
+  function _friendlyNetworkError(err) {
+    if (!err) return 'Unknown network error';
+    var msg = err.message || '';
+    console.error('[SynapseAI] Network error:', msg, err);
+    if (err.name === 'AbortError' || msg.indexOf('aborted') !== -1) {
+      return 'Request timed out — the backend may be slow or unreachable. Please try again.';
+    }
+    if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1 || msg.indexOf('Network request failed') !== -1) {
+      return 'Cannot reach the backend. Check your internet connection and ensure the backend URL is correct and CORS is configured.';
+    }
+    if (msg.indexOf('CORS') !== -1 || msg.indexOf('blocked') !== -1) {
+      return 'CORS error — the backend must allow requests from ' + window.location.origin + '. Check the ALLOWED_ORIGINS setting.';
+    }
+    return msg || 'Unknown network error';
+  }
+
+  function _request(method, path, body, useSession, attempt, contentType) {
+    attempt = attempt || 0;
+    var url = _baseUrl + path;
+    var h = _headers(useSession);
+    if (contentType) h['Content-Type'] = contentType;
+    var opts = { method: method, headers: h };
+    if (body !== undefined && body !== null) {
+      opts.body = (typeof body === 'string') ? body : JSON.stringify(body);
+    }
+    return _fetchWithTimeout(url, opts).then(function (res) {
+      if (res.status === 204) return null;
+      if (res.ok) return res.json();
+      if (res.status >= 500 && attempt < MAX_RETRIES) {
+        var delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            resolve(_request(method, path, body, useSession, attempt + 1, contentType));
+          }, delay);
+        });
+      }
+      return res.json().catch(function () { return { detail: res.statusText }; }).then(function (err) {
+        var msg = _extractErr(err);
+        throw new Error(msg);
+      });
+    }).catch(function (err) {
+      console.error('[SynapseAI] API request failed:', method, path, err);
+      if (err instanceof Error && (err.message.indexOf('Cannot reach') !== -1 || err.message.indexOf('CORS') !== -1 || err.message.indexOf('timed out') !== -1)) {
+        throw err;
+      }
+      if (err.name === 'AbortError' || (err.message && (err.message.indexOf('Failed to fetch') !== -1 || err.message.indexOf('NetworkError') !== -1))) {
+        if (attempt < MAX_RETRIES) {
+          var retryDelay = Math.min(1000 * Math.pow(2, attempt), 8000);
+          console.warn('[SynapseAI] Retrying request (attempt ' + (attempt + 1) + '/' + MAX_RETRIES + '):', method, path);
+          return new Promise(function (resolve) {
+            setTimeout(function () {
+              resolve(_request(method, path, body, useSession, attempt + 1, contentType));
+            }, retryDelay);
+          });
+        }
+        throw new Error(_friendlyNetworkError(err));
+      }
+      throw err;
+    });
+  }
+
+  function _extractErr(e) {
+    if (!e) return 'Unknown error';
+    if (typeof e === 'string') return e;
+    if (typeof e.detail === 'string') return e.detail;
+    if (Array.isArray(e.detail)) return e.detail.map(function (d) { return d.msg || JSON.stringify(d); }).join(', ');
+    return JSON.stringify(e);
+  }
+
+  /* ── Auth ── */
+  function register(email, password) {
+    return _request('POST', '/api/v1/auth/register', { email: email, password: password })
+      .then(function (data) {
+        if (data && data.token && data.token.access_token) {
+          configure({ token: data.token.access_token });
+        }
+        return data;
+      });
+  }
+
+  function login(email, password) {
+    var formBody = new URLSearchParams({
+      username: email,
+      password: password,
+      grant_type: 'password',
+    }).toString();
+    return _request('POST', '/api/v1/auth/login', formBody, false, 0, 'application/x-www-form-urlencoded')
+      .then(function (data) {
+        if (data && data.access_token) {
+          configure({ token: data.access_token });
+        }
+        return data;
+      });
+  }
+
+  function logout() { clearToken(); }
+
+  /* ── Sessions ── */
+  function createSession(name) {
+    return _request('POST', '/api/v1/auth/session', name ? { name: name } : undefined)
+      .then(function (data) {
+        if (data && data.token && data.token.access_token) {
+          _sessionToken = data.token.access_token;
+          _store(SESSION_TOKEN_KEY, _sessionToken);
+        }
+        return data;
+      });
+  }
+
+  function listSessions() { return _request('GET', '/api/v1/auth/sessions'); }
+
+  /* ── Chat (SSE streaming) ── */
+  var STREAM_TIMEOUT_MS = 60000;
+  function chatStream(messages, onChunk, onDone, onError) {
+    var url = _baseUrl + '/api/v1/chatbot/chat/stream';
+    var controller = new AbortController();
+    var streamTimer = setTimeout(function () {
+      controller.abort();
+      if (onError) onError(new Error('Stream timed out after ' + (STREAM_TIMEOUT_MS / 1000) + 's — the AI may be taking too long. Please try again.'));
+    }, STREAM_TIMEOUT_MS);
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessionToken() },
+      body: JSON.stringify({ messages: messages }),
+      signal: controller.signal,
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Stream request failed (' + res.status + ')');
+        var reader = res.body.getReader();
+        var decoder = new TextDecoder();
+        var buffer = '';
+        function read() {
+          reader.read().then(function (result) {
+            if (result.done) { clearTimeout(streamTimer); if (onDone) onDone(); return; }
+            clearTimeout(streamTimer);
+            buffer += decoder.decode(result.value, { stream: true });
+            var lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+            lines.forEach(function (line) {
+              var trimmed = line.trim();
+              if (!trimmed.startsWith('data:')) return;
+              var json = trimmed.slice(5).trim();
+              if (json === '[DONE]') { if (onDone) onDone(); return; }
+              try {
+                var parsed = JSON.parse(json);
+                if (parsed.done) { if (onDone) onDone(); return; }
+                if (parsed.content && onChunk) onChunk(parsed.content);
+              } catch (_) { /* skip */ }
+            });
+            read();
+          }).catch(function (err) {
+            clearTimeout(streamTimer);
+            if (err.name !== 'AbortError' && onError) onError(err);
+          });
+        }
+        read();
+      })
+      .catch(function (err) {
+        clearTimeout(streamTimer);
+        if (err.name === 'AbortError') return;
+        if (onError) onError(new Error(_friendlyNetworkError(err)));
+      });
+    return controller;
+  }
+
+  function getMessages() { return _request('GET', '/api/v1/chatbot/messages', null, true); }
+  function clearMessages() { return _request('DELETE', '/api/v1/chatbot/messages', null, true); }
+
+  /* ── Tasks ── */
+  function createTask(task) { return _request('POST', '/api/v1/tasks', task); }
+  function listTasks(filters) {
+    var params = [];
+    if (filters) {
+      if (filters.completed !== undefined && filters.completed !== null) params.push('completed=' + filters.completed);
+      if (filters.priority) params.push('priority=' + encodeURIComponent(filters.priority));
+      if (filters.category) params.push('category=' + encodeURIComponent(filters.category));
+    }
+    var qs = params.length ? '?' + params.join('&') : '';
+    return _request('GET', '/api/v1/tasks' + qs);
+  }
+  function getTask(taskId) { return _request('GET', '/api/v1/tasks/' + taskId); }
+  function updateTask(taskId, updates) { return _request('PUT', '/api/v1/tasks/' + taskId, updates); }
+  function deleteTask(taskId) { return _request('DELETE', '/api/v1/tasks/' + taskId); }
+  function getAISuggestions(taskId) { return _request('GET', '/api/v1/tasks/' + taskId + '/ai-suggestions'); }
+  function searchTasks(query) { return _request('POST', '/api/v1/tasks/search', { query: query }); }
+
+  /* ── Connection validation ── */
+  function validateConnection(url) {
+    var testUrl = (url || _baseUrl).replace(/\/+$/, '');
+    console.log('[SynapseAI] Validating connection to:', testUrl);
+    return _fetchWithTimeout(testUrl + '/health', {}, 10000).then(function (r) {
+      if (!r.ok) throw new Error('Health check returned HTTP ' + r.status);
+      return r.json();
+    }).then(function (data) {
+      console.log('[SynapseAI] Health check response:', data);
+      if (data && data.status === 'healthy') return data;
+      if (data && typeof data === 'object') return data;
+      throw new Error('Unexpected health response');
+    }).catch(function (err) {
+      console.error('[SynapseAI] Connection validation failed:', err);
+      throw new Error(_friendlyNetworkError(err));
+    });
+  }
+
+  return {
+    DEFAULT_API_URL: DEFAULT_API_URL,
+    configure: configure,
+    getBaseUrl: getBaseUrl,
+    getToken: getToken,
+    getSessionToken: getSessionToken,
+    clearToken: clearToken,
+    isAuthenticated: isAuthenticated,
+    validateConnection: validateConnection,
+    register: register,
+    login: login,
+    logout: logout,
+    createSession: createSession,
+    listSessions: listSessions,
+    chatStream: chatStream,
+    getMessages: getMessages,
+    clearMessages: clearMessages,
+    createTask: createTask,
+    listTasks: listTasks,
+    getTask: getTask,
+    updateTask: updateTask,
+    deleteTask: deleteTask,
+    getAISuggestions: getAISuggestions,
+    searchTasks: searchTasks,
+    friendlyNetworkError: _friendlyNetworkError,
+  };
+})();
+
+// === assets/js/chat.js ===
+/**
+ * Synapse AI – Chat Module
+ *
+ * AI chat functionality including sending messages, streaming SSE
+ * responses, message history, session management, and rendering.
+ *
+ * Depends on: SynapseUI (ui.js), SynapseAuth (auth.js)
+ *
+ * Uses the shared global state at window.SA.
+ */
+
+/* global window, document, fetch, SynapseUI, SynapseAuth */
+
+var SynapseChat = (function () {
+  'use strict';
+
+  function S() { return window.SA; }
+  function base() { return S().apiUrl.replace(/\/+$/, ''); }
+
+  /* ── API calls ── */
+  function apiGetMessages() {
+    return fetch(base() + '/api/v1/chatbot/messages', {
+      headers: { 'Authorization': 'Bearer ' + S().sessionToken }
+    }).then(function (r) {
+      if (!r.ok) throw new Error('Failed to load messages');
+      return r.json();
+    });
+  }
+
+  function apiClearMessages() {
+    return fetch(base() + '/api/v1/chatbot/messages', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + S().sessionToken }
+    }).then(function (r) {
+      if (!r.ok) throw new Error('Failed to clear messages');
+    });
+  }
+
+  /* ── Streaming chat via SSE ── */
+  var STREAM_TIMEOUT_MS = 60000;
+  async function* streamChat(messages) {
+    var controller = new AbortController();
+    var timedOut = false;
+    var streamTimer = setTimeout(function () {
+      timedOut = true;
+      controller.abort();
+    }, STREAM_TIMEOUT_MS);
+    var r;
+    try {
+      r = await fetch(base() + '/api/v1/chatbot/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S().sessionToken },
+        body: JSON.stringify({ messages: messages }),
+        signal: controller.signal
+      });
+    } catch (err) {
+      clearTimeout(streamTimer);
+      console.error('[SynapseAI] Stream fetch error:', err);
+      if (timedOut) throw new Error('Stream timed out — the AI may be taking too long. Please try again.');
+      if (err.name === 'AbortError') throw new Error('Stream was cancelled.');
+      var msg = err.message || '';
+      if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
+        throw new Error('Cannot reach the backend. Check your connection and ensure the backend URL is correct with CORS configured.');
+      }
+      if (msg.indexOf('CORS') !== -1 || msg.indexOf('blocked') !== -1) {
+        throw new Error('CORS error — the backend must allow requests from ' + window.location.origin + '. Check ALLOWED_ORIGINS setting.');
+      }
+      throw err;
+    }
+    if (!r.ok) {
+      clearTimeout(streamTimer);
+      throw new Error('Stream failed (' + r.status + ')');
+    }
+    var reader = r.body.getReader();
+    var dec = new TextDecoder();
+    var buf = '';
+    try {
+      while (true) {
+        var read = await reader.read();
+        if (read.done) break;
+        clearTimeout(streamTimer);
+        buf += dec.decode(read.value, { stream: true });
+        var lines = buf.split('\n');
+        buf = lines.pop() || '';
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i].trim();
+          if (!line.startsWith('data:')) continue;
+          var json = line.slice(5).trim();
+          if (json === '[DONE]') return;
+          try {
+            var d = JSON.parse(json);
+            if (d.done) return;
+            if (d.content) yield d.content;
+          } catch (ex) { /* skip */ }
+        }
+      }
+    } finally {
+      clearTimeout(streamTimer);
+    }
+  }
+
+  /* ── Render messages ── */
+  function renderMessages() {
+    var area = document.getElementById('messages-area');
+    if (!area) return;
+    area.innerHTML = '';
+    if (!S().messages.length) {
+      area.innerHTML = '<div class="msg assistant"><div class="msg-av">\uD83E\uDDE0</div><div class="msg-body">Hi! I\'m Synapse AI. How can I help you today? \uD83D\uDE80</div></div>';
+      return;
+    }
+    S().messages.forEach(function (m) {
+      if (m.role === 'user' || m.role === 'assistant') appendMsg(m.role, m.content);
+    });
+  }
+
+  function appendMsg(role, content) {
+    var area = document.getElementById('messages-area');
+    if (!area) return null;
+    var msg = document.createElement('div');
+    msg.className = 'msg ' + role;
+    var av = document.createElement('div');
+    av.className = 'msg-av';
+    av.textContent = role === 'assistant' ? '\uD83E\uDDE0' : ((S().userEmail[0] || 'U').toUpperCase());
+    var body = document.createElement('div');
+    body.className = 'msg-body';
+    body.textContent = content;
+    msg.appendChild(av);
+    msg.appendChild(body);
+    area.appendChild(msg);
+    area.scrollTop = area.scrollHeight;
+    return body;
+  }
+
+  /* ── Send message with streaming ── */
+  async function sendChat() {
+    var ta = document.getElementById('chat-ta');
+    var text = ta ? ta.value.trim() : '';
+    if (!text || S().streaming) return;
+    ta.value = '';
+    ta.style.height = 'auto';
+    if (!S().sessionToken) {
+      try { await SynapseAuth.createSession('Chat'); } catch (e) {
+        SynapseUI.toast('Session error: ' + e.message, 'error');
+        return;
+      }
+      S().sessions.unshift({ session_id: S().currentSessionId, name: 'Chat' });
+    }
+    S().messages.push({ role: 'user', content: text });
+    appendMsg('user', text);
+    S().streaming = true;
+    var btn = document.getElementById('send-btn');
+    if (btn) btn.disabled = true;
+    var area = document.getElementById('messages-area');
+    var typing = document.createElement('div');
+    typing.className = 'msg assistant msg-typing';
+    typing.innerHTML = '<div class="msg-av">\uD83E\uDDE0</div><div class="msg-body"><span class="chat-hint">Thinking\u2026</span></div>';
+    area.appendChild(typing);
+    area.scrollTop = area.scrollHeight;
+    var bodyEl = typing.querySelector('.msg-body');
+    var full = '';
+    try {
+      for await (var chunk of streamChat(S().messages)) {
+        if (full === '') bodyEl.textContent = '';
+        full += chunk;
+        bodyEl.textContent = full;
+        area.scrollTop = area.scrollHeight;
+      }
+      typing.classList.remove('msg-typing');
+      if (!full) { bodyEl.textContent = 'No response received.'; full = 'No response received.'; }
+      S().messages.push({ role: 'assistant', content: full });
+      SynapseUI.setStatus(true);
+    } catch (e) {
+      typing.classList.remove('msg-typing');
+      var errMsg = e.message || 'Unknown error';
+      console.error('[SynapseAI] Chat stream error:', e);
+      if (errMsg.indexOf('Cannot reach') !== -1 || errMsg.indexOf('timed out') !== -1 || errMsg.indexOf('CORS') !== -1) {
+        SynapseUI.setStatus(false);
+      }
+      var hasGuidance = errMsg.indexOf('Check') !== -1 || errMsg.indexOf('CORS') !== -1 || errMsg.indexOf('try again') !== -1;
+      bodyEl.textContent = '\u26A0 ' + errMsg + (hasGuidance ? '' : '\n\nPlease check your connection and try again.');
+      SynapseUI.toast('Chat error: ' + errMsg, 'error');
+    } finally {
+      S().streaming = false;
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  /* ── Clear chat ── */
+  async function clearChat() {
+    if (!confirm('Clear chat history?')) return;
+    try {
+      if (S().sessionToken) await apiClearMessages();
+      S().messages = [];
+      renderMessages();
+      SynapseUI.toast('Chat cleared', 'info');
+    } catch (e) {
+      SynapseUI.toast('Clear failed: ' + e.message, 'error');
+    }
+  }
+
+  /* ── Load messages for current session ── */
+  async function loadMessages() {
+    try {
+      var data = await apiGetMessages();
+      S().messages = (data && data.messages) ? data.messages : [];
+    } catch (e) {
+      S().messages = [];
+    }
+    renderMessages();
+  }
+
+  /* ── Public API ── */
+  return {
+    renderMessages: renderMessages,
+    appendMsg: appendMsg,
+    sendChat: sendChat,
+    clearChat: clearChat,
+    loadMessages: loadMessages,
+    streamChat: streamChat
+  };
+})();
+
+// === assets/js/tasks.js ===
+/**
+ * Synapse AI – Tasks Module
+ *
+ * Task CRUD operations, filtering, AI suggestions, semantic search,
+ * priority management, due date handling, and rendering.
+ *
+ * Depends on: SynapseUI (ui.js)
+ *
+ * Uses the shared global state at window.SA.
+ */
+
+/* global window, document, fetch, SynapseUI */
+
+var SynapseTasks = (function () {
+  'use strict';
+
+  function S() { return window.SA; }
+  function base() { return S().apiUrl.replace(/\/+$/, ''); }
+  function hdr() {
+    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S().userToken };
+  }
+
+  /* ── API helpers ── */
+  var MAX_RETRIES = 2;
+  function apiReq(method, path, body, attempt) {
+    attempt = attempt || 0;
+    var opts = { method: method, headers: hdr() };
+    if (body !== undefined) opts.body = JSON.stringify(body);
+    return fetch(base() + path, opts).then(function (r) {
+      if (r.status === 204) return null;
+      if (!r.ok) {
+        if (r.status >= 500 && attempt < MAX_RETRIES) {
+          var delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+          return new Promise(function (resolve) {
+            setTimeout(function () { resolve(apiReq(method, path, body, attempt + 1)); }, delay);
+          });
+        }
+        return r.json().catch(function () { return { detail: r.statusText }; }).then(function (e) {
+          var msg = typeof e.detail === 'string' ? e.detail : (Array.isArray(e.detail) ? e.detail.map(function (d) { return d.msg || JSON.stringify(d); }).join(', ') : JSON.stringify(e));
+          throw new Error(msg);
+        });
+      }
+      return r.json();
+    }).catch(function (err) {
+      console.error('[SynapseAI] Task API error:', method, path, err);
+      if (err instanceof Error && err.message && err.message.indexOf('Failed to fetch') === -1 && err.message.indexOf('NetworkError') === -1 && err.name !== 'AbortError') {
+        throw err;
+      }
+      if (attempt < MAX_RETRIES) {
+        var retryDelay = Math.min(1000 * Math.pow(2, attempt), 8000);
+        console.warn('[SynapseAI] Retrying task request (attempt ' + (attempt + 1) + '/' + MAX_RETRIES + '):', method, path);
+        return new Promise(function (resolve) {
+          setTimeout(function () { resolve(apiReq(method, path, body, attempt + 1)); }, retryDelay);
+        });
+      }
+      var msg = (err && err.message) || '';
+      if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
+        throw new Error('Cannot reach the backend. Check your connection and ensure the backend URL is correct with CORS configured.');
+      }
+      throw err;
+    });
+  }
+
+  function apiListTasks()        { return apiReq('GET', '/api/v1/tasks'); }
+  function apiCreateTask(t)      { return apiReq('POST', '/api/v1/tasks', t); }
+  function apiUpdateTask(id, t)  { return apiReq('PUT', '/api/v1/tasks/' + id, t); }
+  function apiDeleteTask(id)     { return apiReq('DELETE', '/api/v1/tasks/' + id); }
+  function apiAISuggestions(id)  { return apiReq('GET', '/api/v1/tasks/' + id + '/ai-suggestions'); }
+  function apiSearchTasks(q)     { return apiReq('POST', '/api/v1/tasks/search', { query: q }); }
+
+  /* ── Filtering ── */
+  function filtered() {
+    return S().tasks.filter(function (t) {
+      if (S().taskFilter === 'active' && t.completed) return false;
+      if (S().taskFilter === 'completed' && !t.completed) return false;
+      if (S().taskSearch) {
+        var q = S().taskSearch.toLowerCase();
+        return ((t.title || '').toLowerCase().includes(q) ||
+                (t.description || '').toLowerCase().includes(q) ||
+                (t.category || '').toLowerCase().includes(q));
+      }
+      return true;
+    });
+  }
+
+  /* ── Render task stats ── */
+  function renderTaskStats() {
+    var c = document.getElementById('task-stats-bar');
+    if (!c) return;
+    var total = S().tasks.length;
+    var done = S().tasks.filter(function (t) { return t.completed; }).length;
+    c.innerHTML =
+      '<span class="stat-chip"><strong>' + total + '</strong> Total</span>' +
+      '<span class="stat-chip"><strong>' + (total - done) + '</strong> Active</span>' +
+      '<span class="stat-chip"><strong>' + done + '</strong> Done</span>';
+  }
+
+  /* ── Render tasks list ── */
+  function renderTasks() {
+    renderTaskStats();
+    var wrap = document.getElementById('task-list-wrap');
+    if (!wrap) return;
+    var list = filtered();
+    if (!list.length) {
+      wrap.innerHTML = '<div class="empty-state"><div class="ei">\uD83D\uDCCB</div><h3>No tasks</h3><p>' +
+        (S().taskSearch || S().taskFilter !== 'all' ? 'No tasks match your filter.' : 'Add your first task above!') + '</p></div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    list.forEach(function (task) {
+      var p = task.priority || 'medium';
+      var ov = !task.completed && SynapseUI.isOverdue(task.due_date);
+      var card = document.createElement('div');
+      card.className = 'task-card' + (task.completed ? ' completed' : '');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.className = 'task-cb';
+      cb.checked = !!task.completed;
+      cb.setAttribute('aria-label', 'Toggle complete');
+      cb.addEventListener('change', function () { toggleTask(task.id, cb.checked); });
+      var bwrap = document.createElement('div');
+      bwrap.className = 'task-body-wrap';
+      var tTitle = document.createElement('div');
+      tTitle.className = 'task-title';
+      tTitle.textContent = task.title;
+      var meta = document.createElement('div');
+      meta.className = 'task-meta-row';
+      meta.innerHTML =
+        '<span class="badge badge-' + p + '">' + p + '</span>' +
+        (task.category ? '<span class="badge badge-cat">' + SynapseUI.esc(task.category) + '</span>' : '') +
+        (task.due_date ? '<span class="badge ' + (ov ? 'badge-overdue' : 'badge-due') + '">' + (ov ? '\u26A0 ' : '\uD83D\uDCC5 ') + SynapseUI.fmtDate(task.due_date) + '</span>' : '') +
+        (task.ai_priority_score != null ? '<span class="badge badge-ai">AI ' + Math.round(task.ai_priority_score * 100) + '%</span>' : '');
+      bwrap.appendChild(tTitle);
+      bwrap.appendChild(meta);
+      var acts = document.createElement('div');
+      acts.className = 'task-actions-row';
+      var aiBtn = document.createElement('button');
+      aiBtn.className = 'tab-btn';
+      aiBtn.title = 'AI Suggestions';
+      aiBtn.textContent = '\uD83E\uDD16';
+      aiBtn.addEventListener('click', function () { toggleAIPanel(task, card, bwrap); });
+      var editBtn = document.createElement('button');
+      editBtn.className = 'tab-btn';
+      editBtn.title = 'Edit';
+      editBtn.textContent = '\u270F';
+      editBtn.addEventListener('click', function () { openEditModal(task); });
+      var delBtn = document.createElement('button');
+      delBtn.className = 'tab-btn del';
+      delBtn.title = 'Delete';
+      delBtn.textContent = '\uD83D\uDDD1';
+      delBtn.addEventListener('click', function () { deleteTask(task.id); });
+      acts.appendChild(aiBtn);
+      acts.appendChild(editBtn);
+      acts.appendChild(delBtn);
+      card.appendChild(cb);
+      card.appendChild(bwrap);
+      card.appendChild(acts);
+      wrap.appendChild(card);
+    });
+  }
+
+  /* ── Load tasks from API ── */
+  async function loadTasks() {
+    var wrap = document.getElementById('task-list-wrap');
+    if (wrap) wrap.innerHTML = '<div class="loading-row"><span class="spinner"></span> Loading tasks\u2026</div>';
+    try {
+      var data = await apiListTasks();
+      S().tasks = (data && data.tasks) ? data.tasks : [];
+      renderTasks();
+    } catch (e) {
+      console.error('[SynapseAI] Failed to load tasks:', e);
+      SynapseUI.toast('Failed to load tasks: ' + e.message, 'error');
+      renderTasks();
+    }
+  }
+
+  /* ── Add task ── */
+  async function addTask() {
+    var titleEl = document.getElementById('new-task-title');
+    var title = titleEl ? titleEl.value.trim() : '';
+    if (!title) { SynapseUI.toast('Please enter a task title', 'error'); if (titleEl) titleEl.focus(); return; }
+    var btn = document.getElementById('add-task-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Adding\u2026'; }
+    try {
+      var t = await apiCreateTask({
+        title: title,
+        description: (document.getElementById('new-task-desc') || {}).value || '',
+        priority: (document.getElementById('new-task-priority') || {}).value || 'medium',
+        category: (document.getElementById('new-task-category') || {}).value || '',
+        due_date: (document.getElementById('new-task-due') || {}).value || ''
+      });
+      S().tasks.unshift(t);
+      renderTasks();
+      titleEl.value = '';
+      ['new-task-category','new-task-due','new-task-desc'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      var prioEl = document.getElementById('new-task-priority');
+      if (prioEl) prioEl.value = 'medium';
+      SynapseUI.toast('Task added!', 'success');
+    } catch (e) {
+      console.error('[SynapseAI] Failed to add task:', e);
+      SynapseUI.toast('Failed: ' + e.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '+ Add Task'; }
+    }
+  }
+
+  /* ── Toggle task completion ── */
+  async function toggleTask(id, completed) {
+    try {
+      var updated = await apiUpdateTask(id, { completed: completed });
+      var idx = S().tasks.findIndex(function (t) { return t.id === id; });
+      if (idx !== -1) S().tasks[idx] = updated;
+      renderTasks();
+    } catch (e) {
+      console.error('[SynapseAI] Failed to toggle task:', e);
+      SynapseUI.toast('Update failed: ' + e.message, 'error');
+      renderTasks();
+    }
+  }
+
+  /* ── Delete task ── */
+  async function deleteTask(id) {
+    if (!confirm('Delete this task?')) return;
+    try {
+      await apiDeleteTask(id);
+      S().tasks = S().tasks.filter(function (t) { return t.id !== id; });
+      renderTasks();
+      SynapseUI.toast('Deleted', 'info');
+    } catch (e) {
+      console.error('[SynapseAI] Failed to delete task:', e);
+      SynapseUI.toast('Delete failed: ' + e.message, 'error');
+    }
+  }
+
+  /* ── Edit modal ── */
+  function openEditModal(task) {
+    S().editingId = task.id;
+    document.getElementById('edit-title').value = task.title || '';
+    document.getElementById('edit-desc').value = task.description || '';
+    document.getElementById('edit-priority').value = task.priority || 'medium';
+    document.getElementById('edit-category').value = task.category || '';
+    document.getElementById('edit-due').value = task.due_date || '';
+    document.getElementById('edit-modal').classList.remove('hidden');
+    document.getElementById('edit-title').focus();
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+    S().editingId = null;
+  }
+
+  async function saveEdit() {
+    if (!S().editingId) return;
+    var title = document.getElementById('edit-title').value.trim();
+    if (!title) { SynapseUI.toast('Title required', 'error'); return; }
+    var btn = document.getElementById('save-edit');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving\u2026'; }
+    try {
+      var updated = await apiUpdateTask(S().editingId, {
+        title: title,
+        description: document.getElementById('edit-desc').value.trim(),
+        priority: document.getElementById('edit-priority').value,
+        category: document.getElementById('edit-category').value.trim(),
+        due_date: document.getElementById('edit-due').value
+      });
+      var idx = S().tasks.findIndex(function (t) { return t.id === S().editingId; });
+      if (idx !== -1) S().tasks[idx] = updated;
+      closeEditModal();
+      renderTasks();
+      SynapseUI.toast('Task updated!', 'success');
+    } catch (e) {
+      console.error('[SynapseAI] Failed to save edit:', e);
+      SynapseUI.toast('Update failed: ' + e.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
+    }
+  }
+
+  /* ── AI suggestions panel ── */
+  async function toggleAIPanel(task, card, bwrap) {
+    var existing = card.querySelector('.ai-panel');
+    if (existing) { existing.remove(); return; }
+    var panel = document.createElement('div');
+    panel.className = 'ai-panel';
+    panel.innerHTML = '<div style="display:flex;align-items:center;gap:.5rem"><span class="spinner"></span><span style="color:var(--text2)">Getting AI suggestions\u2026</span></div>';
+    bwrap.appendChild(panel);
+    try {
+      var s = await apiAISuggestions(task.id);
+      var html = '<h4>\uD83E\uDD16 AI Suggestions</h4>';
+      if (s.priority_suggestion) {
+        html += '<p><strong>Priority:</strong> ' + SynapseUI.esc(s.priority_suggestion);
+        if (s.priority_score != null) html += ' <em style="color:var(--text2)">(' + Math.round(s.priority_score * 100) + '% confidence)</em>';
+        html += '</p>';
+      }
+      if (s.suggested_due_date) html += '<p><strong>Suggested due date:</strong> ' + SynapseUI.esc(s.suggested_due_date) + '</p>';
+      if (s.breakdown && s.breakdown.length) {
+        html += '<p><strong>Steps:</strong></p><ol>';
+        s.breakdown.forEach(function (b) { html += '<li>' + SynapseUI.esc(b) + '</li>'; });
+        html += '</ol>';
+      }
+      if (s.recommendations && s.recommendations.length) {
+        html += '<p><strong>Recommendations:</strong></p><ul>';
+        s.recommendations.forEach(function (r) { html += '<li>' + SynapseUI.esc(r) + '</li>'; });
+        html += '</ul>';
+      }
+      panel.innerHTML = html;
+      var idx = S().tasks.findIndex(function (t) { return t.id === task.id; });
+      if (idx !== -1 && s.priority_score != null) S().tasks[idx].ai_priority_score = s.priority_score;
+    } catch (e) {
+      console.error('[SynapseAI] AI suggestions failed:', e);
+      panel.innerHTML = '<p class="text-danger">AI suggestions failed: ' + SynapseUI.esc(e.message) + '</p>';
+    }
+  }
+
+  /* ── AI semantic search ── */
+  async function runAISearch(q) {
+    var c = document.getElementById('ai-search-results');
+    if (!c) return;
+    c.innerHTML = '<div class="loading-row"><span class="spinner"></span> Searching\u2026</div>';
+    try {
+      var data = await apiSearchTasks(q);
+      var results = (data && data.results) ? data.results : [];
+      if (!results.length) {
+        c.innerHTML = '<p class="text-sm" style="color:var(--text2)">No results for \u201C' + SynapseUI.esc(q) + '\u201D</p>';
+        return;
+      }
+      c.innerHTML = '<p class="font-semibold text-sm" style="margin-bottom:.5rem">' + results.length + ' result(s) for \u201C' + SynapseUI.esc(q) + '\u201D:</p>';
+      results.forEach(function (t) {
+        var el = document.createElement('div');
+        el.className = 'task-card';
+        el.innerHTML = '<div class="task-body-wrap"><div class="task-title">' + SynapseUI.esc(t.title) + '</div>' +
+          '<div class="task-meta-row"><span class="badge badge-' + (t.priority || 'medium') + '">' + (t.priority || 'medium') + '</span>' +
+          (t.category ? '<span class="badge badge-cat">' + SynapseUI.esc(t.category) + '</span>' : '') + '</div></div>';
+        c.appendChild(el);
+      });
+    } catch (e) {
+      console.error('[SynapseAI] AI search failed:', e);
+      c.innerHTML = '<p class="text-danger text-sm">Search failed: ' + SynapseUI.esc(e.message) + '</p>';
+    }
+  }
+
+  /* ── Public API ── */
+  return {
+    loadTasks: loadTasks,
+    renderTasks: renderTasks,
+    addTask: addTask,
+    toggleTask: toggleTask,
+    deleteTask: deleteTask,
+    openEditModal: openEditModal,
+    closeEditModal: closeEditModal,
+    saveEdit: saveEdit,
+    toggleAIPanel: toggleAIPanel,
+    runAISearch: runAISearch
+  };
+})();
+
+// === assets/js/app.js ===
+/**
+ * Synapse AI – Main Application
+ *
+ * Application initialization, event listeners, routing, UI state
+ * management, session handling, and auto-reconnection.
+ *
+ * Backend URL is configured dynamically via the setup screen and
+ * persisted in localStorage.
+ *
+ * Depends on: SynapseUI (ui.js), SynapseAuth (auth.js),
+ *             SynapseChat (chat.js), SynapseTasks (tasks.js)
+ *
+ * Uses the shared global state at window.SA.
+ */
+
+/* global window, document, SynapseUI, SynapseAuth, SynapseChat, SynapseTasks */
+
+(function () {
+  'use strict';
+
+  /* ── Default backend URL — sourced from SynapseAPI or localStorage ── */
+  var DEFAULT_API_URL = (typeof SynapseAPI !== 'undefined' && SynapseAPI.DEFAULT_API_URL)
+    ? SynapseAPI.DEFAULT_API_URL
+    : '';
+
+  /* ── Shared application state ── */
+  window.SA = {
+    apiUrl: '',
+    userToken: '',
+    sessionToken: '',
+    userEmail: '',
+    currentSessionId: '',
+    sessions: [],
+    messages: [],
+    tasks: [],
+    taskFilter: 'all',
+    taskSearch: '',
+    editingId: null,
+    streaming: false,
+    theme: 'light'
+  };
+
+  function S() { return window.SA; }
+
+  /* ── Sessions ── */
+  function renderSessions() {
+    var c = document.getElementById('sessions-list');
+    if (!c) return;
+    c.innerHTML = '';
+    if (!S().sessions.length) {
+      c.innerHTML = '<div class="text-xs" style="padding:.35rem .75rem;color:var(--text2)">No sessions yet</div>';
+      return;
+    }
+    S().sessions.forEach(function (s) {
+      var el = document.createElement('div');
+      el.className = 'sess-item' + (s.session_id === S().currentSessionId ? ' active' : '');
+      el.innerHTML = '<span class="sess-title">' + SynapseUI.esc(s.name || 'Chat ' + (s.session_id || '').slice(0, 6)) + '</span>';
+      el.addEventListener('click', function () { switchSession(s); });
+      c.appendChild(el);
+    });
+  }
+
+  async function loadSessions() {
+    try {
+      var list = await SynapseAuth.getSessions();
+      S().sessions = Array.isArray(list) ? list : [];
+      renderSessions();
+    } catch (e) { /* non-fatal */ }
+  }
+
+  async function createNewSession(name) {
+    try {
+      var sess = await SynapseAuth.createSession(name || 'New Chat');
+      S().sessions.unshift(sess);
+      renderSessions();
+      S().messages = [];
+      SynapseChat.renderMessages();
+      SynapseUI.toast('New chat session created', 'success');
+    } catch (e) {
+      SynapseUI.toast('Session error: ' + e.message, 'error');
+    }
+  }
+
+  async function switchSession(sess) {
+    S().currentSessionId = sess.session_id;
+    S().sessionToken = sess.token.access_token;
+    try { localStorage.setItem('synapse_session_token', sess.token.access_token); } catch (e) { /* ignore */ }
+    try { localStorage.setItem('synapse_current_session_id', sess.session_id); } catch (e) { /* ignore */ }
+    renderSessions();
+    await SynapseChat.loadMessages();
+    SynapseUI.toast('Switched: ' + (sess.name || 'Chat'), 'info');
+    SynapseUI.closeSidebar();
+  }
+
+  /* ── Enter app (after login) ── */
+  var _healthInterval = null;
+  async function enterApp() {
+    SynapseUI.showScreen('app');
+    var emailEl = document.getElementById('user-email-display');
+    var avEl = document.getElementById('user-avatar');
+    if (emailEl) emailEl.textContent = S().userEmail || 'User';
+    if (avEl && S().userEmail) avEl.textContent = S().userEmail[0].toUpperCase();
+
+    /* Initial health check */
+    checkHealth();
+
+    /* Periodic health checks every 30 seconds for auto-reconnect */
+    if (_healthInterval) clearInterval(_healthInterval);
+    _healthInterval = setInterval(checkHealth, 30000);
+
+    await loadSessions();
+
+    if (!S().sessionToken) {
+      try { await createNewSession('My Chat'); } catch (e) { /* non-fatal */ }
+    }
+    if (S().sessionToken) {
+      await SynapseChat.loadMessages();
+    }
+    SynapseUI.showView('chat');
+  }
+
+  function checkHealth() {
+    var base = S().apiUrl.replace(/\/+$/, '');
+    if (!base) return;
+    fetch(base + '/health', { method: 'GET' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        var ok = data && (data.status === 'healthy' || data.status === 'degraded' || data.status === 'ok');
+        SynapseUI.setStatus(ok !== false);
+        updateConnectionBanner(true);
+      })
+      .catch(function (err) {
+        console.warn('[SynapseAI] Health check failed:', err.message || err);
+        SynapseUI.setStatus(false);
+        updateConnectionBanner(false);
+      });
+  }
+
+  function updateConnectionBanner(online) {
+    var banner = document.getElementById('connection-banner');
+    if (!banner) return;
+    if (online) {
+      banner.classList.add('hidden');
+    } else {
+      banner.classList.remove('hidden');
+    }
+  }
+
+  /* ── Initialize app ── */
+  async function init() {
+    SynapseAuth.restoreState();
+
+    var savedTheme = SynapseUI.getStoredTheme();
+    S().theme = SynapseUI.applyTheme(savedTheme || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'));
+
+    /* Sync SynapseAPI base URL with the restored state */
+    if (S().apiUrl && typeof SynapseAPI !== 'undefined') {
+      SynapseAPI.configure({ baseUrl: S().apiUrl });
+    }
+
+    /* Pre-fill setup URL only if we have a stored URL */
+    var setupUrl = document.getElementById('setup-url');
+    if (setupUrl && !setupUrl.value && S().apiUrl) {
+      setupUrl.value = S().apiUrl;
+    }
+
+    /* If we have an API URL, try to skip setup */
+    if (S().apiUrl) {
+      if (S().userToken) {
+        await enterApp();
+        return;
+      }
+      /* Have URL but not logged in: go to auth screen */
+      SynapseUI.showScreen('auth');
+      return;
+    }
+
+    /* No URL configured: show setup */
+    console.info('[SynapseAI] No backend URL configured. Showing setup screen.');
+    SynapseUI.showScreen('setup');
+  }
+
+  /* ── Bind all event listeners ── */
+  document.addEventListener('DOMContentLoaded', function () {
+
+    /* Setup screen */
+    var setupUrl = document.getElementById('setup-url');
+    var setupBtn = document.getElementById('setup-connect-btn');
+    var setupStatus = document.getElementById('setup-status');
+    if (setupBtn) {
+      setupBtn.addEventListener('click', async function () {
+        var url = setupUrl ? setupUrl.value.trim() : '';
+        if (!url) { setupStatus.textContent = 'Please enter a URL'; setupStatus.style.color = 'var(--danger)'; return; }
+        if (!/^https?:\/\/.+/.test(url)) { setupStatus.textContent = 'Please enter a valid URL starting with http:// or https://'; setupStatus.style.color = 'var(--danger)'; return; }
+        setupBtn.disabled = true; setupBtn.textContent = 'Testing\u2026';
+        setupStatus.innerHTML = '<span class="spinner"></span> Connecting to backend\u2026';
+        setupStatus.style.color = 'var(--text2)';
+        setupStatus.style.whiteSpace = 'normal';
+        var cleanUrl = url.replace(/\/+$/, '');
+        console.log('[SynapseAI] Testing backend connection:', cleanUrl);
+        try {
+          var controller = new AbortController();
+          var timer = setTimeout(function () { controller.abort(); }, 30000);
+          var r = await fetch(cleanUrl + '/health', { signal: controller.signal });
+          clearTimeout(timer);
+          if (!r.ok) throw new Error('Backend returned HTTP ' + r.status + '. Please verify the URL is correct and the backend is running.');
+          var d = await r.json();
+          console.log('[SynapseAI] Backend health response:', d);
+          SynapseAuth.saveApiUrl(cleanUrl);
+          if (typeof SynapseAPI !== 'undefined') SynapseAPI.configure({ baseUrl: cleanUrl });
+          setupStatus.innerHTML = '\u2705 Connected!' + (d.version ? ' (v' + d.version + ')' : '');
+          setupStatus.style.color = 'var(--success)';
+          setTimeout(function () { SynapseUI.showScreen('auth'); }, 600);
+        } catch (e) {
+          console.error('[SynapseAI] Connection failed:', e);
+          var errMsg;
+          if (e.name === 'AbortError') {
+            errMsg = '\u274C Connection timed out after 30s.\n\u2022 The backend may be starting up \u2014 try again in a minute\n\u2022 Check that the URL is correct';
+          } else if (e.message && (e.message.indexOf('Failed to fetch') !== -1 || e.message.indexOf('NetworkError') !== -1)) {
+            errMsg = '\u274C Cannot reach backend. Possible causes:\n\u2022 Backend is not running or URL is incorrect\n\u2022 CORS not configured \u2014 add ' + window.location.origin + ' to ALLOWED_ORIGINS in your backend .env';
+          } else if (e.message) {
+            errMsg = '\u274C Connection error: ' + e.message;
+          } else {
+            errMsg = '\u274C Cannot reach backend. Check URL and CORS settings.';
+          }
+          setupStatus.textContent = errMsg;
+          setupStatus.style.color = 'var(--danger)';
+          setupStatus.style.whiteSpace = 'pre-line';
+        } finally {
+          setupBtn.disabled = false; setupBtn.textContent = 'Connect & Continue \u2192';
+        }
+      });
+    }
+    if (setupUrl) setupUrl.addEventListener('keydown', function (e) { if (e.key === 'Enter' && setupBtn) setupBtn.click(); });
+
+    /* Auth tabs */
+    document.querySelectorAll('.auth-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.auth-tab').forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        var name = tab.getAttribute('data-tab');
+        document.getElementById('login-form').classList.toggle('hidden', name !== 'login');
+        document.getElementById('register-form').classList.toggle('hidden', name !== 'register');
+      });
+    });
+
+    /* Login */
+    var loginBtn = document.getElementById('login-btn');
+    if (loginBtn) {
+      loginBtn.addEventListener('click', async function () {
+        var email = document.getElementById('login-email').value.trim();
+        var pw = document.getElementById('login-password').value;
+        var errEl = document.getElementById('login-error');
+        if (!email || !pw) { errEl.textContent = 'Email and password required'; errEl.classList.remove('hidden'); return; }
+        loginBtn.disabled = true; loginBtn.textContent = 'Signing in\u2026'; errEl.classList.add('hidden');
+        try {
+          await SynapseAuth.login(email, pw);
+          SynapseUI.toast('Welcome back, ' + email + '!', 'success');
+          await enterApp();
+        } catch (e) { errEl.textContent = e.message; errEl.classList.remove('hidden'); }
+        finally { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
+      });
+    }
+    ['login-email','login-password'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('keydown', function (e) { if (e.key === 'Enter' && loginBtn) loginBtn.click(); });
+    });
+
+    /* Register */
+    var regBtn = document.getElementById('reg-btn');
+    if (regBtn) {
+      regBtn.addEventListener('click', async function () {
+        var email = document.getElementById('reg-email').value.trim();
+        var pw = document.getElementById('reg-password').value;
+        var errEl = document.getElementById('reg-error');
+        if (!email || !pw) { errEl.textContent = 'Email and password required'; errEl.classList.remove('hidden'); return; }
+        regBtn.disabled = true; regBtn.textContent = 'Creating account\u2026'; errEl.classList.add('hidden');
+        try {
+          await SynapseAuth.register(email, pw);
+          SynapseUI.toast('Account created! Welcome, ' + email + '!', 'success');
+          await enterApp();
+        } catch (e) { errEl.textContent = e.message; errEl.classList.remove('hidden'); }
+        finally { regBtn.disabled = false; regBtn.textContent = 'Create Account'; }
+      });
+    }
+    ['reg-email','reg-password'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('keydown', function (e) { if (e.key === 'Enter' && regBtn) regBtn.click(); });
+    });
+
+    /* Change backend */
+    var changeLink = document.getElementById('change-backend-link');
+    if (changeLink) {
+      changeLink.addEventListener('click', function () {
+        SynapseAuth.clearApiUrl();
+        SynapseUI.showScreen('setup');
+      });
+    }
+
+    /* Nav links */
+    document.querySelectorAll('.nav-link[data-view]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        var v = link.getAttribute('data-view');
+        SynapseUI.showView(v);
+        if (v === 'tasks' && !S().tasks.length) SynapseTasks.loadTasks();
+        SynapseUI.closeSidebar();
+      });
+    });
+
+    /* New session */
+    function handleNewSession() {
+      var name = prompt('Session name (optional):') || 'New Chat';
+      createNewSession(name);
+    }
+    var ns1 = document.getElementById('new-session-btn');
+    var ns2 = document.getElementById('new-session-btn2');
+    if (ns1) ns1.addEventListener('click', handleNewSession);
+    if (ns2) ns2.addEventListener('click', handleNewSession);
+
+    /* Logout */
+    var logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function () {
+        if (!confirm('Sign out of Synapse AI?')) return;
+        SynapseAuth.logout();
+        SynapseUI.showScreen('auth');
+        SynapseUI.toast('Signed out', 'info');
+      });
+    }
+
+    /* Theme */
+    var themeBtn = document.getElementById('theme-toggle-btn');
+    if (themeBtn) themeBtn.addEventListener('click', function () {
+      S().theme = SynapseUI.applyTheme(S().theme === 'dark' ? 'light' : 'dark');
+    });
+
+    /* Hamburger */
+    var hamburger = document.getElementById('hamburger');
+    if (hamburger) {
+      hamburger.addEventListener('click', function () {
+        SynapseUI.toggleSidebar();
+      });
+    }
+    var sov = document.getElementById('sidebar-overlay');
+    if (sov) sov.addEventListener('click', SynapseUI.closeSidebar);
+
+    /* Chat textarea */
+    var chatTa = document.getElementById('chat-ta');
+    if (chatTa) {
+      chatTa.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
+      chatTa.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); SynapseChat.sendChat(); } });
+    }
+    var sendBtn = document.getElementById('send-btn');
+    if (sendBtn) sendBtn.addEventListener('click', SynapseChat.sendChat);
+
+    var clearChatBtn = document.getElementById('clear-chat-btn');
+    if (clearChatBtn) clearChatBtn.addEventListener('click', SynapseChat.clearChat);
+
+    /* Add task */
+    var addTaskBtn = document.getElementById('add-task-btn');
+    if (addTaskBtn) addTaskBtn.addEventListener('click', SynapseTasks.addTask);
+    var newTitleEl = document.getElementById('new-task-title');
+    if (newTitleEl) newTitleEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') SynapseTasks.addTask(); });
+
+    /* Task search */
+    var tsearch = document.getElementById('task-search-input');
+    if (tsearch) tsearch.addEventListener('input', function () { S().taskSearch = this.value; SynapseTasks.renderTasks(); });
+
+    /* Filter buttons */
+    document.querySelectorAll('.fbtn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.fbtn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        S().taskFilter = btn.getAttribute('data-filter');
+        SynapseTasks.renderTasks();
+      });
+    });
+
+    /* Edit modal */
+    var closeEdit = document.getElementById('close-edit-modal');
+    var cancelEdit = document.getElementById('cancel-edit');
+    var saveEditBtn = document.getElementById('save-edit');
+    if (closeEdit) closeEdit.addEventListener('click', SynapseTasks.closeEditModal);
+    if (cancelEdit) cancelEdit.addEventListener('click', SynapseTasks.closeEditModal);
+    if (saveEditBtn) saveEditBtn.addEventListener('click', SynapseTasks.saveEdit);
+    var editModal = document.getElementById('edit-modal');
+    if (editModal) editModal.addEventListener('click', function (e) { if (e.target === this) SynapseTasks.closeEditModal(); });
+
+    /* AI Search modal */
+    var aiSearchBtn = document.getElementById('ai-search-btn');
+    if (aiSearchBtn) aiSearchBtn.addEventListener('click', function () { document.getElementById('ai-search-modal').classList.remove('hidden'); document.getElementById('ai-q').focus(); });
+    var closeAiSearch = document.getElementById('close-ai-search');
+    if (closeAiSearch) closeAiSearch.addEventListener('click', function () { document.getElementById('ai-search-modal').classList.add('hidden'); });
+    var aiSearchModal = document.getElementById('ai-search-modal');
+    if (aiSearchModal) aiSearchModal.addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
+    var runSearch = document.getElementById('run-ai-search');
+    if (runSearch) runSearch.addEventListener('click', function () { var q = document.getElementById('ai-q').value.trim(); if (q) SynapseTasks.runAISearch(q); });
+    var aiQEl = document.getElementById('ai-q');
+    if (aiQEl) aiQEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { var q = this.value.trim(); if (q) SynapseTasks.runAISearch(q); } });
+
+    /* Global Escape key */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        SynapseTasks.closeEditModal();
+        var aim = document.getElementById('ai-search-modal');
+        if (aim) aim.classList.add('hidden');
+      }
+    });
+
+    init();
+  });
+
+})();
+
+</script>
 </body>
 </html>
