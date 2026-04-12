@@ -30,16 +30,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    defaults:
+      run:
+        working-directory: synapseai-platform
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
       - name: Install uv
         run: |
           pip install uv
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Verify project file
+        run: |
+          if [ ! -f pyproject.toml ]; then
+            echo "::error::pyproject.toml not found in synapseai-platform/"
+            exit 1
+          fi
+          echo "Found pyproject.toml in synapseai-platform/"
       - name: Deploy
         run: uv sync --all-groups --extra dev
