@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Synapse AI – AI-powered platform with intelligent chat, smart task management, RAG search, and long-term memory.">
+    <meta property="og:title" content="Synapse AI – Your AI-Powered Digital Brain">
+    <meta property="og:description" content="Synapse AI – AI-powered platform with intelligent chat, smart task management, RAG search, and long-term memory.">
+    <meta property="og:type" content="website">
+    <title>Synapse AI – Your AI-Powered Digital Brain</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container flex items-center justify-between">
+            <a href="/" class="nav-brand">🧠 Synapse AI</a>
+
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="pages/docs.html" class="nav-link">Docs</a>
+                <a href="pages/about.html" class="nav-link">About</a>
+                <button class="theme-toggle btn btn-icon" id="theme-toggle" aria-label="Toggle theme">🌙</button>
+                <a href="pages/chat.html" class="btn btn-primary btn-sm">Try Demo</a>
+            </div>
+
+            <button class="nav-toggle nav-hamburger" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content text-center">
+            <span class="badge badge-primary">✨ AI-Powered Intelligence Platform</span>
+            <h1 class="hero-title">
+                Your AI-Powered<br>
+                <span class="gradient-text">Digital Brain</span>
+            </h1>
+            <p class="hero-subtitle">
+                Experience next-generation AI with intelligent chat, smart task management,
+                RAG-powered search, long-term memory, and LangGraph orchestration — all in one unified platform.
+            </p>
+            <div class="hero-cta">
+                <a href="pages/chat.html" class="btn btn-primary">Start Chatting →</a>
+                <a href="pages/tasks.html" class="btn btn-secondary">Manage Tasks</a>
+            </div>
+
+            <div class="stats-strip">
+                <div class="stat-item">
+                    <span class="stat-value">5+</span>
+                    <span class="stat-label">AI Models</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">&lt;2s</span>
+                    <span class="stat-label">Response</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">∞</span>
+                    <span class="stat-label">Sessions</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">99.9%</span>
+                    <span class="stat-label">Uptime</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+        <div class="container">
+            <h2 class="section-title text-center">Features</h2>
+            <p class="section-subtitle text-center">Everything you need for an intelligent AI workflow</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Intelligent AI Chat</h3>
+                    <p>Stream responses with simulated typing, Markdown rendering, session management, and contextual memory.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Smart Task Manager</h3>
+                    <p>Create, organize, and track tasks with priorities, categories, filters, and AI-powered suggestions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>RAG-Powered Search</h3>
+                    <p>Retrieve relevant information using Retrieval-Augmented Generation with Pinecone vector database.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Long-term Memory</h3>
+                    <p>AI remembers your preferences, past conversations, and context using mem0 memory framework.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>LangGraph Orchestration</h3>
+                    <p>Complex AI workflows with StateGraph, tool calling, DuckDuckGo search, and PostgreSQL checkpointing.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Real-time Diagnostics</h3>
+                    <p>Monitor system health, track performance metrics, and view detailed service status dashboards.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section class="section">
+        <div class="container text-center">
+            <h2 class="section-title">Powered By</h2>
+            <div class="tech-stack">
+                <div class="tech-item">FastAPI</div>
+                <div class="tech-item">LangGraph</div>
+                <div class="tech-item">PostgreSQL</div>
+                <div class="tech-item">OpenAI</div>
+                <div class="tech-item">Pinecone</div>
+                <div class="tech-item">Next.js</div>
+                <div class="tech-item">Three.js</div>
+                <div class="tech-item">Prometheus</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title text-center">What People Are Saying</h2>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p class="testimonial-quote">"Synapse AI transformed how our team handles knowledge management. The RAG search is incredibly accurate."</p>
+                    <div class="testimonial-author">
+                        <span class="testimonial-avatar">👨‍💼</span>
+                        <div>
+                            <span class="testimonial-name">Alex Chen</span>
+                            <span class="testimonial-role">CTO at TechVentures</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-quote">"The LangGraph integration makes complex workflows feel simple. Best AI platform I've used."</p>
+                    <div class="testimonial-author">
+                        <span class="testimonial-avatar">👩‍💻</span>
+                        <div>
+                            <span class="testimonial-name">Sarah Kim</span>
+                            <span class="testimonial-role">AI Engineer</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-quote">"Finally an AI tool with real memory. It actually remembers our previous conversations!"</p>
+                    <div class="testimonial-author">
+                        <span class="testimonial-avatar">👨‍🎓</span>
+                        <div>
+                            <span class="testimonial-name">James Rodriguez</span>
+                            <span class="testimonial-role">Product Lead</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section">
+        <div class="container">
+            <h2 class="section-title text-center">Pricing</h2>
+            <p class="section-subtitle text-center">Choose the plan that fits your needs</p>
+
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Starter</h3>
+                    <div class="pricing-price">Free</div>
+                    <p>Perfect for exploration</p>
+                    <ul class="pricing-features">
+                        <li>100 messages/day</li>
+                        <li>5 sessions</li>
+                        <li>Basic search</li>
+                        <li>Community support</li>
+                    </ul>
+                    <a href="pages/chat.html" class="btn btn-secondary">Get Started Free</a>
+                </div>
+
+                <div class="pricing-card pricing-featured">
+                    <h3>Pro</h3>
+                    <div class="pricing-price">$29<span>/mo</span></div>
+                    <p>For power users</p>
+                    <ul class="pricing-features">
+                        <li>Unlimited messages</li>
+                        <li>Unlimited sessions</li>
+                        <li>RAG search</li>
+                        <li>Priority support</li>
+                        <li>Custom models</li>
+                        <li>API access</li>
+                    </ul>
+                    <a href="pages/chat.html" class="btn btn-primary">Start Pro Trial</a>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="pricing-price">Custom</div>
+                    <p>For teams</p>
+                    <ul class="pricing-features">
+                        <li>Everything in Pro</li>
+                        <li>Custom deployment</li>
+                        <li>SLA guarantee</li>
+                        <li>Dedicated support</li>
+                        <li>SSO &amp; SAML</li>
+                    </ul>
+                    <a href="mailto:rameshsain070@gmail.com" class="btn btn-secondary">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section">
+        <div class="container">
+            <h2 class="section-title text-center">Frequently Asked Questions</h2>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <button class="faq-question">What is Synapse AI?</button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Synapse AI is a full-stack AI platform that combines intelligent chat, task management,
+                            RAG-powered search, and long-term memory into one unified interface. Built with FastAPI,
+                            LangGraph, and PostgreSQL.
+                        </div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">Does it work without a backend?</button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Yes! Synapse AI includes a complete demo mode that works entirely in your browser. Chat
+                            responses are simulated, and tasks are stored in localStorage. Connect a backend anytime
+                            to unlock full AI capabilities.
+                        </div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">What AI models are supported?</button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Synapse AI supports OpenAI GPT-4o, GPT-4o-mini, and Google Gemini models with automatic
+                            fallback. The LangGraph orchestration layer manages model selection and tool calling.
+                        </div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">How does RAG search work?</button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            RAG (Retrieval-Augmented Generation) uses Pinecone vector database to store and retrieve
+                            relevant context. When you ask a question, the system finds related information and includes
+                            it in the AI's context for more accurate responses.
+                        </div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">Is it open source?</button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Yes! Synapse AI is fully open source on GitHub. You can self-host the entire platform,
+                            contribute to development, or customize it for your needs.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section hero text-center">
+        <div class="container">
+            <h2 class="section-title">Ready to Experience the Future of AI?</h2>
+            <p class="section-subtitle">Join thousands of developers using Synapse AI to build smarter applications.</p>
+            <a href="pages/chat.html" class="btn btn-primary">Launch Synapse AI →</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <span class="nav-brand">🧠 Synapse AI</span>
+                    <p class="footer-desc">Your AI-Powered Digital Brain</p>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <a href="pages/chat.html">Chat</a>
+                    <a href="pages/tasks.html">Tasks</a>
+                    <a href="pages/chat.html">Search</a>
+                    <a href="pages/chat.html">Memory</a>
+                    <a href="pages/chat.html">Diagnostics</a>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Developers</h4>
+                    <a href="pages/docs.html">Documentation</a>
+                    <a href="pages/docs.html">API Reference</a>
+                    <a href="https://github.com/Rameshsain070/Synapse_AI" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <a href="pages/about.html">About</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="mailto:rameshsain070@gmail.com">Contact</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Synapse AI. Built with ❤️ by Ramesh Sain</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/theme.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
