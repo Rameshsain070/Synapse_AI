@@ -20,8 +20,44 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # ── Backend validation ───────────────────────────────────────────────────
+  backend-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: synapseai-platform
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync --no-dev
+
+      - name: Lint with ruff
+        run: uv run ruff check app/ --exit-zero
+
+  # ── Build Docker image ─────────────────────────────────────────────────
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t synapseai-platform synapseai-platform/
+
+  # ── Deploy frontend to GitHub Pages ────────────────────────────────────
   build:
     runs-on: ubuntu-latest
+    needs: [backend-check, docker-build]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
