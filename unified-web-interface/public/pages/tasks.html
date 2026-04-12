@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Task Manager – organize and track your tasks with Synapse AI.">
+    <title>Tasks - Synapse AI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container flex items-center justify-between">
+            <a href="../index.html" class="nav-brand">🧠 Synapse AI</a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">Home</a>
+                <a href="chat.html" class="nav-link">Chat</a>
+                <a href="docs.html" class="nav-link">Docs</a>
+                <a href="about.html" class="nav-link">About</a>
+                <button class="theme-toggle btn btn-icon" id="theme-toggle">🌙</button>
+            </div>
+            <button class="nav-toggle nav-hamburger" aria-label="Toggle navigation menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Tasks Container -->
+    <div class="tasks-container">
+
+        <!-- Task Stats -->
+        <div class="task-stats" id="task-stats">
+            <div class="stat-card">
+                <div class="stat-label">Total</div>
+                <div class="stat-count" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">To Do</div>
+                <div class="stat-count" id="stat-todo">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">In Progress</div>
+                <div class="stat-count" id="stat-progress">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Done</div>
+                <div class="stat-count" id="stat-done">0</div>
+            </div>
+        </div>
+
+        <!-- Task Filters -->
+        <div class="task-filters">
+            <input type="text" class="input" id="task-search" placeholder="Search tasks...">
+            <select class="select" id="filter-status">
+                <option value="all">All</option>
+                <option value="todo">To Do</option>
+                <option value="in-progress">In Progress</option>
+                <option value="done">Done</option>
+            </select>
+            <select class="select" id="filter-priority">
+                <option value="all">All</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+            <select class="select" id="filter-category">
+                <option value="all">All</option>
+                <option value="general">General</option>
+                <option value="work">Work</option>
+                <option value="personal">Personal</option>
+                <option value="learning">Learning</option>
+            </select>
+            <button class="btn btn-primary" id="add-task-btn">Add Task</button>
+        </div>
+
+        <!-- Task List -->
+        <div class="task-list" id="task-list">
+            <!-- Populated by tasks.js -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display:none;">
+            <div class="empty-state-icon">📋</div>
+            <p>No tasks found</p>
+            <p>Create your first task or adjust filters</p>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="task-modal" style="display:none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Add Task</h2>
+                <button class="btn btn-icon modal-close" id="modal-close">&times;</button>
+            </div>
+            <form id="task-form">
+                <div class="form-group">
+                    <label for="task-title">Title</label>
+                    <input type="text" class="input" id="task-title" required placeholder="Task title">
+                </div>
+                <div class="form-group">
+                    <label for="task-description">Description</label>
+                    <textarea class="textarea" id="task-description" placeholder="Task description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="task-priority">Priority</label>
+                    <select class="select" id="task-priority">
+                        <option value="high">High</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-category">Category</label>
+                    <select class="select" id="task-category">
+                        <option value="general">General</option>
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                        <option value="learning">Learning</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-status">Status</label>
+                    <select class="select" id="task-status">
+                        <option value="todo">To Do</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <input type="hidden" id="task-id">
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-task-btn">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/theme.js"></script>
+    <script src="../js/nav.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/tasks.js"></script>
+</body>
+</html>
