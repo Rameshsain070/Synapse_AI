@@ -46,8 +46,10 @@ if _langfuse_public and _langfuse_secret:
             secret_key=_langfuse_secret,
             host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"),
         )
-    except Exception:
-        pass  # Langfuse is optional; the app works without it
+    except Exception as exc:
+        logger.warning("langfuse_init_failed", error=str(exc))
+else:
+    logger.info("langfuse_disabled", reason="LANGFUSE_PUBLIC_KEY or LANGFUSE_SECRET_KEY not set")
 
 
 @asynccontextmanager
