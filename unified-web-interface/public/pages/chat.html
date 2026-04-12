@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Chat with Synapse AI – your intelligent assistant for tasks, search, and more.">
+    <title>Chat - Synapse AI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container flex items-center justify-between">
+            <a href="../index.html" class="nav-brand">🧠 Synapse AI</a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">Home</a>
+                <a href="tasks.html" class="nav-link">Tasks</a>
+                <a href="docs.html" class="nav-link">Docs</a>
+                <a href="about.html" class="nav-link">About</a>
+                <button class="theme-toggle btn btn-icon" id="theme-toggle">🌙</button>
+                <button class="btn btn-primary btn-sm" id="chat-new-session-nav">New Chat</button>
+            </div>
+            <button class="nav-toggle nav-hamburger" aria-label="Toggle navigation menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Chat Container -->
+    <div class="chat-container">
+        <!-- Sidebar -->
+        <aside class="chat-sidebar" id="chat-sidebar">
+            <div class="chat-sidebar-header">
+                <h3>Sessions</h3>
+                <button class="btn btn-icon" id="chat-new-session" aria-label="New session">+</button>
+            </div>
+            <div class="session-list" id="chat-sessions">
+                <!-- Populated by chat.js -->
+            </div>
+            <div class="chat-sidebar-footer" style="padding:1rem;border-top:1px solid var(--border);margin-top:auto;">
+                <button class="btn btn-sm" id="chat-clear-btn" style="width:100%;">Clear All</button>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <div class="chat-header" style="padding:0.75rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;background:var(--surface);">
+                <button class="btn btn-icon chat-sidebar-toggle" id="chat-sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+                <h3 class="chat-session-title" id="chat-session-title">New Chat</h3>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-msg chat-msg--ai">
+                    <div class="chat-msg-avatar">🧠</div>
+                    <div class="chat-msg-body">
+                        <div class="chat-msg-content">
+                            👋 Hi! I'm Synapse AI, your intelligent assistant. I can help with tasks, answer questions, search for information, and remember our conversations. Try asking me about: <strong>task management</strong>, <strong>RAG search</strong>, <strong>LangGraph</strong>, or just say <strong>hello</strong>!
+                        </div>
+                        <div class="chat-msg-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="chat-typing-indicator" style="display:none;margin:0 1.5rem 0.5rem;">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+
+            <div class="chat-input-area">
+                <textarea
+                    class="textarea"
+                    id="chat-input"
+                    placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
+                    rows="1"
+                    aria-label="Chat message input"
+                ></textarea>
+                <button class="btn btn-primary btn-icon" id="chat-send-btn" aria-label="Send message">➤</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/theme.js"></script>
+    <script src="../js/nav.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/chat.js"></script>
+    <script>
+    (function() {
+        var navBtn = document.getElementById('chat-new-session-nav');
+        var sidebarBtn = document.getElementById('chat-new-session');
+        if (navBtn && sidebarBtn) {
+            navBtn.addEventListener('click', function() { sidebarBtn.click(); });
+        }
+    })();
+    </script>
+</body>
+</html>
