@@ -148,11 +148,10 @@
   function debounce(fn, delay) {
     var timer;
     return function () {
-      var context = this;
       var args = arguments;
       clearTimeout(timer);
-      timer = setTimeout(function () {
-        fn.apply(context, args);
+      timer = setTimeout(() => {
+        fn.apply(this, args);
       }, delay);
     };
   }
@@ -173,7 +172,7 @@
     var backendUrl;
     try {
       backendUrl = localStorage.getItem('synapse-backend-url');
-    } catch (e) {
+    } catch {
       backendUrl = null;
     }
 

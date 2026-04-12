@@ -44,7 +44,7 @@
         if (linkPath === currentPath) {
           link.classList.add('active');
         }
-      } catch (e) {
+      } catch {
         // Invalid URL, skip
       }
     }
