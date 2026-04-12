@@ -20,7 +20,8 @@ var SynapseAPI = (function () {
   var DEFAULT_API_URL = 'https://synapseai-production-3489.up.railway.app';
   var TOKEN_KEY = 'synapse_user_token';
   var SESSION_TOKEN_KEY = 'synapse_session_token';
-  var MAX_RETRIES = 2;
+  var MAX_RETRIES = 3;
+  var REQUEST_TIMEOUT_MS = 30000;
 
   var _baseUrl = DEFAULT_API_URL;
   var _token = '';
@@ -50,6 +51,31 @@ var SynapseAPI = (function () {
     return h;
   }
 
+  /** Wrap fetch with a timeout so requests don't hang forever. */
+  function _fetchWithTimeout(url, opts, timeoutMs) {
+    timeoutMs = timeoutMs || REQUEST_TIMEOUT_MS;
+    var controller = new AbortController();
+    opts.signal = controller.signal;
+    var timer = setTimeout(function () { controller.abort(); }, timeoutMs);
+    return fetch(url, opts).finally(function () { clearTimeout(timer); });
+  }
+
+  /** Classify a fetch error into a user-friendly message. */
+  function _friendlyNetworkError(err) {
+    if (!err) return 'Unknown network error';
+    var msg = err.message || '';
+    if (err.name === 'AbortError' || msg.indexOf('aborted') !== -1) {
+      return 'Request timed out — the backend may be slow or unreachable. Please try again.';
+    }
+    if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1 || msg.indexOf('Network request failed') !== -1) {
+      return 'Cannot reach the backend. Check your internet connection and ensure the backend URL is correct and CORS is configured.';
+    }
+    if (msg.indexOf('CORS') !== -1 || msg.indexOf('blocked') !== -1) {
+      return 'CORS error — the backend must allow requests from this origin. Check the ALLOWED_ORIGINS setting.';
+    }
+    return msg || 'Unknown network error';
+  }
+
   function _request(method, path, body, useSession, attempt, contentType) {
     attempt = attempt || 0;
     var url = _baseUrl + path;
@@ -59,20 +85,37 @@ var SynapseAPI = (function () {
     if (body !== undefined && body !== null) {
       opts.body = (typeof body === 'string') ? body : JSON.stringify(body);
     }
-    return fetch(url, opts).then(function (res) {
+    return _fetchWithTimeout(url, opts).then(function (res) {
       if (res.status === 204) return null;
       if (res.ok) return res.json();
       if (res.status >= 500 && attempt < MAX_RETRIES) {
+        var delay = Math.min(1000 * Math.pow(2, attempt), 8000);
         return new Promise(function (resolve) {
           setTimeout(function () {
             resolve(_request(method, path, body, useSession, attempt + 1, contentType));
-          }, 1000 * (attempt + 1));
+          }, delay);
         });
       }
       return res.json().catch(function () { return { detail: res.statusText }; }).then(function (err) {
         var msg = _extractErr(err);
         throw new Error(msg);
       });
+    }).catch(function (err) {
+      if (err instanceof Error && (err.message.indexOf('Cannot reach') !== -1 || err.message.indexOf('CORS') !== -1 || err.message.indexOf('timed out') !== -1)) {
+        throw err;
+      }
+      if (err.name === 'AbortError' || (err.message && (err.message.indexOf('Failed to fetch') !== -1 || err.message.indexOf('NetworkError') !== -1))) {
+        if (attempt < MAX_RETRIES) {
+          var retryDelay = Math.min(1000 * Math.pow(2, attempt), 8000);
+          return new Promise(function (resolve) {
+            setTimeout(function () {
+              resolve(_request(method, path, body, useSession, attempt + 1, contentType));
+            }, retryDelay);
+          });
+        }
+        throw new Error(_friendlyNetworkError(err));
+      }
+      throw err;
     });
   }
 
@@ -127,9 +170,14 @@ var SynapseAPI = (function () {
   function listSessions() { return _request('GET', '/api/v1/auth/sessions'); }
 
   /* ── Chat (SSE streaming) ── */
+  var STREAM_TIMEOUT_MS = 60000;
   function chatStream(messages, onChunk, onDone, onError) {
     var url = _baseUrl + '/api/v1/chatbot/chat/stream';
     var controller = new AbortController();
+    var streamTimer = setTimeout(function () {
+      controller.abort();
+      if (onError) onError(new Error('Stream timed out after ' + (STREAM_TIMEOUT_MS / 1000) + 's — the AI may be taking too long. Please try again.'));
+    }, STREAM_TIMEOUT_MS);
     fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessionToken() },
@@ -143,7 +191,8 @@ var SynapseAPI = (function () {
         var buffer = '';
         function read() {
           reader.read().then(function (result) {
-            if (result.done) { if (onDone) onDone(); return; }
+            if (result.done) { clearTimeout(streamTimer); if (onDone) onDone(); return; }
+            clearTimeout(streamTimer);
             buffer += decoder.decode(result.value, { stream: true });
             var lines = buffer.split('\n');
             buffer = lines.pop() || '';
@@ -159,12 +208,17 @@ var SynapseAPI = (function () {
               } catch (_) { /* skip */ }
             });
             read();
+          }).catch(function (err) {
+            clearTimeout(streamTimer);
+            if (err.name !== 'AbortError' && onError) onError(err);
           });
         }
         read();
       })
       .catch(function (err) {
-        if (err.name !== 'AbortError' && onError) onError(err);
+        clearTimeout(streamTimer);
+        if (err.name === 'AbortError') return;
+        if (onError) onError(new Error(_friendlyNetworkError(err)));
       });
     return controller;
   }
@@ -193,9 +247,15 @@ var SynapseAPI = (function () {
   /* ── Connection validation ── */
   function validateConnection(url) {
     var testUrl = (url || _baseUrl).replace(/\/+$/, '');
-    return fetch(testUrl + '/health').then(function (r) {
-      if (!r.ok) throw new Error('Health check failed');
+    return _fetchWithTimeout(testUrl + '/health', {}, 10000).then(function (r) {
+      if (!r.ok) throw new Error('Health check returned HTTP ' + r.status);
       return r.json();
+    }).then(function (data) {
+      if (data && data.status === 'healthy') return data;
+      if (data && typeof data === 'object') return data;
+      throw new Error('Unexpected health response');
+    }).catch(function (err) {
+      throw new Error(_friendlyNetworkError(err));
     });
   }
 
@@ -223,5 +283,6 @@ var SynapseAPI = (function () {
     deleteTask: deleteTask,
     getAISuggestions: getAISuggestions,
     searchTasks: searchTasks,
+    friendlyNetworkError: _friendlyNetworkError,
   };
 })();

@@ -93,6 +93,7 @@
   }
 
   /* ── Enter app (after login) ── */
+  var _healthInterval = null;
   async function enterApp() {
     SynapseUI.showScreen('app');
     var emailEl = document.getElementById('user-email-display');
@@ -100,8 +101,12 @@
     if (emailEl) emailEl.textContent = S().userEmail || 'User';
     if (avEl && S().userEmail) avEl.textContent = S().userEmail[0].toUpperCase();
 
-    var base = S().apiUrl.replace(/\/+$/, '');
-    fetch(base + '/health').then(function () { SynapseUI.setStatus(true); }).catch(function () { SynapseUI.setStatus(false); });
+    /* Initial health check */
+    checkHealth();
+
+    /* Periodic health checks every 30 seconds for auto-reconnect */
+    if (_healthInterval) clearInterval(_healthInterval);
+    _healthInterval = setInterval(checkHealth, 30000);
 
     await loadSessions();
 
@@ -112,6 +117,34 @@
       await SynapseChat.loadMessages();
     }
     SynapseUI.showView('chat');
+  }
+
+  function checkHealth() {
+    var base = S().apiUrl.replace(/\/+$/, '');
+    fetch(base + '/health', { method: 'GET' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        var ok = data && (data.status === 'healthy' || data.status === 'ok');
+        SynapseUI.setStatus(ok !== false);
+        updateConnectionBanner(true);
+      })
+      .catch(function () {
+        SynapseUI.setStatus(false);
+        updateConnectionBanner(false);
+      });
+  }
+
+  function updateConnectionBanner(online) {
+    var banner = document.getElementById('connection-banner');
+    if (!banner) return;
+    if (online) {
+      banner.classList.add('hidden');
+    } else {
+      banner.classList.remove('hidden');
+    }
   }
 
   /* ── Initialize app ── */
@@ -158,18 +191,29 @@
       setupBtn.addEventListener('click', async function () {
         var url = setupUrl ? setupUrl.value.trim() : '';
         if (!url) { setupStatus.textContent = 'Please enter a URL'; setupStatus.style.color = 'var(--danger)'; return; }
+        if (!/^https?:\/\/.+/.test(url)) { setupStatus.textContent = 'Please enter a valid URL starting with http:// or https://'; setupStatus.style.color = 'var(--danger)'; return; }
         setupBtn.disabled = true; setupBtn.textContent = 'Testing\u2026';
         setupStatus.textContent = 'Connecting\u2026'; setupStatus.style.color = 'var(--text2)';
         try {
-          var r = await fetch(url.replace(/\/+$/, '') + '/health');
+          var cleanUrl = url.replace(/\/+$/, '');
+          var r = await fetch(cleanUrl + '/health');
           var d = await r.json();
-          SynapseAuth.saveApiUrl(url);
-          setupStatus.textContent = '\u2705 Connected! (v' + (d.version || '?') + ')';
+          SynapseAuth.saveApiUrl(cleanUrl);
+          setupStatus.textContent = '\u2705 Connected!' + (d.version ? ' (v' + d.version + ')' : '');
           setupStatus.style.color = 'var(--success)';
           setTimeout(function () { SynapseUI.showScreen('auth'); }, 600);
         } catch (e) {
-          setupStatus.textContent = '\u274C Cannot reach backend. Check URL and CORS settings.';
+          var errMsg = 'Cannot reach backend.';
+          if (e.message && e.message.indexOf('Failed to fetch') !== -1) {
+            errMsg = '\u274C Cannot reach backend. Possible causes:\n\u2022 Backend is not running\n\u2022 CORS not configured (add your GitHub Pages URL to ALLOWED_ORIGINS)\n\u2022 URL is incorrect';
+          } else if (e.message) {
+            errMsg = '\u274C Connection error: ' + e.message;
+          } else {
+            errMsg = '\u274C Cannot reach backend. Check URL and CORS settings.';
+          }
+          setupStatus.textContent = errMsg;
           setupStatus.style.color = 'var(--danger)';
+          setupStatus.style.whiteSpace = 'pre-line';
         } finally {
           setupBtn.disabled = false; setupBtn.textContent = 'Connect & Continue \u2192';
         }

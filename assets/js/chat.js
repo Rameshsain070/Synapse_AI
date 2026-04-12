@@ -37,33 +37,61 @@ var SynapseChat = (function () {
   }
 
   /* ── Streaming chat via SSE ── */
+  var STREAM_TIMEOUT_MS = 60000;
   async function* streamChat(messages) {
-    var r = await fetch(base() + '/api/v1/chatbot/chat/stream', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S().sessionToken },
-      body: JSON.stringify({ messages: messages })
-    });
-    if (!r.ok) throw new Error('Stream failed (' + r.status + ')');
+    var controller = new AbortController();
+    var timedOut = false;
+    var streamTimer = setTimeout(function () {
+      timedOut = true;
+      controller.abort();
+    }, STREAM_TIMEOUT_MS);
+    var r;
+    try {
+      r = await fetch(base() + '/api/v1/chatbot/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S().sessionToken },
+        body: JSON.stringify({ messages: messages }),
+        signal: controller.signal
+      });
+    } catch (err) {
+      clearTimeout(streamTimer);
+      if (timedOut) throw new Error('Stream timed out — the AI may be taking too long. Please try again.');
+      if (err.name === 'AbortError') throw new Error('Stream was cancelled.');
+      var msg = err.message || '';
+      if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
+        throw new Error('Cannot reach the backend. Check your connection and ensure the backend URL is correct with CORS configured.');
+      }
+      throw err;
+    }
+    if (!r.ok) {
+      clearTimeout(streamTimer);
+      throw new Error('Stream failed (' + r.status + ')');
+    }
     var reader = r.body.getReader();
     var dec = new TextDecoder();
     var buf = '';
-    while (true) {
-      var read = await reader.read();
-      if (read.done) break;
-      buf += dec.decode(read.value, { stream: true });
-      var lines = buf.split('\n');
-      buf = lines.pop() || '';
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i].trim();
-        if (!line.startsWith('data:')) continue;
-        var json = line.slice(5).trim();
-        if (json === '[DONE]') return;
-        try {
-          var d = JSON.parse(json);
-          if (d.done) return;
-          if (d.content) yield d.content;
-        } catch (ex) { /* skip */ }
+    try {
+      while (true) {
+        var read = await reader.read();
+        if (read.done) break;
+        clearTimeout(streamTimer);
+        buf += dec.decode(read.value, { stream: true });
+        var lines = buf.split('\n');
+        buf = lines.pop() || '';
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i].trim();
+          if (!line.startsWith('data:')) continue;
+          var json = line.slice(5).trim();
+          if (json === '[DONE]') return;
+          try {
+            var d = JSON.parse(json);
+            if (d.done) return;
+            if (d.content) yield d.content;
+          } catch (ex) { /* skip */ }
+        }
       }
+    } finally {
+      clearTimeout(streamTimer);
     }
   }
 
@@ -136,10 +164,15 @@ var SynapseChat = (function () {
       typing.classList.remove('msg-typing');
       if (!full) { bodyEl.textContent = 'No response received.'; full = 'No response received.'; }
       S().messages.push({ role: 'assistant', content: full });
+      SynapseUI.setStatus(true);
     } catch (e) {
       typing.classList.remove('msg-typing');
-      bodyEl.textContent = 'Error: ' + e.message;
-      SynapseUI.toast('Chat error: ' + e.message, 'error');
+      var errMsg = e.message || 'Unknown error';
+      if (errMsg.indexOf('Cannot reach') !== -1 || errMsg.indexOf('timed out') !== -1) {
+        SynapseUI.setStatus(false);
+      }
+      bodyEl.textContent = '\u26A0 ' + errMsg;
+      SynapseUI.toast('Chat error: ' + errMsg, 'error');
     } finally {
       S().streaming = false;
       if (btn) btn.disabled = false;

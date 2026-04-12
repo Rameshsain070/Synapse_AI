@@ -21,16 +21,41 @@ var SynapseTasks = (function () {
   }
 
   /* ── API helpers ── */
-  function apiReq(method, path, body) {
+  var MAX_RETRIES = 2;
+  function apiReq(method, path, body, attempt) {
+    attempt = attempt || 0;
     var opts = { method: method, headers: hdr() };
     if (body !== undefined) opts.body = JSON.stringify(body);
     return fetch(base() + path, opts).then(function (r) {
       if (r.status === 204) return null;
-      if (!r.ok) return r.json().catch(function () { return { detail: r.statusText }; }).then(function (e) {
-        var msg = typeof e.detail === 'string' ? e.detail : (Array.isArray(e.detail) ? e.detail.map(function (d) { return d.msg || JSON.stringify(d); }).join(', ') : JSON.stringify(e));
-        throw new Error(msg);
-      });
+      if (!r.ok) {
+        if (r.status >= 500 && attempt < MAX_RETRIES) {
+          var delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+          return new Promise(function (resolve) {
+            setTimeout(function () { resolve(apiReq(method, path, body, attempt + 1)); }, delay);
+          });
+        }
+        return r.json().catch(function () { return { detail: r.statusText }; }).then(function (e) {
+          var msg = typeof e.detail === 'string' ? e.detail : (Array.isArray(e.detail) ? e.detail.map(function (d) { return d.msg || JSON.stringify(d); }).join(', ') : JSON.stringify(e));
+          throw new Error(msg);
+        });
+      }
       return r.json();
+    }).catch(function (err) {
+      if (err instanceof Error && err.message && err.message.indexOf('Failed to fetch') === -1 && err.message.indexOf('NetworkError') === -1 && err.name !== 'AbortError') {
+        throw err;
+      }
+      if (attempt < MAX_RETRIES) {
+        var retryDelay = Math.min(1000 * Math.pow(2, attempt), 8000);
+        return new Promise(function (resolve) {
+          setTimeout(function () { resolve(apiReq(method, path, body, attempt + 1)); }, retryDelay);
+        });
+      }
+      var msg = (err && err.message) || '';
+      if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
+        throw new Error('Cannot reach the backend. Check your connection and ensure the backend URL is correct with CORS configured.');
+      }
+      throw err;
     });
   }
 
@@ -198,7 +223,7 @@ var SynapseTasks = (function () {
       await apiDeleteTask(id);
       S().tasks = S().tasks.filter(function (t) { return t.id !== id; });
       renderTasks();
-      SynapseUI.toast('Deleted', 'error');
+      SynapseUI.toast('Deleted', 'info');
     } catch (e) {
       SynapseUI.toast('Delete failed: ' + e.message, 'error');
     }
