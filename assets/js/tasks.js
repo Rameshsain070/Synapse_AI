@@ -42,11 +42,13 @@ var SynapseTasks = (function () {
       }
       return r.json();
     }).catch(function (err) {
+      console.error('[SynapseAI] Task API error:', method, path, err);
       if (err instanceof Error && err.message && err.message.indexOf('Failed to fetch') === -1 && err.message.indexOf('NetworkError') === -1 && err.name !== 'AbortError') {
         throw err;
       }
       if (attempt < MAX_RETRIES) {
         var retryDelay = Math.min(1000 * Math.pow(2, attempt), 8000);
+        console.warn('[SynapseAI] Retrying task request (attempt ' + (attempt + 1) + '/' + MAX_RETRIES + '):', method, path);
         return new Promise(function (resolve) {
           setTimeout(function () { resolve(apiReq(method, path, body, attempt + 1)); }, retryDelay);
         });
@@ -166,6 +168,7 @@ var SynapseTasks = (function () {
       S().tasks = (data && data.tasks) ? data.tasks : [];
       renderTasks();
     } catch (e) {
+      console.error('[SynapseAI] Failed to load tasks:', e);
       SynapseUI.toast('Failed to load tasks: ' + e.message, 'error');
       renderTasks();
     }
@@ -197,6 +200,7 @@ var SynapseTasks = (function () {
       if (prioEl) prioEl.value = 'medium';
       SynapseUI.toast('Task added!', 'success');
     } catch (e) {
+      console.error('[SynapseAI] Failed to add task:', e);
       SynapseUI.toast('Failed: ' + e.message, 'error');
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = '+ Add Task'; }
@@ -211,7 +215,8 @@ var SynapseTasks = (function () {
       if (idx !== -1) S().tasks[idx] = updated;
       renderTasks();
     } catch (e) {
-      SynapseUI.toast('Update failed', 'error');
+      console.error('[SynapseAI] Failed to toggle task:', e);
+      SynapseUI.toast('Update failed: ' + e.message, 'error');
       renderTasks();
     }
   }
@@ -225,6 +230,7 @@ var SynapseTasks = (function () {
       renderTasks();
       SynapseUI.toast('Deleted', 'info');
     } catch (e) {
+      console.error('[SynapseAI] Failed to delete task:', e);
       SynapseUI.toast('Delete failed: ' + e.message, 'error');
     }
   }
@@ -266,6 +272,7 @@ var SynapseTasks = (function () {
       renderTasks();
       SynapseUI.toast('Task updated!', 'success');
     } catch (e) {
+      console.error('[SynapseAI] Failed to save edit:', e);
       SynapseUI.toast('Update failed: ' + e.message, 'error');
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
@@ -303,6 +310,7 @@ var SynapseTasks = (function () {
       var idx = S().tasks.findIndex(function (t) { return t.id === task.id; });
       if (idx !== -1 && s.priority_score != null) S().tasks[idx].ai_priority_score = s.priority_score;
     } catch (e) {
+      console.error('[SynapseAI] AI suggestions failed:', e);
       panel.innerHTML = '<p class="text-danger">AI suggestions failed: ' + SynapseUI.esc(e.message) + '</p>';
     }
   }
@@ -329,6 +337,7 @@ var SynapseTasks = (function () {
         c.appendChild(el);
       });
     } catch (e) {
+      console.error('[SynapseAI] AI search failed:', e);
       c.innerHTML = '<p class="text-danger text-sm">Search failed: ' + SynapseUI.esc(e.message) + '</p>';
     }
   }
