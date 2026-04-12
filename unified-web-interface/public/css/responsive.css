@@ -1,0 +1,411 @@
+/* ============================================
+   Synapse AI — Responsive Styles
+   Mobile-first breakpoints & adaptive layouts
+   ============================================ */
+
+/* ----------------------------------------
+   Base / Mobile  (< 640px)
+   ---------------------------------------- */
+
+.container {
+  padding-inline: 1rem;
+}
+
+/* Navigation */
+.nav-links {
+  display: none;
+  position: fixed;
+  inset: 0;
+  top: 64px;
+  background: var(--surface);
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+  gap: 0.5rem;
+  z-index: 99;
+  border-top: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+.nav-links.active {
+  display: flex;
+}
+
+.navbar.nav-open .nav-links {
+  display: flex;
+}
+
+.nav-toggle {
+  display: flex;
+}
+
+/* Hero */
+.hero {
+  padding: 5rem 0 3rem;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+}
+
+.hero-cta {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hero-cta .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Grids — single column */
+.features-grid,
+.pricing-grid,
+.testimonials-grid,
+.team-grid,
+.tech-stack {
+  grid-template-columns: 1fr;
+}
+
+/* Stats */
+.stats-strip {
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+/* Chat */
+.chat-sidebar {
+  display: none;
+}
+
+.chat-sidebar.active {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  top: 64px;
+  z-index: 90;
+  width: 100%;
+  max-width: 320px;
+  border-right: 1px solid var(--border);
+}
+
+.chat-container {
+  grid-template-columns: 1fr;
+}
+
+.chat-sidebar-toggle {
+  display: inline-flex;
+}
+
+/* Tasks */
+.tasks-container {
+  grid-template-columns: 1fr;
+}
+
+.task-filters {
+  flex-direction: column;
+}
+
+.task-stats {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.task-item {
+  flex-direction: column;
+}
+
+.task-item-main {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Docs */
+.docs-sidebar {
+  display: none;
+}
+
+.docs-sidebar.active {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  top: 64px;
+  z-index: 90;
+  width: 100%;
+  max-width: 280px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+.docs-container {
+  grid-template-columns: 1fr;
+}
+
+.docs-sidebar-toggle {
+  display: inline-flex;
+}
+
+/* Footer */
+.footer-grid {
+  grid-template-columns: 1fr;
+  text-align: center;
+}
+
+/* Touch targets */
+.btn,
+.nav-link,
+.faq-question,
+.task-item input[type="checkbox"],
+.select,
+.input,
+.textarea {
+  min-height: 44px;
+}
+
+/* Modal */
+.modal {
+  width: 95%;
+  margin: 1rem;
+  max-height: 90vh;
+}
+
+/* ----------------------------------------
+   Small Tablets  (≥ 640px)
+   ---------------------------------------- */
+
+@media (min-width: 640px) {
+  .container {
+    padding-inline: 1.5rem;
+  }
+
+  .hero-cta {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .hero-cta .btn {
+    width: auto;
+  }
+
+  .features-grid,
+  .testimonials-grid,
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-strip {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .task-filters {
+    flex-direction: row;
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+    text-align: left;
+  }
+
+  .modal {
+    width: 85%;
+    margin: auto;
+  }
+}
+
+/* ----------------------------------------
+   Tablets  (≥ 768px)
+   ---------------------------------------- */
+
+@media (min-width: 768px) {
+  /* Show desktop nav */
+  .nav-links {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    padding: 0;
+    background: transparent;
+    border-top: none;
+    overflow: visible;
+  }
+
+  .nav-toggle {
+    display: none;
+  }
+
+  .hero {
+    padding: 7rem 0 4rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.25rem, 5vw, 3rem);
+  }
+
+  .pricing-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tech-stack {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .chat-sidebar-toggle {
+    display: none;
+  }
+
+  .chat-sidebar {
+    display: flex;
+  }
+
+  .chat-container {
+    grid-template-columns: 280px 1fr;
+  }
+
+  .task-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .task-filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .task-item {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .task-item-main {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .modal {
+    width: 600px;
+  }
+}
+
+/* ----------------------------------------
+   Desktop  (≥ 1024px)
+   ---------------------------------------- */
+
+@media (min-width: 1024px) {
+  .container {
+    padding-inline: 2rem;
+  }
+
+  .features-grid,
+  .testimonials-grid,
+  .pricing-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .team-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Docs — sidebar visible */
+  .docs-sidebar {
+    display: flex;
+  }
+
+  .docs-sidebar-toggle {
+    display: none;
+  }
+
+  .docs-container {
+    grid-template-columns: 260px 1fr;
+  }
+
+  .chat-container {
+    grid-template-columns: 300px 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 2fr repeat(3, 1fr);
+  }
+
+  .hero {
+    padding: 8rem 0 5rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.75rem, 4vw, 3.75rem);
+  }
+
+  .modal {
+    width: 640px;
+  }
+}
+
+/* ----------------------------------------
+   Large Desktop  (≥ 1280px)
+   ---------------------------------------- */
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 2rem;
+  }
+
+  .chat-container {
+    grid-template-columns: 320px 1fr;
+  }
+
+  .docs-container {
+    grid-template-columns: 280px 1fr;
+  }
+
+  .hero-title {
+    font-size: 3.75rem;
+  }
+}
+
+/* ----------------------------------------
+   Reduced Motion
+   ---------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ----------------------------------------
+   Print
+   ---------------------------------------- */
+
+@media print {
+  .navbar,
+  .chat-sidebar,
+  .docs-sidebar,
+  .nav-toggle,
+  .chat-input-area,
+  .toast,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .card,
+  .feature-card,
+  .pricing-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
