@@ -117,6 +117,19 @@ def parse_dict_of_lists_from_env(prefix, default_dict=None):
     return result
 
 
+# GitHub Pages origins (shared across environments)
+_GITHUB_PAGES_ORIGINS = [
+    "https://Rameshsain070.github.io",
+    "https://Rameshsain070.github.io/Synapse_AI",
+]
+
+# Local development origins
+_LOCAL_DEV_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+]
+
+
 class Settings:
     """Application settings without using pydantic."""
 
@@ -140,7 +153,9 @@ class Settings:
         self.DEBUG = os.getenv("DEBUG", "false").lower() in ("true", "1", "t", "yes")
 
         # CORS Settings
-        self.ALLOWED_ORIGINS = parse_list_from_env("ALLOWED_ORIGINS", ["*"])
+        self.ALLOWED_ORIGINS = parse_list_from_env(
+            "ALLOWED_ORIGINS", _LOCAL_DEV_ORIGINS + _GITHUB_PAGES_ORIGINS
+        )
 
         # Langfuse Configuration
         self.LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY", "")
@@ -226,22 +241,26 @@ class Settings:
                 "LOG_LEVEL": "DEBUG",
                 "LOG_FORMAT": "console",
                 "RATE_LIMIT_DEFAULT": ["1000 per day", "200 per hour"],
+                "ALLOWED_ORIGINS": _LOCAL_DEV_ORIGINS + _GITHUB_PAGES_ORIGINS,
             },
             Environment.STAGING: {
                 "DEBUG": False,
                 "LOG_LEVEL": "INFO",
                 "RATE_LIMIT_DEFAULT": ["500 per day", "100 per hour"],
+                "ALLOWED_ORIGINS": list(_GITHUB_PAGES_ORIGINS),
             },
             Environment.PRODUCTION: {
                 "DEBUG": False,
                 "LOG_LEVEL": "WARNING",
                 "RATE_LIMIT_DEFAULT": ["200 per day", "50 per hour"],
+                "ALLOWED_ORIGINS": list(_GITHUB_PAGES_ORIGINS),
             },
             Environment.TEST: {
                 "DEBUG": True,
                 "LOG_LEVEL": "DEBUG",
                 "LOG_FORMAT": "console",
                 "RATE_LIMIT_DEFAULT": ["1000 per day", "1000 per hour"],  # Relaxed for testing
+                "ALLOWED_ORIGINS": _LOCAL_DEV_ORIGINS + _GITHUB_PAGES_ORIGINS,
             },
         }
 
