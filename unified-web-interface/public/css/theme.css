@@ -1,0 +1,71 @@
+/* ============================================
+   Synapse AI — Theme System
+   CSS Custom Properties for Light & Dark modes
+   ============================================ */
+
+:root {
+  /* Background & Surface */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface2: #f1f5f9;
+
+  /* Text */
+  --text: #0f172a;
+  --text2: #64748b;
+
+  /* Borders */
+  --border: #e2e8f0;
+
+  /* Primary — Indigo */
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-light: rgba(99, 102, 241, 0.1);
+
+  /* Accent */
+  --accent: #8b5cf6;
+
+  /* Semantic */
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+
+  /* Elevation */
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.06);
+
+  /* Shape & Motion */
+  --radius: 0.75rem;
+  --transition: 0.2s ease;
+}
+
+/* ---- Dark Theme ---- */
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface2: #334155;
+
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+
+  --border: #334155;
+
+  --primary: #818cf8;
+  --primary-hover: #6366f1;
+  --primary-light: rgba(129, 140, 248, 0.12);
+
+  --accent: #a78bfa;
+
+  --success: #4ade80;
+  --danger: #f87171;
+  --warning: #fbbf24;
+
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Smooth theme transition */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
