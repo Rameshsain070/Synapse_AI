@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete REST API documentation for the Synapse AI platform — chat, tasks, RAG search, sessions, and more.">
+    <title>API Docs - Synapse AI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container flex items-center justify-between">
+            <a href="../index.html" class="nav-brand">🧠 Synapse AI</a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">Home</a>
+                <a href="chat.html" class="nav-link">Chat</a>
+                <a href="tasks.html" class="nav-link">Tasks</a>
+                <a href="about.html" class="nav-link">About</a>
+                <button class="theme-toggle btn btn-icon" id="theme-toggle" aria-label="Toggle theme">🌙</button>
+            </div>
+            <button class="nav-toggle nav-hamburger" aria-label="Toggle navigation menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Docs Layout -->
+    <div class="docs-container">
+
+        <!-- Sidebar -->
+        <aside class="docs-sidebar" id="docs-sidebar">
+            <h3 style="padding:0 1.5rem 1rem;margin:0;font-size:1.125rem;">API Reference</h3>
+
+            <nav class="docs-sidebar-nav">
+                <!-- Getting Started -->
+                <span style="padding:0.75rem 1.5rem 0.25rem;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);font-weight:700;">Getting Started</span>
+                <a href="#overview">Overview</a>
+                <a href="#authentication">Authentication</a>
+                <a href="#quick-start">Quick Start</a>
+
+                <!-- Chat API -->
+                <span style="padding:0.75rem 1.5rem 0.25rem;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);font-weight:700;">Chat API</span>
+                <a href="#send-message">Send Message</a>
+                <a href="#stream-chat">Stream Chat</a>
+                <a href="#get-messages">Get Messages</a>
+
+                <!-- Tasks API -->
+                <span style="padding:0.75rem 1.5rem 0.25rem;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);font-weight:700;">Tasks API</span>
+                <a href="#list-tasks">List Tasks</a>
+                <a href="#create-task">Create Task</a>
+                <a href="#update-task">Update Task</a>
+                <a href="#delete-task">Delete Task</a>
+                <a href="#ai-suggestions">AI Suggestions</a>
+
+                <!-- Sessions -->
+                <span style="padding:0.75rem 1.5rem 0.25rem;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);font-weight:700;">Sessions</span>
+                <a href="#create-session">Create Session</a>
+                <a href="#list-sessions">List Sessions</a>
+                <a href="#delete-session">Delete Session</a>
+
+                <!-- Search -->
+                <span style="padding:0.75rem 1.5rem 0.25rem;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);font-weight:700;">Search</span>
+                <a href="#rag-search">RAG Search</a>
+                <a href="#vector-search">Vector Search</a>
+
+                <!-- System -->
+                <span style="padding:0.75rem 1.5rem 0.25rem;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);font-weight:700;">System</span>
+                <a href="#health-check">Health Check</a>
+                <a href="#diagnostics">Diagnostics</a>
+            </nav>
+        </aside>
+
+        <!-- Mobile sidebar toggle -->
+        <button class="docs-sidebar-toggle btn btn-icon" id="docs-sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+
+        <!-- Content -->
+        <div class="docs-content">
+
+            <!-- Overview -->
+            <section id="overview">
+                <h1>Synapse AI API Reference</h1>
+                <p>Complete REST API documentation for the Synapse AI platform. Built with FastAPI, the API provides intelligent chat, task management, RAG search, and session management.</p>
+
+                <h3>Base URL</h3>
+                <pre><code>https://your-backend.railway.app/api/v1</code></pre>
+
+                <p><strong>Authentication:</strong> Most endpoints require a Bearer token obtained from the login endpoint. Include it in the <code>Authorization</code> header:</p>
+                <pre><code>Authorization: Bearer &lt;your_token&gt;</code></pre>
+            </section>
+
+            <!-- Quick Start -->
+            <section id="quick-start">
+                <h2>Quick Start</h2>
+                <p>Get up and running in three steps:</p>
+                <ol style="margin-bottom:1rem;padding-left:1.25rem;line-height:2;">
+                    <li>Register an account via <code>POST /api/v1/auth/register</code></li>
+                    <li>Login to obtain a Bearer token via <code>POST /api/v1/auth/login</code></li>
+                    <li>Call any endpoint with <code>Authorization: Bearer &lt;token&gt;</code></li>
+                </ol>
+            </section>
+
+            <!-- Authentication -->
+            <section id="authentication">
+                <h2>Authentication</h2>
+
+                <!-- Register -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/api/v1/auth/register</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Create a new user account.</p>
+                        <h4>Request Body</h4>
+<pre><code>{
+  "email": "user@example.com",
+  "password": "securepassword"
+}</code></pre>
+                        <h4>Example</h4>
+<pre><code>curl -X POST https://your-backend.railway.app/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"securepassword"}'</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>{
+  "user": {
+    "id": "abc-123",
+    "email": "user@example.com"
+  },
+  "token": "eyJhbGci..."
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Login -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/api/v1/auth/login</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Authenticate and receive an access token. Uses form-urlencoded body.</p>
+                        <h4>Request Body <span class="badge badge-warning">form-urlencoded</span></h4>
+<pre><code>username=user@example.com
+password=securepassword
+grant_type=password</code></pre>
+                        <h4>Example</h4>
+<pre><code>curl -X POST https://your-backend.railway.app/api/v1/auth/login \
+  -d "username=user@example.com&amp;password=securepassword&amp;grant_type=password"</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>{
+  "access_token": "eyJhbGci...",
+  "token_type": "bearer"
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chat API -->
+            <section id="chat-api">
+                <h2>Chat API</h2>
+
+                <!-- Send Message -->
+                <div class="endpoint-card" id="send-message">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/api/v1/chatbot/chat</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Send a message to the AI chatbot and receive a response.</p>
+                        <h4>Request Body</h4>
+<pre><code>{
+  "message": "What is LangGraph?",
+  "session_id": "optional-session-uuid"
+}</code></pre>
+                        <h4>Example</h4>
+<pre><code>curl -X POST https://your-backend.railway.app/api/v1/chatbot/chat \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"message":"What is LangGraph?","session_id":"abc-123"}'</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>{
+  "response": "LangGraph is a framework for building stateful AI agents...",
+  "session_id": "abc-123"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Stream Chat -->
+                <div class="endpoint-card" id="stream-chat">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/api/v1/chatbot/chat/stream</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Stream a chat response using Server-Sent Events (SSE). The response is delivered as a series of text chunks.</p>
+                        <h4>Request Body</h4>
+<pre><code>{
+  "message": "Explain RAG in detail",
+  "session_id": "abc-123"
+}</code></pre>
+                        <h4>Example</h4>
+<pre><code>curl -N -X POST https://your-backend.railway.app/api/v1/chatbot/chat/stream \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Explain RAG in detail","session_id":"abc-123"}'</code></pre>
+                        <h4>Response <span class="badge badge-success">SSE stream</span></h4>
+<pre><code>data: {"chunk": "RAG stands for "}
+data: {"chunk": "Retrieval-Augmented Generation..."}
+data: [DONE]</code></pre>
+                    </div>
+                </div>
+
+                <!-- Get Messages -->
+                <div class="endpoint-card" id="get-messages">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/api/v1/chatbot/messages?session_id=xxx</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Retrieve all messages for a given session.</p>
+                        <h4>Query Parameters</h4>
+                        <ul style="margin-bottom:1rem;padding-left:1.25rem;">
+                            <li><code>session_id</code> — The session UUID</li>
+                        </ul>
+                        <h4>Example</h4>
+<pre><code>curl https://your-backend.railway.app/api/v1/chatbot/messages?session_id=abc-123 \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>[
+  {
+    "role": "user",
+    "content": "What is LangGraph?",
+    "timestamp": "2025-01-15T10:30:00Z"
+  },
+  {
+    "role": "assistant",
+    "content": "LangGraph is a framework...",
+    "timestamp": "2025-01-15T10:30:02Z"
+  }
+]</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tasks API -->
+            <section id="tasks-api">
+                <h2>Tasks API</h2>
+
+                <!-- List Tasks -->
+                <div class="endpoint-card" id="list-tasks">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/api/v1/tasks</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Retrieve all tasks for the authenticated user.</p>
+                        <h4>Example</h4>
+<pre><code>curl https://your-backend.railway.app/api/v1/tasks \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>[
+  {
+    "id": "task-001",
+    "title": "Review PR #42",
+    "description": "Review the latest pull request",
+    "priority": "high",
+    "category": "development",
+    "status": "todo",
+    "created_at": "2025-01-15T09:00:00Z"
+  }
+]</code></pre>
+                    </div>
+                </div>
+
+                <!-- Create Task -->
+                <div class="endpoint-card" id="create-task">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/api/v1/tasks</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Create a new task.</p>
+                        <h4>Request Body</h4>
+<pre><code>{
+  "title": "Review PR #42",
+  "description": "Review the latest pull request",
+  "priority": "high",
+  "category": "development"
+}</code></pre>
+                        <h4>Example</h4>
+<pre><code>curl -X POST https://your-backend.railway.app/api/v1/tasks \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Review PR #42","description":"Review the latest pull request","priority":"high","category":"development"}'</code></pre>
+                        <h4>Response <span class="badge badge-success">201</span></h4>
+<pre><code>{
+  "id": "task-002",
+  "title": "Review PR #42",
+  "description": "Review the latest pull request",
+  "priority": "high",
+  "category": "development",
+  "status": "todo",
+  "created_at": "2025-01-15T12:00:00Z"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Update Task -->
+                <div class="endpoint-card" id="update-task">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-put">PUT</span>
+                        <span class="endpoint-path">/api/v1/tasks/{id}</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Update an existing task by ID.</p>
+                        <h4>Request Body</h4>
+<pre><code>{
+  "title": "Review PR #42 (updated)",
+  "status": "in-progress",
+  "priority": "medium"
+}</code></pre>
+                        <h4>Example</h4>
+<pre><code>curl -X PUT https://your-backend.railway.app/api/v1/tasks/task-002 \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"in-progress"}'</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>{
+  "id": "task-002",
+  "title": "Review PR #42 (updated)",
+  "status": "in-progress",
+  "priority": "medium",
+  "updated_at": "2025-01-15T14:00:00Z"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Delete Task -->
+                <div class="endpoint-card" id="delete-task">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-delete">DELETE</span>
+                        <span class="endpoint-path">/api/v1/tasks/{id}</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Delete a task by ID.</p>
+                        <h4>Example</h4>
+<pre><code>curl -X DELETE https://your-backend.railway.app/api/v1/tasks/task-002 \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+                        <h4>Response <span class="badge badge-success">204</span></h4>
+<pre><code>No content</code></pre>
+                    </div>
+                </div>
+
+                <!-- AI Suggestions -->
+                <div class="endpoint-card" id="ai-suggestions">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/api/v1/tasks/{id}/ai-suggestions</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Get AI-powered suggestions for a specific task, including next steps and priority recommendations.</p>
+                        <h4>Example</h4>
+<pre><code>curl https://your-backend.railway.app/api/v1/tasks/task-001/ai-suggestions \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>{
+  "task_id": "task-001",
+  "suggestions": [
+    "Break this task into smaller subtasks",
+    "Consider setting a deadline for this week",
+    "Similar tasks were completed faster with pair programming"
+  ]
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Semantic Search -->
+                <div class="endpoint-card" id="rag-search">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/api/v1/tasks/search</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Perform a semantic search across tasks using natural language.</p>
+                        <h4>Request Body</h4>
+<pre><code>{
+  "query": "tasks related to code review"
+}</code></pre>
+                        <h4>Example</h4>
+<pre><code>curl -X POST https://your-backend.railway.app/api/v1/tasks/search \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"tasks related to code review"}'</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>[
+  {
+    "id": "task-001",
+    "title": "Review PR #42",
+    "score": 0.94
+  }
+]</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sessions -->
+            <section id="sessions">
+                <h2>Sessions</h2>
+
+                <!-- Create Session -->
+                <div class="endpoint-card" id="create-session">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/api/v1/auth/sessions</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Create a new chat session.</p>
+                        <h4>Example</h4>
+<pre><code>curl -X POST https://your-backend.railway.app/api/v1/auth/sessions \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+                        <h4>Response <span class="badge badge-success">201</span></h4>
+<pre><code>{
+  "id": "session-456",
+  "created_at": "2025-01-15T10:00:00Z"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- List Sessions -->
+                <div class="endpoint-card" id="list-sessions">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/api/v1/auth/sessions</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>List all sessions for the authenticated user.</p>
+                        <h4>Example</h4>
+<pre><code>curl https://your-backend.railway.app/api/v1/auth/sessions \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>[
+  {
+    "id": "session-456",
+    "created_at": "2025-01-15T10:00:00Z",
+    "message_count": 12
+  }
+]</code></pre>
+                    </div>
+                </div>
+
+                <!-- Delete Session -->
+                <div class="endpoint-card" id="delete-session">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-delete">DELETE</span>
+                        <span class="endpoint-path">/api/v1/auth/sessions/{id}</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Delete a session and all its messages.</p>
+                        <h4>Example</h4>
+<pre><code>curl -X DELETE https://your-backend.railway.app/api/v1/auth/sessions/session-456 \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+                        <h4>Response <span class="badge badge-success">204</span></h4>
+<pre><code>No content</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search -->
+            <section id="vector-search">
+                <h2>Search</h2>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/api/v1/rag/search</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Perform a RAG-powered vector search across ingested documents and knowledge base.</p>
+                        <h4>Request Body</h4>
+<pre><code>{
+  "query": "How does the memory system work?",
+  "top_k": 5
+}</code></pre>
+                        <h4>Example</h4>
+<pre><code>curl -X POST https://your-backend.railway.app/api/v1/rag/search \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"How does the memory system work?","top_k":5}'</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>{
+  "results": [
+    {
+      "content": "The memory system uses mem0 to store long-term context...",
+      "score": 0.92,
+      "source": "architecture.md"
+    }
+  ]
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Health -->
+            <section id="health">
+                <h2>System</h2>
+
+                <!-- Health Check -->
+                <div class="endpoint-card" id="health-check">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/health</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Check service health status. No authentication required.</p>
+                        <h4>Example</h4>
+<pre><code>curl https://your-backend.railway.app/health</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span></h4>
+<pre><code>{
+  "status": "healthy",
+  "version": "1.0.0",
+  "uptime": "3d 12h 45m"
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Diagnostics / Metrics -->
+                <div class="endpoint-card" id="diagnostics">
+                    <div class="endpoint-header">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/metrics</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Prometheus-format metrics endpoint for monitoring and alerting.</p>
+                        <h4>Example</h4>
+<pre><code>curl https://your-backend.railway.app/metrics</code></pre>
+                        <h4>Response <span class="badge badge-success">200</span> <span class="badge badge-warning">text/plain</span></h4>
+<pre><code># HELP http_requests_total Total HTTP requests
+# TYPE http_requests_total counter
+http_requests_total{method="GET",endpoint="/health"} 1024
+http_requests_total{method="POST",endpoint="/api/v1/chatbot/chat"} 4567</code></pre>
+                    </div>
+                </div>
+            </section>
+
+        </div><!-- /.docs-content -->
+    </div><!-- /.docs-container -->
+
+    <script src="../js/theme.js"></script>
+    <script src="../js/nav.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        // Sidebar toggle for mobile
+        (function () {
+            var toggle = document.getElementById('docs-sidebar-toggle');
+            var sidebar = document.getElementById('docs-sidebar');
+            if (toggle && sidebar) {
+                toggle.addEventListener('click', function () {
+                    sidebar.classList.toggle('active');
+                });
+                // Close sidebar when a link is clicked (mobile)
+                sidebar.querySelectorAll('a').forEach(function (link) {
+                    link.addEventListener('click', function () {
+                        sidebar.classList.remove('active');
+                    });
+                });
+            }
+
+            // Highlight active sidebar link on scroll
+            var sections = document.querySelectorAll('.docs-content section[id], .endpoint-card[id]');
+            var navLinks = document.querySelectorAll('.docs-sidebar-nav a');
+            function onScroll() {
+                var scrollPos = window.scrollY + 100;
+                var current = '';
+                sections.forEach(function (section) {
+                    if (section.offsetTop <= scrollPos) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(function (link) {
+                    link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+                });
+            }
+            window.addEventListener('scroll', onScroll);
+            onScroll();
+        })();
+    </script>
+</body>
+</html>
